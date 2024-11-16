@@ -29,7 +29,7 @@ if (!defined('ABSPATH')) {
  * @package PortalsToAdventure
  * @subpackage Logger
  */
-class log
+class Log
 {
   private $logger;
   private $logPath;
@@ -45,9 +45,17 @@ class log
    * @param int $level The logging level. Default is Logger::DEBUG.
    * @param bool $ifLogUncaught Whether to log uncaught exceptions. Default is false.
    */
-  public function __construct($name, $path = 'pta-debug.log', $level = Logger::DEBUG, $ifLogUncaught = false)
+  public function __construct($name = "PTA", $path = 'pta-debug.log', $level = Logger::DEBUG, $ifLogUncaught = false)
   {
+
     $this->logger = new Logger($name);
+
+    // Skip file system setup if running in test environment
+    if (defined('PHPUNIT_RUNNING') && PHPUNIT_RUNNING) {
+      // Set up a NullHandler to avoid file operations
+      $this->logger->pushHandler(new \Monolog\Handler\NullHandler($level));
+      return;
+    }
 
     $this->log_level = $level;
 

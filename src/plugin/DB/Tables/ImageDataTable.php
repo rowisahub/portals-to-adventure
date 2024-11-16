@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\logger\log;
+use PTA\logger\Log;
 
 class ImageDataTable implements TableInterface
 {
@@ -30,9 +30,8 @@ class ImageDataTable implements TableInterface
     'submission_data'
   ];
 
-  public function __construct(DBHandlerInterface $handler_instance)
+  public function __construct(DBHandlerInterface $handler_instance, $wpdb)
   {
-    global $wpdb;
     $this->wpdb = $wpdb;
 
     $this->logger = new log('DB.Tables.ImageDataTable');

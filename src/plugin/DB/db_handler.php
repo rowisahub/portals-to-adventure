@@ -22,7 +22,7 @@ use PTA\DB\Tables\UserInfoTable;
 use PTA\DB\Tables\SubmissionDataTable;
 use PTA\DB\Tables\ImageDataTable;
 
-use PTA\logger\log;
+use PTA\logger\Log;
 
 // Class
 class db_handler implements DBHandlerInterface
@@ -47,17 +47,38 @@ class db_handler implements DBHandlerInterface
   // Logger
   private $logger;
 
+  // wpdb
+  private $wpdb;
 
-  public function __construct()
-  {
-    $this->define_tables();
-    //$this->PTA_Plugin_File = $PTA_Plugin_File;
 
-    $this->logger = new log(name: 'DB.Handler');
+  public function __construct(
+    Log $logger = null,
+    db_update $update = null,
+    db_backup $backup = null,
+    db_functions $functions = null,
+    UserInfoTable $userInfoTable = null,
+    SubmissionDataTable $submissionDataTable = null,
+    ImageDataTable $imageDataTable = null,
+    \wpdb $wpdbIn = null
+  ) {
+    global $wpdb;
+    $this->wpdb = $wpdbIn ?? $wpdb;
 
-    $this->update = new db_update($this);
-    $this->backup = new db_backup();
-    $this->functions = new db_functions($this);
+    $this->user_info_table = $userInfoTable ?? new UserInfoTable($this, $this->wpdb);
+    $this->submission_data_table = $submissionDataTable ?? new SubmissionDataTable($this, $this->wpdb);
+    $this->image_data_table = $imageDataTable ?? new ImageDataTable($this, $this->wpdb);
+
+    $this->db_tables = [
+      $this->user_info_table,
+      $this->submission_data_table,
+      $this->image_data_table
+    ];
+
+    $this->logger = $logger ?? new log(name: 'DB.Handler');
+
+    $this->update = $update ?? new db_update($this);
+    $this->backup = $backup ?? new db_backup();
+    $this->functions = $functions ?? new db_functions($this);
   }
 
   public function init()
@@ -72,10 +93,15 @@ class db_handler implements DBHandlerInterface
 
   public function register_activation()
   {
+    // check if PTA_PLUGIN_DIR is defined
+    if (!defined('PTA_PLUGIN_DIR')) {
+      return;
+    }
     register_activation_hook(PTA_PLUGIN_DIR, [$this, 'plugin_activation']);
   }
 
-  public function get_instance($name){
+  public function get_instance($name)
+  {
     switch ($name) {
       case 'update':
         return $this->update;
@@ -137,6 +163,8 @@ class db_handler implements DBHandlerInterface
       $this->logger->error('Failed to create tables');
     }
 
+    return $ifSuccess;
+
   }
 
   /**
@@ -170,28 +198,6 @@ class db_handler implements DBHandlerInterface
   public function get_pta_prefix()
   {
     return $this->wld_prefix;
-  }
-
-  /**
-   * Defines the database tables used by the plugin.
-   *
-   * This method sets up the necessary database tables for the plugin to function properly.
-   * It ensures that the required tables are created and available for use.
-   *
-   * @return void
-   */
-  private function define_tables()
-  {
-    // Load user_info, submission_data, and image_data table in this order
-    $this->user_info_table = new UserInfoTable($this);
-    $this->submission_data_table = new SubmissionDataTable($this);
-    $this->image_data_table = new ImageDataTable($this);
-
-    $this->db_tables = [
-      $this->user_info_table,
-      $this->submission_data_table,
-      $this->image_data_table
-    ];
   }
 
 }

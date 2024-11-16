@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\logger\log;
+use PTA\logger\Log;
 
 class SubmissionDataTable implements TableInterface
 {
@@ -29,9 +29,8 @@ class SubmissionDataTable implements TableInterface
         'user_info'
     ];
 
-    public function __construct(DBHandlerInterface $handler_instance)
+    public function __construct(DBHandlerInterface $handler_instance, $wpdb)
     {
-        global $wpdb;
         $this->wpdb = $wpdb;
 
         $this->logger = new log('DB.Tables.SubmissionDataTable');

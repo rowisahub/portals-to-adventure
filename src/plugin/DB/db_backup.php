@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-use PTA\logger\log;
+use PTA\logger\Log;
 use PTA\interfaces\DB\DBHandlerInterface;
 use PTA\interfaces\DB\BackupInterface;
 
@@ -35,7 +35,7 @@ class db_backup implements BackupInterface
     global $wpdb;
     $upload_dir = wp_upload_dir();
     $this->backup_dir = trailingslashit($upload_dir['basedir']) . 'pta/backups/';
-    
+
     $this->log = new log('DB.Backup');
 
     $this->full_prefix = $wpdb->prefix . $this->wld_prefix;
@@ -47,13 +47,6 @@ class db_backup implements BackupInterface
   {
     $this->log = $this->log->getLogger();
 
-    // Check if the backup directory exists
-    if (!file_exists($this->backup_dir)) {
-      if (!wp_mkdir_p($this->backup_dir)) {
-        wp_die(__('Failed to create backup directory.', 'pta-plugin'));
-      }
-      $this->log->info('Backup directory created');
-    }
   }
 
   /**
@@ -122,6 +115,14 @@ class db_backup implements BackupInterface
   {
     $this->log->info('Saving database backup to file');
     $backup_file = $this->backup_dir . 'backup-' . date('Y-m-d-H-i-s') . '.sql';
+
+    // Check if the backup directory exists
+    if (!file_exists($this->backup_dir)) {
+      if (!wp_mkdir_p($this->backup_dir)) {
+        wp_die(__('Failed to create backup directory.', 'pta-plugin'));
+      }
+      $this->log->info('Backup directory created');
+    }
 
     if (!$compress) {
 

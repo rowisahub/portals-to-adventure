@@ -44,7 +44,7 @@ interface UpdateInterface
    *
    * @return bool True if the backup was successful, false otherwise.
    */
-  private function backup_db();
+  // private function backup_db();
 
   /**
    * Updates the database schema and data.
@@ -54,7 +54,7 @@ interface UpdateInterface
    *
    * @return void
    */
-  private function update_db();
+  // private function update_db();
 
   /**
    * Checks for updates in the database.
@@ -64,5 +64,5 @@ interface UpdateInterface
    *
    * @return bool True if updates are required, false otherwise.
    */
-  private function check_for_updates();
+  // private function check_for_updates();
 }

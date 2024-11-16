@@ -1,9 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="vendor/autoload.php"
+<phpunit bootstrap="tests/bootstrap.php"
          colors="true"
          stopOnFailure="false">
+    <php>
+        <ini name="display_errors" value="On"/>
+        <ini name="error_reporting" value="-1"/>
+        <const name="PHPUNIT_RUNNING" value="true"/>
+    </php>
     <testsuites>
-        <testsuite name="Plugin Test Suite">
+        <testsuite name="PTA Plugin Test Suite">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>

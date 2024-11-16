@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 /* Require Class */
 use PTA\Enqueue;
-use PTA\logger\log;
+use PTA\logger\Log;
 use PTA\DB\db_handler;
 
 /**

@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\logger\log;
+use PTA\logger\Log;
 
 class UserInfoTable implements TableInterface
 {
@@ -27,10 +27,10 @@ class UserInfoTable implements TableInterface
   private $pta_prefix;
   private $table_requirements;
 
-  public function __construct(DBHandlerInterface $handler_instance)
+  public function __construct(DBHandlerInterface $handler_instance, $wpdb)
   {
-    global $wpdb;
     $this->wpdb = $wpdb;
+    
     $this->logger =
       $this->handler_instance = $handler_instance;
 
