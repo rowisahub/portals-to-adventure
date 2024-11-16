@@ -4,14 +4,21 @@ https://en.wikipedia.org/wiki/Model–view–controller
 
 File structure:
 
-portals_to_adventure.php // Main plugin file
+portals_to_adventure.php // File   | Main plugin file
 
 assets                   // Folder | where controller files are stored
  - admin                 // Folder | where admin specific controller files are stored
  - public                // Folder | where public pecific controller files are stored
+  - css                  // Folder | where css files are stored
+  - images               // Folder | where images files are stored
+  - js                   // Folder | where js files are stored
+ - enqueue.php           // File   | class to enqueue public/admin files
 
 public                   // Folder | where front-end HTML, CSS, and JS files are stored
- - CSS                   // Folder | where front-end CSS is stored
- - HTML                  // Folder | where front-end HTML is stored
- - JS                    // Folder | where front-end JS is stored
+ - CSS                   // Folder | where css files are stored
+ - HTML                  // Folder | where html files are stored
+ - JS                    // Folder | where js files are stored
 
+src                      // Folder | 
+ - interfaces            // Folder | where interfaces are stored
+ - plugin                // Folder | where plugin specific files are stored
