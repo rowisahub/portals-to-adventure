@@ -46,10 +46,11 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
       
-      - name: Remove google services dependencies
+      - name: Clean up
         if: steps.check_release.outputs.needs_release == 'true'
         run: |
           rm -rf vendor/google/apiclient-services/src/*
+          rm -rf composer.json composer.lock .github .git structure.txt
 
       - name: Release zip file
         id: release
@@ -58,8 +59,8 @@ jobs:
           VERSION=${{ steps.current_version.outputs.current_version }}
           PLUGIN_DIR=.
           # Create zip file
-          ZIP_NAME="pta-v${VERSION}.zip"  
-          zip -r "$ZIP_NAME" "$PLUGIN_DIR" -x ".git/*" ".github/*"
+          ZIP_NAME="pta-v${VERSION}.zip"
+          zip -r "$ZIP_NAME" "$PLUGIN_DIR"
           echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release
