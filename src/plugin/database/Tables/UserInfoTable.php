@@ -13,6 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\log;
 
 class UserInfoTable implements TableInterface
 {
@@ -30,8 +31,11 @@ class UserInfoTable implements TableInterface
   {
     global $wpdb;
     $this->wpdb = $wpdb;
-    $this->logger = createLogger('DB.Tables.UserInfoTable');
-    $this->handler_instance = $handler_instance;
+    $this->logger =
+      $this->handler_instance = $handler_instance;
+
+    $this->logger = new log('DB.Tables.UserInfoTable');
+    $this->logger = $this->logger->getLogger();
 
     $this->pta_prefix = $handler_instance->get_pta_prefix();
 

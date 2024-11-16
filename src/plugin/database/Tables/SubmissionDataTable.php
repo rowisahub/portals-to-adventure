@@ -13,6 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\log;
 
 class SubmissionDataTable implements TableInterface
 {
@@ -32,7 +33,10 @@ class SubmissionDataTable implements TableInterface
     {
         global $wpdb;
         $this->wpdb = $wpdb;
-        $this->logger = createLogger('DB.Tables.SubmissionDataTable');
+
+        $this->logger = new log('DB.Tables.SubmissionDataTable');
+        $this->logger = $this->logger->getLogger();
+        
         $this->handler_instance = $handler_instance;
 
         $this->pta_prefix = $handler_instance->get_pta_prefix();

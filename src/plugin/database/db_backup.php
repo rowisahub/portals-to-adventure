@@ -29,12 +29,9 @@ class db_backup implements BackupInterface
     'submission_data',
     'image_data'
   ];
-  private $handler_instance;
 
-  public function __construct(DBHandlerInterface $handler_instance)
+  public function __construct()
   {
-    $this->handler_instance = $handler_instance;
-    
     global $wpdb;
     $upload_dir = wp_upload_dir();
     $this->backup_dir = trailingslashit($upload_dir['basedir']) . 'pta/backups/';

@@ -71,7 +71,7 @@ class db_update implements UpdateInterface
    */
   private function backup_db()
   {
-    return $this->handler_instance->db_backup->perform_backup();
+    return $this->handler_instance->get_instance('backup')->create_backup();
   }
 
   private function update_db()

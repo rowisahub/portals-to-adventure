@@ -83,7 +83,7 @@ class log
   {
     if (!file_exists($this->logDir)) {
       mkdir($this->logDir, 0755, true);
-      file_put_contents($this->logDir . '/.htaccess', htaccess_content());
+      file_put_contents($this->logDir . '/.htaccess', $this->htaccess_content());
     }
 
     if (!is_writable($this->logDir)) {

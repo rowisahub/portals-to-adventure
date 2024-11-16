@@ -14,6 +14,13 @@ if (!defined('ABSPATH')) {
 interface DBHandlerInterface
 {
   /**
+   * Get the instance of the specified class.
+   * 
+   * @param string $name The name of the class to retrieve.
+   * @return mixed The instance of the class.
+   */
+  public function get_instance($name);
+  /**
    * Retrieves the path of the table.
    *
    * @param string $table_name The name of the table.

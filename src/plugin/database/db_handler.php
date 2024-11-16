@@ -56,7 +56,7 @@ class db_handler implements DBHandlerInterface
     $this->logger = new log(name: 'DB.Handler');
 
     $this->update = new db_update($this);
-    $this->backup = new db_backup($this);
+    $this->backup = new db_backup();
     $this->functions = new db_functions($this);
   }
 
@@ -73,6 +73,19 @@ class db_handler implements DBHandlerInterface
   public function register_activation()
   {
     register_activation_hook(PTA_PLUGIN_DIR, [$this, 'plugin_activation']);
+  }
+
+  public function get_instance($name){
+    switch ($name) {
+      case 'update':
+        return $this->update;
+      case 'backup':
+        return $this->backup;
+      case 'functions':
+        return $this->functions;
+      default:
+        return $this;
+    }
   }
 
   public function get_table_path($table_name)
