@@ -1,6 +1,4 @@
 {
-    "name": "row/pta",
-    "description": "PTA Plugin",
     "type": "wordpress-plugin",
     "autoload": {
         "psr-4": {
