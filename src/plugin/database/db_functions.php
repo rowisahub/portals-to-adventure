@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 // Requires
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\log;
+use PTA\logger\log;
 
 class db_functions {
     private $handler_instance;

@@ -22,7 +22,7 @@ use PTA\DB\Tables\UserInfoTable;
 use PTA\DB\Tables\SubmissionDataTable;
 use PTA\DB\Tables\ImageDataTable;
 
-use PTA\log;
+use PTA\logger\log;
 
 // Class
 class db_handler implements DBHandlerInterface
@@ -84,7 +84,7 @@ class db_handler implements DBHandlerInterface
       case 'functions':
         return $this->functions;
       default:
-        return $this;
+        return null;
     }
   }
 

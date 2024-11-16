@@ -1,5 +1,5 @@
 <?php
-namespace PTA;
+namespace PTA\logger;
 /*
 File: logger.php
 Description: Logger for the plugin.

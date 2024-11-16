@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 use PTA\interfaces\DB\TableInterface;
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\log;
+use PTA\logger\log;
 
 class UserInfoTable implements TableInterface
 {

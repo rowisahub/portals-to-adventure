@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-use PTA\log;
+use PTA\logger\log;
 use PTA\interfaces\DB\DBHandlerInterface;
 use PTA\interfaces\DB\UpdateInterface;
 
