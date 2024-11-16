@@ -6,6 +6,8 @@ Version: 1.5.0
 Author: Rowan and Braedon
 */
 
+namespace PTA;
+
 /* Prevent direct access */
 if (!defined('ABSPATH')) {
   exit;
