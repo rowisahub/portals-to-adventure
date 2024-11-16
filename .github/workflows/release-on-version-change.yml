@@ -1,0 +1,76 @@
+name: New Release on Version Change
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get current version
+        id: current_version
+        run: |
+          current_version=$(grep -m1 "Version:" portals_to_adventure.php | awk '{print $2}')
+          echo "current_version=$current_version" >> "$GITHUB_OUTPUT"
+
+      - name: Get previous version
+        id: previous_version
+        run: |
+          previous_version=$(git show HEAD~1:portals_to_adventure.php | grep -m1 "Version:" | awk '{print $2}')
+          echo "previous_version=$previous_version" >> "$GITHUB_OUTPUT"
+      
+      - name: Check if release is needed
+        id: check_release
+        run: |
+          echo "needs_release=$([ "${{ steps.current_version.outputs.current_version }}" != "${{ steps.previous_version.outputs.previous_version }}" ] && echo 'true' || echo 'false')" >> "$GITHUB_OUTPUT"
+
+      - name: Set up PHP and Composer
+        if: steps.check_release.outputs.needs_release == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+      
+      - name: Install dependencies
+        if: steps.check_release.outputs.needs_release == 'true'
+        run: |
+          composer install --no-dev --optimize-autoloader
+      
+      - name: Remove google services dependencies
+        if: steps.check_release.outputs.needs_release == 'true'
+        run: |
+          rm -rf vendor/google/apiclient-services/src/*
+
+      - name: Release zip file
+        id: release
+        if: steps.check_release.outputs.needs_release == 'true'
+        run: |
+          VERSION=${{ steps.current_version.outputs.current_version }}
+          PLUGIN_DIR=.
+          # Create zip file
+          ZIP_NAME="pta-v${VERSION}.zip"  
+          zip -r "$ZIP_NAME" "$PLUGIN_DIR" -x ".git/*" ".github/*"
+          echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: steps.check_release.outputs.needs_release == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.current_version.outputs.current_version }}
+          name: Release v${{ steps.current_version.outputs.current_version }}
+          body: |
+            ## Changes
+            - Version updated from ${{ steps.previous_version.outputs.previous_version }} to ${{ steps.current_version.outputs.current_version }}
+          artifacts: "${{ steps.release.outputs.zip_name }}"
+          draft: false
+          prerelease: false

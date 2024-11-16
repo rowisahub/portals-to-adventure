@@ -1,0 +1,17 @@
+{
+    "name": "row/pta",
+    "description": "PTA Plugin",
+    "type": "wordpress-plugin",
+    "autoload": {
+        "psr-4": {
+            "PTA\\": "includes/"
+        }
+    },
+    "require": {
+        "google/apiclient": "^2.18",
+        "monolog/monolog": "^3.7"
+    },
+    "scripts": {
+        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+    }
+}
