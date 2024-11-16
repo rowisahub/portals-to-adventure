@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) {
 /* Require Class */
 use PTA\Enqueue;
 use PTA\log;
+use PTA\DB\db_handler;
 
 /**
  * Class PTA
@@ -34,8 +35,10 @@ class PTA
     $this->enqueue = new Enqueue();
 
     /* Logger */
-    $logger = new log(name: 'Main', ifLogUncaught: true);
-    $this->logger = $logger->getLogger();
+    $this->logger = new log(name: 'Main', ifLogUncaught: true);
+    
+    /* Database Handler */
+    $this->dbHandler = new db_handler();
 
     /* Initialize */
     $this->init();
@@ -52,5 +55,8 @@ class PTA
   public function init()
   {
     $this->enqueue->add_enqueue_action();
+    $this->dbHandler->init();
+
+    $this->logger = $this->logger->getLogger();
   }
 }

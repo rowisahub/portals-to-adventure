@@ -14,9 +14,11 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
+use PTA\log;
+use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\interfaces\DB\BackupInterface;
 
-class db_backup
+class db_backup implements BackupInterface
 {
   private $backup_dir;
   private $log;
@@ -29,16 +31,24 @@ class db_backup
   ];
   private $handler_instance;
 
-  public function __construct($handler_instance)
+  public function __construct(DBHandlerInterface $handler_instance)
   {
     $this->handler_instance = $handler_instance;
     
     global $wpdb;
     $upload_dir = wp_upload_dir();
     $this->backup_dir = trailingslashit($upload_dir['basedir']) . 'pta/backups/';
-    $this->log = createLogger(name: 'DB-BACKUP');
+    
+    $this->log = new log('DB.Backup');
 
     $this->full_prefix = $wpdb->prefix . $this->wld_prefix;
+
+    //$this->log->info('Database backup class initialized');
+  }
+
+  public function init()
+  {
+    $this->log = $this->log->getLogger();
 
     // Check if the backup directory exists
     if (!file_exists($this->backup_dir)) {
@@ -47,8 +57,6 @@ class db_backup
       }
       $this->log->info('Backup directory created');
     }
-
-    //$this->log->info('Database backup class initialized');
   }
 
   /**

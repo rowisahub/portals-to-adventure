@@ -11,17 +11,26 @@ if (!defined('ABSPATH')) {
   exit;
 }
 
+// Requires
+use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\log;
+
 class db_functions {
     private $handler_instance;
     private $logger;
     private $wpdb;
     private $cache;
     
-    public function __construct($handler_instance) {
+    public function __construct(DBHandlerInterface $handler_instance) {
       global $wpdb;
       $this->handler_instance = $handler_instance;
-      $this->logger = createLogger('DB.Functions');
+      $this->logger = new log(name: 'DB.Functions');
       $this->wpdb = $wpdb;
+    }
+
+    public function init() {
+      $this->cache = [];
+      $this->logger = $this->logger->getLogger();
     }
     
     /**

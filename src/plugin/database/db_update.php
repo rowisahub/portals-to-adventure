@@ -14,10 +14,12 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-require_once PTA_PLUGIN_DIR . 'pta-logger.php';
+use PTA\log;
+use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\interfaces\DB\UpdateInterface;
 
 
-class db_update
+class db_update implements UpdateInterface
 {
   private $logger;
   private $handler_instance;
@@ -25,11 +27,20 @@ class db_update
   /**
    * Constructor for the class. Initializes the logger and checks for updates.
    */
-  public function __construct($handler_instance)
+  public function __construct(DBHandlerInterface $handler_instance)
   {
-    $this->logger = createLogger('DB.Update');
+    $this->logger = new log('DB.Update');
     $this->handler_instance = $handler_instance;
+  }
 
+  public function init()
+  {
+    $this->logger = $this->logger->getLogger();
+    $this->register_hooks();
+  }
+
+  public function register_hooks()
+  {
     add_action('plugins_loaded', [$this, 'after_plugin_load']);
   }
 

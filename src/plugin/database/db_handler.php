@@ -22,6 +22,8 @@ use PTA\DB\Tables\UserInfoTable;
 use PTA\DB\Tables\SubmissionDataTable;
 use PTA\DB\Tables\ImageDataTable;
 
+use PTA\log;
+
 // Class
 class db_handler implements DBHandlerInterface
 {
@@ -45,28 +47,32 @@ class db_handler implements DBHandlerInterface
   // Logger
   private $logger;
 
-  // Plugin file
-  private $PTA_Plugin_File;
 
-
-  public function __construct($PTA_Plugin_File)
+  public function __construct()
   {
     $this->define_tables();
-    $this->PTA_Plugin_File = $PTA_Plugin_File;
+    //$this->PTA_Plugin_File = $PTA_Plugin_File;
 
-    $this->logger = createLogger('DB.Handler');
+    $this->logger = new log(name: 'DB.Handler');
 
     $this->update = new db_update($this);
     $this->backup = new db_backup($this);
     $this->functions = new db_functions($this);
+  }
 
-    //register_activation_hook(PTA_PLUGIN_FILE, [$this, 'install']);
-    register_activation_hook(PTA_PLUGIN_DIR, [$this, 'plugin_activation']);
+  public function init()
+  {
+    $this->register_activation();
+    $this->logger = $this->logger->getLogger();
+
+    $this->update->init();
+    $this->backup->init();
+    $this->functions->init();
   }
 
   public function register_activation()
   {
-    register_activation_hook($this->PTA_Plugin_File, [$this, 'plugin_activation']);
+    register_activation_hook(PTA_PLUGIN_DIR, [$this, 'plugin_activation']);
   }
 
   public function get_table_path($table_name)
