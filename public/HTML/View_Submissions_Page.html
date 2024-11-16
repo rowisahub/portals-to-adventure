@@ -1,0 +1,68 @@
+<!-- View Submission Page HTML Start -->
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/View_Submissions_Page.css'; ?>">
+
+<template id="submission-template">
+  <div class="submission-header">
+    <span class="adventure-title">Title: <span class="sub-title"></span></span>
+    <span class="submitter">Submitter: <span class="sub-submitter"></span></span>
+    <span class="votes">Votes: <span class="sub-vote"></span></span>
+  </div>
+  <!-- <textarea class="adventure-text" readonly></textarea> -->
+  <div class="adventure-text-box">
+    <span class="adventure-text"></span>
+  </div>
+  <div class="media-content">
+    <div class="media-item map" data-fancybox="">
+      <img src="" alt="Map Image" class="preview-image"></img>
+    </div>
+    <div class="media-item video" data-fancybox="">
+      <img src="" alt="Video Image" class="preview-image"></img>
+    </div>
+    <div class="media-item thumbnail" data-fancybox="">
+      <img src="" alt="Thumbnail Image" class="preview-image"></img>
+    </div>
+  </div>
+  <a class="view-btn">View Full Submission</a>
+  <div class="share-buttons" id="share-buttons">
+    <button class="share-btn" data-platform="facebook">Share FB</button>
+    <button class="share-btn" data-platform="twitter">Share X</button>
+  </div>
+  <button class="vote-btn add-to-cart-vote">Vote for this Secret Door</button>
+  <p class="vote-instructions">Cast up to 10 votes for this Secret Door</p>
+  <div class="admin-bar-pta">
+    <p class="admin-status">Status: <span class="sub-adstat"></span></p>
+    <p class="admin-reason">Reason: <span class="sub-adreason"></span></p>
+    <button class="admin-btn approve">Approve</button>
+    <button class="admin-btn unreject">Unreject</button>
+    <button class="admin-btn reject">Reject</button>
+    <button class="admin-btn delete">Delete</button>
+  </div>
+</template>
+
+
+
+<div class="form-container">
+  <p>Search or browse the Secret Doors, share them with friends, and vote for your favorites.</p>
+
+  <div class="search-options hide">
+    <button onclick="searchByTitle()">Search by Title</button>
+    <button onclick="searchByContestant()">Search by Contestant</button>
+    <button onclick="browseAll()">Browse All</button>
+  </div>
+
+  <input type="text" id="search-bar" placeholder="Search by Title or Contestant Name" oninput="searchSubmissions()">
+  <select id="admin-filter-dropdown" class="hide">
+    <option value="all">All</option>
+    <option value="Approved">Approved</option>
+    <option value="Pending Approval">Pending Approval</option>
+  </select>
+
+  <div id="submission-list">
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<script src="<?php echo plugin_dir_url(__DIR__) . 'JS/View_Submissions_Page.js'; ?>"></script>
+<!-- View Submission Page HTML End -->

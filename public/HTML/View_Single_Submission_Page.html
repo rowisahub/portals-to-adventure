@@ -1,0 +1,77 @@
+<!-- View User Submission Page HTML Start -->
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/View_Single_Submission_Page.css'; ?>">
+<div class="form-container">
+
+  <div class="admin-view hide">
+    <div class="admin-controls" id="admin-controls">
+      <button class="admin-btn approve">Approve</button>
+      <button class="admin-btn unreject">Unreject</button>
+      <button class="admin-btn reject">Reject</button>
+      <button class="admin-btn delete">Delete</button>
+    </div>
+
+    <p class="admin-status">Status: <span class="sub-adstat"></span></p>
+    <p class="admin-reason">Reason: <span class="sub-adreason"></span></p>
+
+  </div>
+
+  <!-- Title (Non-Editable) -->
+  <div class="submission-header">
+    <span id="submission-date">Date: <span id="date-ele"></span></span>
+    <span id="vote-count">Votes: <span id="vote-ele"></span></span>
+    <span id="views">Views: <span id="view-ele"></span></span>
+  </div>
+
+  <!-- Adventure Author (Non-Editable) -->
+  <label>Author</label>
+  <!-- <input type="text" id="adventure-author" readonly style="cursor: default;"> -->
+  <p id="adventure-author" class="textBox"></p>
+
+  <!-- Adventure Title (Non-Editable) -->
+  <label>Adventure Title</label>
+  <!-- <input type="text" id="adventure-title" readonly style="cursor: default;"> -->
+  <p id="adventure-title" class="textBox"></p>
+
+  <!-- Adventure Text (Non-Editable) -->
+  <label>Discription</label>
+  <!-- <textarea id="adventure-text" readonly rows="6" style="cursor: default;">Adventure description goes here...</textarea> -->
+  <p id="adventure-text" class="textBox"></p>
+
+  <!-- Map (View-only, Clickable) -->
+  <label for="map">Map</label>
+  <div id="map-preview" class="view-only media-item" data-fancybox="">
+    <img src="" alt="Map Image" class="preview-image"></img>
+  </div>
+
+  <!-- Video (View-only, Clickable) -->
+  <label for="video">Video</label>
+  <div id="video-preview" class="view-only media-item" data-fancybox="">
+    <img src="" alt="Video Image" class="preview-image"></img>
+  </div>
+
+  <!-- Thumbnail (View-only, Clickable) -->
+  <label for="thumbnail">Thumbnail</label>
+  <div id="thumbnail-preview" class="view-only media-item" data-fancybox="">
+    <img src="" alt="Thumbnail Image" class="preview-image"></img>
+  </div>
+
+  <!-- Rest of Submission images -->
+  <label for="media-content" id="media-content" class="hide">Extra Images</label>
+  <div class="media-content-list hide" id="media-content-list">
+  </div>
+
+  <button class="vote-btn">Vote for this Secret Door</button>
+
+
+  <!-- Social Media Share Buttons -->
+  <div class="social-buttons hide">
+    <button class="share-btn" data-platform="facebook">Share FB</button>
+    <button class="share-btn" data-platform="twitter">Share X</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<script src="<?php echo plugin_dir_url(__DIR__) . 'JS/View_Single_Submission_Page.js'; ?>"></script>
+<!-- View User Submission Page HTML End -->

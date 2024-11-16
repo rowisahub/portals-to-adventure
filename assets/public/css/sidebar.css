@@ -1,0 +1,107 @@
+/* Sidebar Container */
+.sidebar-container {
+    position: fixed;
+    top: 0;
+    left: -300px; /* Hide off-screen initially */
+    width: 300px; /* Width of the sidebar + space for the hamburger icon */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f7f7;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: left 0.3s ease; /* Animate the whole container */
+    z-index: 1000;
+}
+
+/* Hamburger Icon */
+.hamburger-icon {
+    position: absolute; /* Position relative to the sidebar container */
+    top: 20px; /* Position from the top of the container */
+    right: -50px; /* Position it to the right of the sidebar */
+    cursor: pointer;
+    padding: 10px;
+    transition: right 0.3s ease; /* Smooth transition for icon movement */
+    z-index: 1001; /* Ensure it's above the sidebar */
+}
+
+.hamburger-icon img {
+    width: 40px; /* Adjust the size for better visibility */
+    height: auto;
+    filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2)); /* Add shadow for contrast */
+    transition: transform 0.3s ease; /* Add animation for interaction */
+}
+
+/* Sidebar Open State */
+.sidebar-container.open .hamburger-icon img {
+    transform: rotate(90deg); /* Example of icon animation when menu is open */
+    right: 200px;
+}
+
+/* Sidebar */
+.side-menu {
+    flex: 1; /* Take the remaining space */
+    background-color: #f7f7f7;
+    overflow-y: auto;
+}
+
+.side-menu-content {
+    padding: 15px;
+}
+
+.sidebar-container.open {
+    left: 0; /* Slide in when open */
+}
+
+/* Hover Options */
+.user-info {
+    position: relative;
+}
+
+.user-options {
+    display: none;
+    position: absolute;
+    right: 0px;
+    top: 0;
+    background-color: #f7f7f7;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.user-info:hover .user-options {
+    display: block;
+}
+
+/* Submissions Hover Options */
+.submission-item {
+    position: relative;
+    padding-right: 100px; /* Space for hover options */
+}
+
+.submission-options {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background-color: #f7f7f7;
+    padding: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.submission-item:hover .submission-options {
+    display: block;
+}
+
+.side-menu a {
+    display: block;
+    margin: 10px 0;
+    color: #333;
+    text-decoration: none;
+}
+
+.side-menu hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 10px 0;
+}

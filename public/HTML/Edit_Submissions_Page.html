@@ -1,0 +1,93 @@
+<!-- Edit Submission Page HTML Start -->
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/Edit_Submissions_Page.css'; ?>">
+<!-- <form method="post" enctype="multipart/form-data"></form> -->
+<div class="form-container">
+  <p>Edit your in-progress adventures and submit them for fan voting.</p>
+
+  <!-- Warning box for if the submission is rejeected and the resaon -->
+  <div id="reject-warning" class="reject-warning hide">
+    <p>Your submission has been rejected. Please edit the submission if you wish to reupload.</p>
+    <p>Reason: <span id="reject-reason"></span></p>
+  </div>
+
+  <form method="post" id="secret-door-form-update" enctype="multipart/form-data">
+
+    <input type="hidden" id="submission_id" name="submission_id" value="">
+
+
+    <!-- Secret Doors In Progress List -->
+    <label for="secret-doors-list">Secret Doors In Progress</label>
+    <select id="secret-doors-list">
+      <option value="door1"> - Select The Door to Edit - </option>
+      <!-- <option value="door2">Secret Door Title 2 (June 2, 2024)</option> -->
+      <!-- More secret doors go here -->
+    </select>
+
+    <!-- Title (Editable) -->
+    <label for="title" class="tooltip">
+      Title
+      <span class="tooltiptext">(40 characters max)</span>
+    </label>
+    <input type="text" id="title" name="submission_title" value="Secret Door Title" maxlength="40" required>
+    <p id="title-error" class="error"></p>
+
+
+    <!-- Adventure Text (Editable) -->
+    <label for="adventure-text" class="tooltip">
+      Description
+      <span class="tooltiptext">(10,000 character max)</span>
+    </label>
+    <textarea id="adventure-text" name="submission_description" maxlength="10000" rows="6" required>Adventure description goes here...
+    </textarea>
+    <p id="text-error" class="error"></p>
+
+
+    <!-- Video Link (Editable) -->
+    <label for="video-link" class="tooltip">
+      Video Link
+      <span class="tooltiptext">For preview, use approved list! (40 char max)</span>
+    </label>
+    <input type="text" id="video-link" name="video_link" maxlength="150" required>
+    <p id="video-error" class="error"></p>
+
+
+    <!-- Thumbnail (View-only) and Upload New Thumbnail -->
+    <label for="images" class="tooltip">
+      Images
+      <span class="tooltiptext">Remove, Set Map, Set Thumbnail, Here!</span>
+    </label>
+    <input type="file" id="images" name="new_images[]" accept="image/*" multiple>
+    <p id="thumbnail-error" class="error hide"></p>
+    <div id="thumbnail-preview" class="thumbnail-preview"></div>
+
+    <!-- Submit Button and Accept Terms -->
+    <label for="accept-terms">Accept terms of the contest</label>
+    <input type="checkbox" id="accept-terms" name="accept-terms">
+
+    <!-- Save Changes Button -->
+    <input type="submit" name="update_submission" value="Save" id="save-btn" disabled></input>
+
+    <!-- <button type="button" id="submit-btn" disabled>Submit</button> -->
+
+    <input type="submit" name="update_submission" value="Publish" id="submit-btn" disabled></input>
+
+    <!-- Delete Adventure Button -->
+    <!-- <button type="button" id="delete-btn" class="delete-btn">Delete Adventure</button> -->
+    <input type="submit" name="update_submission" value="Delete Adventure" id="delete-btn" class="delete-btn"></input>
+
+    <!-- Hidden Form Fields -->
+    <input type="hidden" name="set_map" id="selecedMap" value="">
+    <input type="hidden" name="set_thumbnail" id="selecedThumbnail" value="">
+    <input type="hidden" name="remove_image" id="deletedImages" value="">
+
+  </form>
+
+  <!-- Social Media Share Buttons -->
+  <!-- <div class="social-buttons">
+    <button class="share-btn">Share FB</button>
+    <button class="share-btn">Share X</button>
+  </div> -->
+</div>
+
+<script src="<?php echo plugin_dir_url(__DIR__) . 'JS/Edit_Submissions_Page.js'; ?>"></script>
+<!-- Edit Submission Page HTML End -->

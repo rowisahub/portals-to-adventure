@@ -1,0 +1,55 @@
+<!-- View User Submission Page HTML Start -->
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/View_User_Submissions_Page.css'; ?>">
+<div class="form-container">
+  <p>View all the Secret Door adventures you’ve submitted to the contest. They cannot be further edited or changed, but
+    you can share them with others and keep track of the votes so far.</p>
+
+  <!-- Secret Doors Submitted List -->
+  <label for="secret-doors-list">Secret Doors Submitted</label>
+  <select id="secret-doors-list">
+    <option value="-1"> - Select The Door to Edit - </option>
+    <!-- More submitted doors go here -->
+  </select>
+
+  <!-- Title (Non-Editable) -->
+  <div class="submission-header">
+    <span id="title">Secret Door Title</span>
+    <span id="submission-date">Date: June 1, 2024</span>
+    <span id="vote-count">Votes: 120</span>
+  </div>
+
+  <!-- Adventure Text (Non-Editable) -->
+  <label for="adventure-text">Text</label>
+  <textarea id="adventure-text" readonly rows="6">Please select a submission to view...</textarea>
+
+  <!-- Map (View-only, Clickable) -->
+  <label for="map">Map</label>
+  <div id="map-preview" class="media-item" data-fancybox>
+    <img src="" alt="Map Image" class="preview-image"></img>
+  </div>
+
+  <!-- Video (View-only, Clickable) -->
+  <label for="video">Video</label>
+  <div id="video-preview" class="media-item" data-fancybox>
+    <img src="" alt="Video Image" class="preview-image"></img>
+  </div>
+
+  <!-- Thumbnail (View-only, Clickable) -->
+  <label for="thumbnail">Thumbnail</label>
+  <div id="thumbnail-preview" class="media-item" data-fancybox>
+    <img src="" alt="Thumbnail Image" class="preview-image"></img>
+  </div>
+
+  <!-- Share buttons -->
+  <div class="social-buttons">
+    <button class="share-btn" data-platform="facebook">Share on Facebook</button>
+    <button class="share-btn" data-platform="twitter">Share on Twitter</button>
+  </div>
+
+  <!-- Delete Submission Button -->
+  <button type="button" id="delete-btn" class="delete-btn">Delete Submission</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<script src="<?php echo plugin_dir_url(__DIR__) . 'JS/View_User_Submissions_Page.js'; ?>"></script>
+<!-- View User Submission Page HTML End -->

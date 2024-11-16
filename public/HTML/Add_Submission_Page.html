@@ -1,0 +1,71 @@
+<!-- Add Submission Page HTML Start -->
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/Add_Submission_Page.css'; ?>">
+<!-- <form id="submission-upload-form" method="post" enctype="multipart/form-data"> -->
+<div class="form-container">
+  <p>When you have a title in mind, the text written, your intro video shot and your thumbnail created, upload them here
+    (you can edit and then submit submissions from the My In-Progress Secret Doors page).</p>
+
+  <form id="secret-door-form" method="post" enctype="multipart/form-data">
+    <!-- Create a Title -->
+    <label for="title" class="tooltip">
+      Add Your Adventure Title Here!
+      <span class="tooltiptext">(a unique name for your Secret Door adventure; 40 characters max)</span>
+    </label>
+    <input type="text" id="title" name="title" maxlength="40" required>
+    <p id="title-error" class="error"></p>
+
+    <!-- Add Adventure Text -->
+    <label for="adventure-text" class="tooltip">
+      Add Your Adventure Text Here!
+      <span class="tooltiptext">(copy and paste your adventure’s description here; 10,000 character max)</span>
+    </label>
+    <textarea id="adventure-text" name="description" maxlength="10000" rows="6" required></textarea>
+    <p id="text-error" class="error"></p>
+
+    <!-- Upload Video Introduction -->
+    <label for="video_link" class="tooltip">
+      Link Your Video Here!
+      <span class="tooltiptext">Add Video Link Here!</span>
+    </label>
+    <input type="text" id="videoURL" name="video_link" maxlength="150" required>
+    <p id="video-error" class="error"></p>
+    <!-- <div id="video-thumbnail" class="thumbnail-preview"></div> -->
+
+    <!-- Upload Thumbnail -->
+    <!-- <label for="images" class="tooltip">
+      Upload Your Images Here! (Map, Thumbnail, and Other Images)
+      <span class="tooltiptext">Add Map, Thumbnail, and Other Images Here!</span>
+    </label>
+    <input type="file" id="image-upload" name="images[]" accept="image/*" multiple required>
+    <p id="thumbnail-error" class="error hide"></p>
+    <div id="thumbnail-preview" class="thumbnail-preview"></div> -->
+
+    <label for="map" class="tooltip">
+      Upload Map Here!
+      <span class="tooltiptext">Select Map</span>
+    </label>
+    <input type="file" id="map-upload" name="map[]" accept="image/*" required>
+    <p id="map-error" class="error hide"></p>
+    <div id="map-preview" class="thumbnail-preview"></div>
+
+    <label for="thumbnail" class="tooltip">
+      Upload Thumbnail Here!
+      <span class="tooltiptext">Select Thumbnail</span>
+    </label>
+    <input type="file" id="thumbnail-upload" name="thumbnail[]" accept="image/*" required>
+    <p id="thumbnail-error" class="error hide"></p>
+    <div id="thumbnail-preview" class="thumbnail-preview"></div>
+
+    <input type="hidden" name="selecedMap" id="selecedMap" value="">
+    <input type="hidden" name="selecedThumbnail" id="selecedThumbnail" value="">
+
+    <!-- Add Adventure Button -->
+    <input type="submit" name="submit_submission" value="Add Adventure" id="SubmBut"></input>
+    <!-- <p>Click here to add this to your in-progress Secret Doors, which you can edit and then submit for approval on the
+      Your In-Progress Secret Doors page</p> -->
+  </form>
+</div>
+
+<!-- <script src="<?php echo plugins_url() . '/wld-pta/assets/js/api.js'; ?>"></script> -->
+<script src="<?php echo plugin_dir_url(__DIR__) . 'JS/Add_Submission_Page.js'; ?>"></script>
+<!-- Add Submission Page HTML End -->
