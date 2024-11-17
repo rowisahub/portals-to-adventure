@@ -40,6 +40,7 @@ class Plugin_Updater
 
   public function init($plugin_file, $repo_owner = null, $repo_name = null)
   {
+
     $this->logger = $this->logger->getLogger();
 
     $this->register_hooks();
@@ -75,7 +76,7 @@ class Plugin_Updater
     }
 
     if (!isset($API_response->tag_name)) {
-      $this->logger->warning('No tag name found in release information');
+      //$this->logger->warning('No tag name found in release information');
       return $transient;
     }
 
@@ -85,7 +86,7 @@ class Plugin_Updater
     $latest_version = ltrim($API_response->tag_name, 'v');
 
     if (version_compare($this->current_version, $latest_version, '<')) {
-      $this->logger->info('New version available: ' . $this->current_version . ' -> ' . $latest_version);
+      //$this->logger->info('New version available: ' . $this->current_version . ' -> ' . $latest_version);
 
       $plugin_slug = plugin_basename($this->plugin_file);
 
