@@ -1,4 +1,5 @@
 <?php
+namespace PTA\Update;
 /*
 File: pta-updates2.php
 Description: Updates for the plugin.
@@ -13,11 +14,13 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
+//require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
 require_once plugin_dir_path(__FILE__) . 'update-api.php';
+use PTA\logger\Log;
+
 
 // Class for handling plugin updates
-class PTA_Plugin_Updater
+class Plugin_Updater
 {
   private $repo_owner = 'rowisahub';
   private $repo_name = 'wld-pta';
@@ -27,11 +30,19 @@ class PTA_Plugin_Updater
   private $current_version;
   private $api_instance;
   private $api_download_url_base = '/wp-json/pta/v1/update';
+  private $logger;
 
   // Constructor to initialize the updater
-  public function __construct($plugin_file, $repo_owner = null, $repo_name = null)
+  public function __construct()
   {
-    global $logPTAUpdater;
+    $this->logger = new Log(name: 'Updater');
+  }
+
+  public function init($plugin_file, $repo_owner = null, $repo_name = null)
+  {
+    $this->logger = $this->logger->getLogger();
+
+    $this->register_hooks();
 
     $this->repo_owner = $repo_owner ?? $this->repo_owner;
     $this->repo_name = $repo_name ?? $this->repo_name;
@@ -39,15 +50,17 @@ class PTA_Plugin_Updater
     $this->api_url = "https://api.github.com/repos/{$this->repo_owner}/{$this->repo_name}/releases/latest";
     $this->current_version = $this->get_plugin_version();
 
-    add_filter('pre_set_site_transient_update_plugins', array($this, 'check_for_updates'));
+    // Init API
+    //$this->api_instance = new PTA_Update_API($this);
+  }
 
-    // Initialize the API
-    $this->api_instance = new PTA_Update_API($this);
+  public function register_hooks()
+  {
+    add_filter('pre_set_site_transient_update_plugins', array($this, 'check_for_updates'));
   }
 
   public function check_for_updates($transient)
   {
-    global $logPTAUpdater;
 
     if (empty($transient->checked)) {
       return $transient;
@@ -62,7 +75,7 @@ class PTA_Plugin_Updater
     }
 
     if (!isset($API_response->tag_name)) {
-      $logPTAUpdater->warning('No tag name found in release information');
+      $this->logger->warning('No tag name found in release information');
       return $transient;
     }
 
@@ -72,7 +85,7 @@ class PTA_Plugin_Updater
     $latest_version = ltrim($API_response->tag_name, 'v');
 
     if (version_compare($this->current_version, $latest_version, '<')) {
-      $logPTAUpdater->info('New version available: ' . $this->current_version . ' -> ' . $latest_version);
+      $this->logger->info('New version available: ' . $this->current_version . ' -> ' . $latest_version);
 
       $plugin_slug = plugin_basename($this->plugin_file);
 

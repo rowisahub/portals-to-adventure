@@ -12,6 +12,8 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\ErrorHandler;
 use Monolog\Processor\IntrospectionProcessor;
 
+use PTA\interfaces\logger\PTALogInterface;
+
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -29,7 +31,7 @@ if (!defined('ABSPATH')) {
  * @package PortalsToAdventure
  * @subpackage Logger
  */
-class Log
+class Log implements PTALogInterface
 {
   private $logger;
   private $logPath;
@@ -82,6 +84,11 @@ class Log
     $this->createLog($level, $ifLogUncaught);
   }
 
+  /**
+   * Retrieves the logger instance.
+   *
+   * @return Logger The logger instance.
+   */
   public function getLogger()
   {
     return $this->logger;
