@@ -15,22 +15,31 @@ if (!defined('ABSPATH')) {
 
 // Requires
 require_once PTA_PLUGIN_DIR . 'src/DB/db-functions.php';
-require_once PTA_PLUGIN_DIR . 'src/pta-logger.php';
+use PTA\logger\Log;
 
 /**
  * Class PTA_Woocommerce_Extension
  *
  * This class contains the WooCommerce extension functions for the plugin.
  */
-class Woocommerce
+class Woocommerce_Extension
 {
   private $isLoaded;
   private $log;
   public function __construct()
   {
+    $this->log = new Log(name: 'WooCommerce');
+  }
+
+  public function init()
+  {
+    $this->register_hooks();
+    $this->log = $this->log->getLogger();
+  }
+
+  public function register_hooks()
+  {
     add_action(hook_name: 'woocommerce_loaded', callback: array($this, 'prefix_woocommerce_loaded'));
-    global $logWooCommerce;
-    $this->log = $logWooCommerce;
   }
 
   public function prefix_woocommerce_loaded()

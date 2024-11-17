@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
 use PTA\Enqueue;
 use PTA\logger\Log;
 use PTA\DB\db_handler;
+use PTA\Woocommerce\Woocommerce_Extension;
 
 /**
  * Class PTA
@@ -28,6 +29,7 @@ class PTA
   private $enqueue;
   private $dbHandler;
   private $logger;
+  private $woocommerceExtension;
 
   public function __construct()
   {
@@ -39,6 +41,9 @@ class PTA
     
     /* Database Handler */
     $this->dbHandler = new db_handler();
+
+    /* Woocommerce Extension */
+    $this->woocommerceExtension = new Woocommerce_Extension();
 
     /* Initialize */
     $this->init();
@@ -54,9 +59,16 @@ class PTA
    */
   public function init()
   {
+    /* Enqueue */
     $this->enqueue->add_enqueue_action();
+
+    /* Database Handler */
     $this->dbHandler->init();
 
+    /* Woocommerce Extension */
+    $this->woocommerceExtension->init();
+
+    /* Logger */
     $this->logger = $this->logger->getLogger();
   }
 }
