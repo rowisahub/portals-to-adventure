@@ -73,7 +73,7 @@ class PTA
     /* Woocommerce Extension */
     $this->woocommerceExtension->init();
 
-    /* Update */
+    /* Update WIP */
     //$this->update->init();
 
     /* Logger */
