@@ -79,4 +79,21 @@ class PTA
     /* Logger */
     $this->logger = $this->logger->getLogger();
   }
+
+  public function get_instance($name){
+    switch($name){
+      case 'enqueue':
+        return $this->enqueue;
+      case 'dbHandler':
+        return $this->dbHandler;
+      case 'logger':
+        return $this->logger;
+      case 'woocommerceExtension':
+        return $this->woocommerceExtension;
+      case 'update':
+        return $this->update;
+      default:
+        return null;
+    }
+  }
 }
