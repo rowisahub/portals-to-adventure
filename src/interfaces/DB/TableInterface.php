@@ -1,5 +1,5 @@
 <?php
-namespace PTA\Interfaces\DB;
+namespace PTA\interfaces\DB;
 /*
 File: TableInterface.php
 Description: Table interface for the plugin.

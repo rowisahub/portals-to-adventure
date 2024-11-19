@@ -19,6 +19,10 @@ use PTA\logger\Log;
 use Brain\Monkey;
 use Brain\Monkey\Functions;
 
+const ARRAY_A = 'ARRAY_A';
+const ARRAY_N = 'ARRAY_N';
+const OBJECT = 'OBJECT';
+
 class DBHandlerTest extends TestCase
 {
     private $dbHandler;

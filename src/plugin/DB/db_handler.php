@@ -88,7 +88,7 @@ class db_handler implements DBHandlerInterface
 
     $this->update->init();
     $this->backup->init();
-    $this->functions->init();
+    $this->functions->init(handler_instance: $this, wpdb: $this->wpdb);
   }
 
   public function register_activation()
@@ -195,6 +195,11 @@ class db_handler implements DBHandlerInterface
     return $this->db_version;
   }
 
+  /**
+   * Retrieves the prefix used for the Portals to Adventure (PTA) database tables.
+   *
+   * @return string The prefix for the PTA database tables.
+   */
   public function get_pta_prefix()
   {
     return $this->wld_prefix;
