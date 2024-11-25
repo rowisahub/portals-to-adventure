@@ -17,6 +17,19 @@ use PTA\interfaces\DB\QueryBuilderInterface;
  * Class QueryBuilder
  *
  * A flexible and secure SQL query builder for constructing and executing complex database queries.
+ * 
+ * Create an instance of the QueryBuilder
+ * 
+ * $queryBuilder = new PTA\DB\QueryBuilder($wpdb);
+ * 
+ * $queryBuilder->select(['id', 'name'])
+ * 
+ *        ->from('my_table')
+ *        ->where(['status' => 'active'])
+ *        ->orderBy('name', 'ASC')
+ *        ->limit(10);
+ * 
+ * $sql = $queryBuilder->get_sql();
  *
  * @package PTA\DB
  */

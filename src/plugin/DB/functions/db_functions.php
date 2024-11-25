@@ -3,7 +3,6 @@ namespace PTA\DB;
 /*
 File: db_functions.php
 Description: Database functions for the plugin.
-Authors: Rowan Wachtler, Braedon Salwoski
 */
 
 // Prevent direct access

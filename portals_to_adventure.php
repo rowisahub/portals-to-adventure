@@ -37,7 +37,7 @@ if (file_exists(filename: __DIR__ . '/vendor/autoload.php')) {
     ?>
     <div class="notice notice-error">
       <p>
-        <?php _e('Portals to Adventure plugin is not working because the vendor/autoload.php file is missing. Please contact the devs.', 'pta'); ?>
+        <?php _e('Portals to Adventure plugin is not working Please contact the devs.', 'pta'); ?>
       </p>
     </div>
     <?php
