@@ -92,10 +92,29 @@ class db_functions
     return $results;
   }
 
-  public function get_data_builder(QueryBuilder $query_builder)
+  /**
+   * Retrieves the specified table from the database.
+   *
+   * @param string $table_name The name of the table to retrieve.
+   * @return mixed The table data or false if the table does not exist.
+   */
+  public function get_table($table_name)
+  {
+    return $this->db_tables[$table_name];
+  }
+
+  /**
+   * Retrieves data using the provided QueryBuilder instance.
+   *
+   * @param QueryBuilder $query_builder The QueryBuilder instance used to build the query.
+   * @return mixed The data retrieved from the database.
+   */
+  public function exe_from_builder(QueryBuilder $query_builder, $output_type = ARRAY_A)
   {
     $queryBuilderSQL = $query_builder->get_sql();
-    //$prepared_sql = $this->wpdb->prepare($queryBuilderSQL);
+    $prepared_sql = $this->wpdb->prepare($queryBuilderSQL);
+
+    return $this->wpdb->get_results($prepared_sql, $output_type);
 
   }
 
@@ -162,5 +181,10 @@ class db_functions
     $permString .= $PermIsBanned ? '1' : '0';
 
     return $permString;
+  }
+
+  public function get_WPDB()
+  {
+    return $this->wpdb;
   }
 }

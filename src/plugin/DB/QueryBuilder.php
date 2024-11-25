@@ -503,4 +503,5 @@ class QueryBuilder implements QueryBuilderInterface
     $this->bindings = [];
     return $this;
   }
+
 }
