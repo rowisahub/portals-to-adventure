@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-use PTA\interfaces\DB\DBHandlerInterface;
+use PTA\DB\db_handler;
 use PTA\logger\Log;
 use PTA\DB\QueryBuilder;
 use PTA\interfaces\DB\QueryBuilderInterface;
@@ -29,20 +29,24 @@ class db_functions
     $this->logger = new log(name: 'DB.Functions');
   }
 
-  public function init(DBHandlerInterface $handler_instance, $wpdb)
+  public function init(db_handler $handler_instance = null, \wpdb $wpdbIn = null)
   {
-    $this->cache = [];
+    //$this->cache = [];
+
     $this->logger = $this->logger->getLogger();
 
-    $this->wpdb = $wpdb;
+    // uf handler_instance is not null, set it
+    if ($handler_instance !== null) {
+      $this->handler_instance = new db_handler();
+      $this->db_tables = [
+        'user_info' => $this->handler_instance->get_table('user_info'),
+        'submission_data' => $this->handler_instance->get_table('submission_data'),
+        'image_data' => $this->handler_instance->get_table('image_data')
+      ];
+    }
 
-    $this->handler_instance = $handler_instance;
-
-    $this->db_tables = [
-      'user_info' => $this->handler_instance->get_table('user_info'),
-      'submission_data' => $this->handler_instance->get_table('submission_data'),
-      'image_data' => $this->handler_instance->get_table('image_data')
-    ];
+    $this->wpdb = $wpdbIn ?? $this->handler_instance->get_WPDB();
+    
   }
 
   /**
@@ -100,6 +104,9 @@ class db_functions
    */
   public function get_table($table_name)
   {
+    if (!isset($this->db_tables[$table_name])) {
+      return false;
+    }
     return $this->db_tables[$table_name];
   }
 
@@ -127,8 +134,12 @@ class db_functions
    */
   public function check_id_exists($table, $id)
   {
-
-    $result = $this->get_data($table, ['id'], ['id' => $id]);
+    // check if table is image_data, if so use image_id
+    if ($table === 'image_data') {
+      $result = $this->get_data($table, ['image_id'], ['image_id' => $id]);
+    } else {
+      $result = $this->get_data($table, ['id'], ['id' => $id]);
+    }
 
     return count($result) > 0;
   }

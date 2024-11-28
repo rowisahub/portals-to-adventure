@@ -75,20 +75,21 @@ class db_handler implements DBHandlerInterface
     ];
 
     $this->logger = $logger ?? new log(name: 'DB.Handler');
+    $this->logger = $this->logger->getLogger();
 
     $this->update = $update ?? new db_update($this);
     $this->backup = $backup ?? new db_backup();
-    $this->functions = $functions ?? new db_functions($this);
+    $this->functions = $functions ?? new db_functions();
   }
 
   public function init()
   {
     $this->register_activation();
-    $this->logger = $this->logger->getLogger();
+    //$this->logger = $this->logger->getLogger();
 
     $this->update->init();
     $this->backup->init();
-    $this->functions->init(handler_instance: $this, wpdb: $this->wpdb);
+    $this->functions->init(handler_instance: $this, wpdbIn: $this->wpdb);
   }
 
   public function register_activation()
@@ -203,6 +204,16 @@ class db_handler implements DBHandlerInterface
   public function get_pta_prefix()
   {
     return $this->wld_prefix;
+  }
+
+  /**
+   * Retrieves the WordPress database object.
+   *
+   * @return wpdb The WordPress database object.
+   */
+  public function get_WPDB()
+  {
+    return $this->wpdb;
   }
 
 }
