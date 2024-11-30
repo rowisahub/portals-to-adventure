@@ -35,15 +35,16 @@ class db_functions
 
     $this->logger = $this->logger->getLogger();
 
-    // uf handler_instance is not null, set it
-    if ($handler_instance !== null) {
+    // uf handler_instance is null, set it
+    if ($handler_instance == null) {
       $this->handler_instance = new db_handler();
-      $this->db_tables = [
-        'user_info' => $this->handler_instance->get_table('user_info'),
-        'submission_data' => $this->handler_instance->get_table('submission_data'),
-        'image_data' => $this->handler_instance->get_table('image_data')
-      ];
     }
+
+    $this->db_tables = [
+      'user_info' => $this->handler_instance->get_table('user_info'),
+      'submission_data' => $this->handler_instance->get_table('submission_data'),
+      'image_data' => $this->handler_instance->get_table('image_data')
+    ];
 
     $this->wpdb = $wpdbIn ?? $this->handler_instance->get_WPDB();
     

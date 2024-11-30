@@ -1,19 +1,37 @@
 <?php
 namespace PTA\DB\functions\submission;
 
+/* Prevent direct access */
+if (!defined('ABSPATH')) {
+  exit;
+}
+
+use PTA\DB\db_handler;
 use PTA\DB\db_functions;
 use PTA\DB\QueryBuilder;
 use PTA\logger\Log;
 
-class submission_functions extends db_functions {
+class submission_functions {
 
   private $table_path;
+  private $db_functions;
   private $handler_instance;
   private $logger;
+  private \wpdb $wpdb;
 
-  public function __construct() {
-    parent::__construct();
-    $this->init();
+  public function __construct(db_handler $handler_instance = null, db_functions $db_functions = null) {
+    // if handler_instance is null, set it
+    if ($db_functions == null) {
+      $this->db_functions = new db_functions();
+    }
+    if ($handler_instance == null) {
+      $this->handler_instance = new db_handler();
+    }
+
+    $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+    $this->db_functions->init(handler_instance: $this->handler_instance);
+
+    $this->wpdb = $this->handler_instance->get_WPDB();
 
     $this->table_path = $this->handler_instance->get_table_path('submission_data');
 
@@ -21,7 +39,7 @@ class submission_functions extends db_functions {
     $this->logger = $this->logger->getLogger();
   }
 
-  function add_submission(
+  public function add_submission(
     $user_owner_id, 
     $title, 
     $description, 
@@ -33,7 +51,7 @@ class submission_functions extends db_functions {
     $likes_votes = 0, 
     $state = 'In Progress'
   ) {
-    $uuid = $this->generate_uuid('submission_data');
+    $uuid = $this->db_functions->generate_uuid('submission_data');
 
     $data = [
       'id' => $uuid,
@@ -49,72 +67,72 @@ class submission_functions extends db_functions {
       'state' => $state
     ];
 
-    $this->get_WPDB()->insert($this->table_path, $data);
+    $this->wpdb->insert($this->table_path, $data);
 
     return $uuid;
   }
 
-  function update_submission($submission_id, $data) {
-    $this->get_WPDB()->update($this->table_path, $data, ['id' => $submission_id]);
+  public function update_submission($submission_id, $data) {
+    $this->wpdb->update($this->table_path, $data, ['id' => $submission_id]);
   }
 
-  function get_submission($submission_id, $output_type = 'ARRAY_A') {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_submission($submission_id, $output_type = 'ARRAY_A') {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['id' => $submission_id]);
 
-    return $this->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
-  function get_submissions_by_user($user_id, $output_type = 'ARRAY_A') {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_submissions_by_user($user_id, $output_type = 'ARRAY_A') {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['user_owner_id' => $user_id]);
 
-    return $this->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
-  function get_submission_value($submission_id, $key) {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_submission_value($submission_id, $key) {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select($key)
                  ->from($this->table_path)
                  ->where(['id' => $submission_id]);
 
-    $result = $this->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder($queryBuilder);
 
     return $result[$key] ?? null;
   }
 
-  function get_submission_by_state($user_owner_id, $state, $output_type = 'ARRAY_A') {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_submission_by_state($user_owner_id, $state, $output_type = 'ARRAY_A') {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['user_owner_id' => $user_owner_id, 'state' => $state]);
 
-    return $this->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
-  function get_all_submissions_by_state($state, $numOfSubmissions = 10, $output_type = 'ARRAY_A') {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_all_submissions_by_state($state, $numOfSubmissions = 10, $output_type = 'ARRAY_A') {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['state' => $state])
                  ->limit($numOfSubmissions);
 
-    return $this->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
-  function get_all_submissions($output_type = 'ARRAY_A') {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+  public function get_all_submissions($output_type = 'ARRAY_A') {
+    $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path);
 
-    return $this->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
-  function remove_submission($submission_id, $message = 'Submission Removed By User') {
+  public function remove_submission($submission_id, $message = 'Submission Removed By User') {
     $this->update_submission($submission_id, [
       'state' => 'Removed',
       'is_removed' => 1,
@@ -122,7 +140,7 @@ class submission_functions extends db_functions {
     ]);
   }
 
-  function unremove_submission($submission_id) {
+  public function unremove_submission($submission_id) {
     $this->update_submission($submission_id, [
       'state' => 'In Progress',
       'is_removed' => 0,
@@ -130,14 +148,14 @@ class submission_functions extends db_functions {
     ]);
   }
 
-  function add_view_count($submission_id) {
+  public function add_view_count($submission_id) {
     $submission = $this->get_submission($submission_id);
     $view_count = $submission['views'] + 1;
     $this->update_submission($submission_id, ['views' => $view_count]);
   }
 
-  function add_submission_vote($submission_id, $count = 1) {
-    if (!$this->check_id_exists('submission_data', $submission_id)) {
+  public function add_submission_vote($submission_id, $count = 1) {
+    if (!$this->db_functions->check_id_exists('submission_data', $submission_id)) {
       return false;
     }
     $submission = $this->get_submission($submission_id);

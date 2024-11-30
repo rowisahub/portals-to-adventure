@@ -1,19 +1,36 @@
 <?php
 namespace PTA\DB\functions\user;
 
+/* Prevent direct access */
+if (!defined('ABSPATH')) {
+  exit;
+}
+
+use PTA\DB\db_handler;
 use PTA\DB\db_functions;
 use PTA\DB\QueryBuilder;
 use PTA\logger\Log;
 
-class user_functions extends db_functions {
+class user_functions {
 
   private $table_path;
   private $handler_instance;
+  private $db_functions;
   private $logger;
+  private \wpdb $wpdb;
 
-  public function __construct() {
-    parent::__construct();
-    $this->init();
+  public function __construct(db_handler $handler_instance = null, db_functions $db_functions = null) {
+    if ($db_functions == null) {
+      $this->db_functions = new db_functions();
+    }
+    if ($handler_instance == null) {
+      $this->handler_instance = new db_handler();
+    }
+
+    $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+    $this->db_functions->init(handler_instance: $this->handler_instance);
+    
+    $this->wpdb = $this->handler_instance->get_WPDB();
 
     $this->table_path = $this->handler_instance->get_table_path('user_info');
 
@@ -22,7 +39,6 @@ class user_functions extends db_functions {
   }
 
   function register_user($email, $username, $firstName = null, $lastName = null, $verified_email = 0, $token = '', $birthday = null, $permissions = '', $payment_info = null) {
-    global $logDB;
 
     // also need to register user in WordPress
     $user = get_user_by('email', $email);
@@ -51,14 +67,14 @@ class user_functions extends db_functions {
     }
 
     if (!$user) {
-      $logDB->error('Error creating user');
+      $this->logger->error('Error creating user');
       return null;
     }
 
     $user_id = $user->ID;
 
-    if ($this->check_id_exists('user_info', $user_id)) {
-      $logDB->debug('User already exists in user_info table');
+    if ($this->db_functions->check_id_exists('user_info', $user_id)) {
+      $this->logger->debug('User already exists in user_info table');
       return $user_id;
     }
 
@@ -72,20 +88,20 @@ class user_functions extends db_functions {
       'payment_info' => $payment_info
     ];
 
-    $this->get_WPDB()->insert($this->table_path, $data);
+    $this->wpdb->insert($this->table_path, $data);
 
-    $logDB->info('User created in user_info table');
+    $this->logger->info('User created in user_info table');
 
     return $user_id;
   }
 
   function get_user_permissions($user_id, $perm = null) {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+    $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['id' => $user_id]);
 
-    $result = $this->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder($queryBuilder);
 
     if ($perm != null) {
       return $result['permissions'][$perm];
@@ -95,12 +111,12 @@ class user_functions extends db_functions {
   }
 
   function get_user_by_id($user_id) {
-    $queryBuilder = new QueryBuilder($this->get_WPDB());
+    $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
     $queryBuilder->select('*')
                  ->from($this->table_path)
                  ->where(['id' => $user_id]);
 
-    return $this->exe_from_builder($queryBuilder);
+    return $this->db_functions->exe_from_builder($queryBuilder);
   }
 
   function check_user_exists($user_id) {
@@ -114,7 +130,7 @@ class user_functions extends db_functions {
   }
 
   function remove_user($user_id) {
-    $this->get_WPDB()->delete($this->table_path, ['id' => $user_id]);
+    $this->wpdb->delete($this->table_path, ['id' => $user_id]);
     // remove user from WordPress
     wp_delete_user($user_id);
   }

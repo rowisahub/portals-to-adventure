@@ -48,7 +48,7 @@ class db_handler implements DBHandlerInterface
   private $logger;
 
   // wpdb
-  private $wpdb;
+  private \wpdb $wpdb;
 
 
   public function __construct(
@@ -209,11 +209,27 @@ class db_handler implements DBHandlerInterface
   /**
    * Retrieves the WordPress database object.
    *
-   * @return wpdb The WordPress database object.
+   * @return \wpdb The WordPress database object.
    */
   public function get_WPDB()
   {
     return $this->wpdb;
   }
 
+  public function set_functions($name, $function_instance)
+  {
+    switch ($name) {
+      case 'update':
+        $this->update = $function_instance;
+        break;
+      case 'backup':
+        $this->backup = $function_instance;
+        break;
+      case 'functions':
+        $this->functions = $function_instance;
+        break;
+      default:
+        return null;
+    }
+  }
 }
