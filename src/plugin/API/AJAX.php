@@ -13,6 +13,12 @@ if (!defined('ABSPATH')) {
 
 /* Require Class */
 use PTA\logger\Log;
+use Google_Client;
+use PTA\DB\db_handler;
+use PTA\DB\functions\db_functions;
+use PTA\DB\functions\submission\submission_functions;
+use PTA\DB\functions\image\image_functions;
+use PTA\DB\functions\user\user_functions;
 
 /**
  * Class AJAX
@@ -24,6 +30,12 @@ use PTA\logger\Log;
 class AJAX
 {
   private $logger;
+  private $handler_instance;
+  private $db_functions;
+  private $submission_func;
+  private $image_func;
+  private $user_func;
+  
 
   public function __construct()
   {
@@ -31,7 +43,7 @@ class AJAX
     $this->logger = new Log(name: 'AJAX');
 
     /* Initialize */
-    $this->init();
+    //$this->init();
   }
 
   /**
@@ -39,10 +51,133 @@ class AJAX
    *
    * This method initializes the AJAX API by calling the necessary methods.
    */
-  private function init()
+  public function init(
+    submission_functions $sub_functions = null,
+    image_functions $img_functions = null,
+    user_functions $user_functions = null,
+    db_handler $handler_instance = null,
+    db_functions $db_functions = null
+  )
   {
-    $this->logger = $this->logger->getInstance();
+    $this->logger = $this->logger->getLogger();
     
-    $this->logger->log('Initializing AJAX API...');
+    //$this->logger->log('Initializing AJAX API...');
+
+    // Get the handler instance and db functions instance
+    $this->handler_instance = $handler_instance ?? new db_handler();
+    $this->db_functions = $db_functions ?? new db_functions();
+
+    // if handler_instance is null or db_functions is null, set them
+    if ($handler_instance == null || $db_functions == null) {
+
+      // Set the functions instance in the handler, and initialize the functions
+      $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+      $this->db_functions->init(handler_instance: $this->handler_instance);
+
+    }
+
+    // Set the functions instances for the submission, image, and user functions
+    $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->image_func = $img_functions ?? new image_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+
+    $this->register_hooks();
   }
+
+  public function register_hooks()
+  {
+    /* For Google Login */
+    add_action('wp_ajax_nopriv_wldpta_google_login', array($this, 'wldpta_google_login'));
+    add_action('wp_ajax_wldpta_google_login', array($this, 'wldpta_google_login'));
+
+    /* For adding a vote to the cart */
+    add_action('wp_ajax_nopriv_wldpta_vote_add_to_cart', array($this, 'wldpta_vote_add_to_cart'));
+    add_action('wp_ajax_wldpta_vote_add_to_cart', array($this, 'wldpta_vote_add_to_cart'));
+  }
+
+  public function wldpta_google_login()
+  {
+
+    if (!isset($_POST['credential'])) {
+      wp_send_json_error(array('message' => 'Missing Google credential'));
+    }
+
+    $credential = $_POST['credential'];
+    //$client = new Google_Client(['client_id' => '1056480373919-if6qv2rnlinuimldu4jsp9eeorvm2nmu.apps.googleusercontent.com']); // test
+    $client = new Google_Client(['client_id' => '322331838115-fhp6ql51sqb6ounq5psj1rm83385j449.apps.googleusercontent.com']); // live
+    $payload = $client->verifyIdToken($credential);
+
+    if (!$payload) {
+      wp_send_json_error(array('message' => 'Invalid Google token'));
+    }
+
+    //error_log('Google login payload: ' . print_r($payload, true));
+
+    $email = $payload['email'];
+    $username = sanitize_user($payload['name']);
+    $user = get_user_by('email', $email);
+
+    // check if the promotional emails checkbox is checked
+    $promotionalEmails = isset($_POST['promotionalEmails']) ? $_POST['promotionalEmails'] : '0';
+
+    $userPerms = $this->db_functions->format_permissions($promotionalEmails, 0, 0, 0);
+
+    if (!$user) {
+      // User doesn't exist, create new one
+      $user_id = $this->user_func->register_user(
+        $email,
+        $username,
+        $payload['given_name'],
+        $payload['family_name'],
+        $payload['email_verified'],
+        $payload['sub'],
+        $permissions = $userPerms
+      );
+      if ($user_id == null) {
+        wp_send_json_error(array('message' => 'Error creating user'));
+      }
+      $user = get_user_by('id', $user_id);
+    }
+
+    // Log the user in
+    wp_set_current_user($user->ID);
+    wp_set_auth_cookie($user->ID);
+
+    wp_send_json_success(array('message' => 'User logged in successfully'));
+
+  }
+
+  public function wldpta_vote_add_to_cart(){
+  
+    $checkNonce = check_ajax_referer('wldpta_ajax_nonce', 'nonce');
+  
+    if (!$checkNonce) {
+      wp_send_json_error(array('message' => 'Invalid nonce'));
+    }
+  
+    // check submission status
+  
+    $product_id = get_option('pta_woocommerce_product_id');
+    $submission_id = $_POST['submission_id'];
+  
+    // Add the product to the cart
+    if($product_id > 0){
+      $cart = WC()->cart;
+      $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: array('submission_id' => $submission_id));
+  
+      if($added){
+        wp_send_json_success(array('message' => 'Product added to cart', 'added' => $added));
+      } else {
+        $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'added' => $added));
+        wp_send_json_error(array('message' => 'Error adding product to cart'));
+      }
+      
+    } else {
+      wp_send_json_error(array('message' => 'Invalid product ID'));
+    }
+    
+    wp_die();
+  
+  }
+
 }

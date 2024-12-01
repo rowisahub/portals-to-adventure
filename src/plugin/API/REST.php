@@ -14,10 +14,11 @@ if (!defined('ABSPATH')) {
 /* Require Class */
 use PTA\logger\Log;
 use PTA\DB\db_handler;
-use PTA\DB\db_functions;
+use PTA\DB\functions\db_functions;
 use PTA\DB\functions\user\user_functions;
 use PTA\DB\functions\submission\submission_functions;
 use PTA\DB\functions\image\image_functions;
+use PTA\admin\admin_functions;
 
 /**
  * Class API
@@ -31,9 +32,10 @@ class REST
   private $logger;
   private db_handler $handler_instance;
   private db_functions $db_functions;
-  private user_functions $user;
-  private submission_functions $submission;
-  private image_functions $image;
+  private user_functions $user_func;
+  private submission_functions $submission_func;
+  private image_functions $image_func;
+  private admin_functions $admin_func;
 
   public function __construct()
   {
@@ -41,7 +43,7 @@ class REST
     $this->logger = new Log(name: 'API');
 
     /* Initialize */
-    $this->init();
+    //$this->init();
   }
 
   /**
@@ -49,21 +51,45 @@ class REST
    *
    * This method initializes the REST API by calling the necessary methods.
    */
-  private function init()
+  public function init(
+    submission_functions $sub_functions = null,
+    image_functions $img_functions = null,
+    user_functions $user_functions = null,
+    db_handler $handler_instance = null,
+    db_functions $db_functions = null,
+    admin_functions $admin_functions = null
+  )
   {
     $this->logger = $this->logger->getLogger();
-    
-    $this->logger->log('Initializing REST API...');
 
-    $this->db_functions = new db_functions();
-    $this->handler_instance = new db_handler();
+    // Get the handler instance and db functions instance
+    $this->handler_instance = $handler_instance ?? new db_handler();
+    $this->db_functions = $db_functions ?? new db_functions();
 
-    $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-    $this->db_functions->init(handler_instance: $this->handler_instance);
+    // if handler_instance is null or db_functions is null, set them
+    if ($handler_instance == null || $db_functions == null) {
 
-    $this->user = new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
-    $this->submission = new submission_functions(handler_instance: $this->handler_instance);
-    $this->image = new image_functions(handler_instance: $this->handler_instance);
+      // Set the functions instance in the handler, and initialize the functions
+      $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+      $this->db_functions->init(handler_instance: $this->handler_instance);
+
+    }
+
+    // Set the functions instances for the submission, image, and user functions
+    $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->image_func = $img_functions ?? new image_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+
+    // Set the functions instances for the admin functions
+    $this->admin_func = $admin_functions ?? new admin_functions();
+
+    $this->admin_func->init(
+      sub_functions: $this->submission_func,
+      img_functions: $this->image_func,
+      user_functions: $this->user_func,
+      handler_instance: $this->handler_instance,
+      db_functions: $this->db_functions
+    );
 
     add_action('rest_api_init', array($this, 'register_routes'));
   }
@@ -89,7 +115,6 @@ class REST
 
   public function submission_action($request)
   {
-    global $logAPI;
 
     $params = $request->get_params();
 
@@ -99,7 +124,7 @@ class REST
     $user_id = get_current_user_id();
 
     // log API request
-    $logAPI->info('API request: ' . json_encode($params));
+    $this->logger->info('API request: ' . json_encode($params));
 
     // check if the submission exists
     if (!$this->db_functions->check_id_exists("submission_data", $submission_id)) {
@@ -107,48 +132,48 @@ class REST
     }
 
     // check if the user is the owner of the submission, or if the user is an admin
-    $submission = $this->submission->get_submission($submission_id);
+    $submission = $this->submission_func->get_submission($submission_id);
     if ($submission['user_owner_id'] != $user_id && !current_user_can('administrator')) {
       return new \WP_Error('forbidden', 'You do not have permission to modify this submission', array('status' => 403));
     }
 
     switch ($action) {
       case 'approve':
-        $logAPI->debug('Approve submission');
+        $this->logger->debug('Approve submission');
 
         if (!current_user_can('administrator')) {
           error_log('User is not admin');
           return new \WP_Error('forbidden', 'You do not have permission to use action', array('status' => 403));
         }
 
-        approve_submission($submission_id);
+        $this->admin_func->approve_submission($submission_id);
 
         break;
       case 'reject':
-        $logAPI->debug('Reject submission');
+        $this->logger->debug('Reject submission');
 
         if (!current_user_can('administrator')) {
           error_log('User is not admin');
           return new \WP_Error('forbidden', 'You do not have permission to use action', array('status' => 403));
         }
 
-        reject_submission($submission_id, $reason);
+        $this->admin_func->reject_submission($submission_id, $reason);
 
         break;
       case 'delete':
-        $logAPI->debug('Delete submission');
-        delete_submission($submission_id, $reason);
+        $this->logger->debug('Delete submission');
+        $this->admin_func->delete_submission($submission_id, $reason);
 
         break;
       case 'unreject':
-        $logAPI->debug('Unreject submission');
+        $this->logger->debug('Unreject submission');
 
         if (!current_user_can('administrator')) {
           error_log('User is not admin');
           return new \WP_Error('forbidden', 'You do not have permission to use action', array('status' => 403));
         }
 
-        unreject_submission($submission_id);
+        $this->admin_func->unreject_submission($submission_id);
 
         break;
       default:
@@ -162,14 +187,13 @@ class REST
 
   public function get_submissions($request)
   {
-    global $logAPI;
 
     $params = $request->get_params();
     $user_id = get_current_user_id();
     $submissions = array();
 
     // log API request
-    $logAPI->info('API request: ' . json_encode($params));
+    $this->logger->info('API request: ' . json_encode($params));
 
     // Include your database functions if not already included
     // Adjust the path as necessary
@@ -185,7 +209,7 @@ class REST
       }
 
       // Get the submission
-      $submission = get_submission($submission_id);
+      $submission = $this->submission_func->get_submission($submission_id);
 
       // $submission['user_owner_id] != $user_id
       // Check permissions
@@ -196,7 +220,7 @@ class REST
 
       // if submission is Approved, increment views
       if ($submission['state'] == 'Approved') {
-        process_user_view($submission_id);
+        $this->process_user_view($submission_id);
       }
 
       $submissions[] = $submission;
@@ -209,7 +233,7 @@ class REST
         return new \WP_Error('invalid_user_id', 'Invalid user ID', array('status' => 400));
       }
 
-      $submissions = get_submissions_by_user($user_id);
+      $submissions = $this->submission_func->get_submissions_by_user($user_id);
 
     } else if (isset($params['requested'])) {
       // Get all submisssions exept the ones that are removed
@@ -218,24 +242,24 @@ class REST
         return new \WP_Error('forbidden', 'You do not have permission to view this submission', array('status' => 403));
       }
 
-      $submissions = get_all_submissions();
+      $submissions = $this->submission_func->get_all_submissions();
 
 
     } else if (isset($params['state'])) {
       $state = $params['state'];
 
       if ($state == 'Approved') {
-        $submissions = get_all_submissions_by_state($state);
+        $submissions = $this->submission_func->get_all_submissions_by_state($state);
       } else {
         return new \WP_Error('invalid_state', 'Invalid state', array('status' => 400));
       }
     } else {
       // Fetch all 'Approved' submissions
-      $public_submissions = get_all_submissions_by_state('Approved');
+      $public_submissions = $this->submission_func->get_all_submissions_by_state('Approved');
 
       // Fetch 'In Progress' submissions for the current user
       if ($user_id) {
-        $user_submissions = get_submissions_by_user($user_id);
+        $user_submissions = $this->submission_func->get_submissions_by_user($user_id);
       } else {
         $user_submissions = array();
       }
@@ -267,7 +291,6 @@ class REST
 
   public function pta_api_check_permissions(\WP_REST_Request $request)
   {
-    global $logAPI;
 
     // $logAPI->debug('Checking permissions');
     // pta_api_nonce
@@ -277,7 +300,7 @@ class REST
     //error_log('Nonce: ' . $nonce);
 
     if (!$nonce) {
-      $logAPI->warning('No nonce provided');
+      $this->logger->warning('No nonce provided');
       return new \WP_Error('no_nonce', 'Nonce is required for authentication.', array('status' => 403));
     }
 
@@ -288,7 +311,7 @@ class REST
 
     // Verify the nonce. 'my_plugin_nonce_action' should match the action used when creating the nonce.
     if (!$verified) {
-      $logAPI->warning('Invalid nonce');
+      $this->logger->warning('Invalid nonce');
       return new \WP_Error('invalid_nonce', 'Invalid nonce provided.', array('status' => 403));
     }
 
@@ -314,7 +337,11 @@ class REST
   private function format_submission($submission)
   {
     //error_log('Submission: ' . print_r($submission, true));
-    $userName = get_user_by_id($submission['user_owner_id'])['username'];
+    $user = $this->user_func->get_user_by_id($submission['user_owner_id'])[0];
+
+    //$this->logger->debug('User: ' . $user['username']);
+
+    $userName = $user['username'];
     $imageFormated = $this->formate_image_data($submission['image_uploads']);
 
     $thumbnail_url = '';
@@ -385,7 +412,8 @@ class REST
     $imgIDs = json_decode($imageIDs);
     //error_log('Image IDs: ' . print_r($imgIDs, true));
     foreach ($imgIDs as $imageID) {
-      $image = get_image_data($imageID);
+      $image = $this->image_func->get_image_data($imageID)[0];
+      //$this->logger->debug('Image get: ' . print_r($image, true));
       if ($image == null) {
         continue;
       }
@@ -400,5 +428,59 @@ class REST
     }
 
     return $images;
+  }
+
+  public function process_user_view($submission_id)
+  {
+    $cookie_name = 'submission_views';
+    $current_time = time(); // Current Unix timestamp
+  
+    // Retrieve the views from the cookie
+    if (isset($_COOKIE[$cookie_name])) {
+      $views = json_decode(stripslashes($_COOKIE[$cookie_name]), true);
+    } else {
+      $views = array();
+    }
+  
+    // Ensure $views is an array
+    if (!is_array($views)) {
+      $views = array();
+    }
+  
+    // Clean up old views (older than 1 hour)
+    foreach ($views as $key => $timestamp) {
+      if (($current_time - $timestamp) >= HOUR_IN_SECONDS) {
+        unset($views[$key]);
+      }
+    }
+  
+    // Check if the user has viewed this submission in the last hour
+    if (isset($views[$submission_id])) {
+      // Already viewed within the last hour; do nothing
+    } else {
+      // Increment the view count
+      $this->submission_func->add_view_count($submission_id);
+      // Record the view with the current timestamp
+      $views[$submission_id] = $current_time;
+    }
+  
+    // Limit the size of the $views array to prevent cookie size issues
+    $max_views = 50; // Adjust as needed
+    if (count($views) > $max_views) {
+      // Keep only the most recent $max_views entries
+      $views = array_slice($views, -$max_views, $max_views, true);
+    }
+  
+    // Update the cookie with new views data
+  // Set cookie to expire in 1 hour from now
+    setcookie(
+      $cookie_name,
+      json_encode($views),
+      $current_time + HOUR_IN_SECONDS,
+      COOKIEPATH,
+      COOKIE_DOMAIN,
+      is_ssl(),
+      true // httponly flag for security
+    );
   }
 }

@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Require the logger file
-require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
+//require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
 
 class PTA_Update_API
 {

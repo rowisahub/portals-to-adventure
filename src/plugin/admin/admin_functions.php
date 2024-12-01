@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\DB\db_handler;
-use PTA\DB\db_functions;
+use PTA\DB\functions\db_functions;
 use PTA\DB\functions\submission\submission_functions;
 use PTA\DB\functions\image\image_functions;
 use PTA\DB\functions\user\user_functions;
@@ -37,15 +37,20 @@ class admin_functions{
         db_functions $db_functions = null
     ){
         $this->logger = $this->logger->getLogger();
-        $this->logger->info('Initializing admin functions.');
+        //$this->logger->info('Initializing admin functions.');
 
         // Get the handler instance and db functions instance
         $this->handler_instance = $handler_instance ?? new db_handler();
         $this->db_functions = $db_functions ?? new db_functions();
 
-        // Set the functions instance in the handler, and initialize the functions
-        $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-        $this->db_functions->init(handler_instance: $this->handler_instance);
+        // if handler_instance is null or db_functions is null, set them
+        if ($handler_instance == null || $db_functions == null) {
+
+            // Set the functions instance in the handler, and initialize the functions
+            $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+            $this->db_functions->init(handler_instance: $this->handler_instance);
+
+        }
 
         // Set the functions instances for the submission, image, and user functions
         $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);

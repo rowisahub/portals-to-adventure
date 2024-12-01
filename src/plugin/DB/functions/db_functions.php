@@ -1,5 +1,5 @@
 <?php
-namespace PTA\DB;
+namespace PTA\DB\functions;
 /*
 File: db_functions.php
 Description: Database functions for the plugin.
@@ -35,9 +35,14 @@ class db_functions
 
     $this->logger = $this->logger->getLogger();
 
+    // log the handler instance
+    //$this->logger->debug("Is handler instance null? " . ($handler_instance == null ? 'Yes' : 'No'));
+
     // uf handler_instance is null, set it
     if ($handler_instance == null) {
       $this->handler_instance = new db_handler();
+    } else {
+      $this->handler_instance = $handler_instance;
     }
 
     $this->db_tables = [
@@ -77,8 +82,16 @@ class db_functions
     //   return $this->cache[$cache_key];
     // }
 
+    // get the table path from the handler instance
+    $table_path = $this->handler_instance->get_table_path($table);
+
+    if($table_path == null){
+      $this->logger->error("Table path is null for table: " . $table);
+      return null;
+    }
+
     $columns_sql = implode(', ', $columns);
-    $sql = "SELECT {$columns_sql} FROM {$table}";
+    $sql = "SELECT {$columns_sql} FROM {$table_path}";
     $values = [];
 
     if (!empty($where)) {
@@ -89,6 +102,9 @@ class db_functions
       }
       $sql .= " WHERE " . implode(' AND ', $conditions);
     }
+
+    // $this->logger->debug("SQL: " . print_r($sql, true));
+    // $this->logger->debug("Values: " . print_r($values, true));
 
     $prepared_sql = $this->wpdb->prepare($sql, $values);
     $results = $this->wpdb->get_results($prepared_sql, $output_type);
@@ -115,14 +131,22 @@ class db_functions
    * Retrieves data using the provided QueryBuilder instance.
    *
    * @param QueryBuilder $query_builder The QueryBuilder instance used to build the query.
+   * @param string $output_type The type of output to return. Defaults to ARRAY_A. Example: OBJECT or ARRAY_N
    * @return mixed The data retrieved from the database.
    */
   public function exe_from_builder(QueryBuilder $query_builder, $output_type = ARRAY_A)
   {
     $queryBuilderSQL = $query_builder->get_sql();
-    $prepared_sql = $this->wpdb->prepare($queryBuilderSQL);
 
-    return $this->wpdb->get_results($prepared_sql, $output_type);
+    //$this->logger->debug("Query Builder SQL:");
+    //$this->logger->debug($queryBuilderSQL);
+
+    $results = $this->wpdb->get_results($queryBuilderSQL, $output_type);
+
+    //$this->logger->debug("Results:");
+    //$this->logger->debug(json_encode($results));
+
+    return $results;
 
   }
 

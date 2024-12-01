@@ -33,12 +33,12 @@ use PTA\interfaces\DB\QueryBuilderInterface;
  *
  * @package PTA\DB
  */
-class QueryBuilder implements QueryBuilderInterface
+class QueryBuilder
 {
   /**
    * WordPress database access object.
    *
-   * @var wpdb
+   * @var \wpdb
    */
   protected $wpdb;
 
@@ -136,6 +136,7 @@ class QueryBuilder implements QueryBuilderInterface
       $args = func_get_args();
       $this->select = implode(', ', array_map([$this, 'escapeField'], $args));
     }
+    
     return $this;
   }
 
@@ -289,7 +290,7 @@ class QueryBuilder implements QueryBuilderInterface
   /**
    * Get the SQL query.
    *
-   * @return string SQL query.
+   * @return string SQL query string. With placeholders replaced and prepared.
    */
   public function get_sql()
   {
@@ -450,7 +451,7 @@ class QueryBuilder implements QueryBuilderInterface
    */
   protected function escapeIdentifier($identifier)
   {
-    return '`' . str_replace('`', '``', $identifier) . '`';
+    return $identifier; // '`' . str_replace('`', '``', $identifier) . '`';
   }
 
   /**

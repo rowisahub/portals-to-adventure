@@ -4,7 +4,7 @@ file: assets/enqueue.php
 description: Enqueue scripts and styles
 */
 
-namespace PTA;
+namespace PTA\enqueue;
 
 /* Prevent direct access */
 if (!defined('ABSPATH')) {
@@ -48,14 +48,14 @@ class Enqueue implements PTAEnqueueInterface
     /* Sidebar */
     wp_enqueue_style(
       handle: 'pta-sidebar-style',
-      src: plugins_url(path: 'css/sidebar.css', plugin: __FILE__),
+      src: plugins_url(path: 'portals-to-adventure/assets/public/css/sidebar.css'),
       deps: [],
       ver: '1.0.0',
       media: 'all'
     );
     wp_enqueue_script(
       handle: 'pta-sidebar-script',
-      src: plugins_url(path: 'js/sidebar.js', plugin: __FILE__),
+      src: plugins_url(path: 'portals-to-adventure/assets/public/js/sidebar.js'),
       deps: ['jquery'],
       ver: '1.0.0',
       args: true
@@ -64,14 +64,14 @@ class Enqueue implements PTAEnqueueInterface
     /* Login */
     wp_enqueue_style(
       handle: 'pta-login-style',
-      src: plugins_url(path: 'css/login.css', plugin: __FILE__),
+      src: plugins_url(path: 'portals-to-adventure/assets/public/css/login.css'),
       deps: [],
       ver: '1.0.0',
       media: 'all'
     );
     wp_enqueue_script(
       handle: 'pta-login-script',
-      src: plugins_url(path: 'js/login.js', plugin: __FILE__),
+      src: plugins_url(path: 'portals-to-adventure/assets/public/js/login.js'),
       deps: ['jquery'],
       ver: '1.0.0',
       args: true
@@ -89,7 +89,7 @@ class Enqueue implements PTAEnqueueInterface
     /* API */
     wp_enqueue_script(
       handle: 'pta-api',
-      src: plugins_url(path: 'js/api.js', plugin: __FILE__),
+      src: plugins_url(path: 'portals-to-adventure/assets/public/js/api.js'),
       deps: ['jquery'],
       ver: '1.0.0',
       args: true
@@ -99,7 +99,7 @@ class Enqueue implements PTAEnqueueInterface
     if (class_exists(class: 'WooCommerce')) {
       wp_enqueue_script(
         handle: 'pta-woocommerce',
-        src: plugins_url(path: 'js/woocommerce.js', plugin: __FILE__),
+        src: plugins_url(path: 'portals-to-adventure/assets/public/js/woocommerce.js'),
         deps: ['jquery'],
         ver: '1.0.0',
         args: true
@@ -113,14 +113,14 @@ class Enqueue implements PTAEnqueueInterface
       'ajax_url' => admin_url(path: 'admin-ajax.php'),
       'nonce' => wp_create_nonce(action: 'wldpta_ajax_nonce')
     );
-    $ajax_object_json = wp_json_encode(data: $ajax_object);
+    $ajax_object_json = wp_json_encode($ajax_object);
 
     // User data
     $user_data = array(
       'is_logged_in' => is_user_logged_in(),
       'user_name' => is_user_logged_in() ? wp_get_current_user()->display_name : ''
     );
-    $user_data_json = wp_json_encode(data: $user_data);
+    $user_data_json = wp_json_encode($user_data);
 
     // API
     $api_data = array(

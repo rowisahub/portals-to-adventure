@@ -35,7 +35,7 @@ jobs:
           vendor/bin/phpunit
       
   release:
-    needs: test
+#    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

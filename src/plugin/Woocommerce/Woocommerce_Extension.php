@@ -14,8 +14,12 @@ if (!defined('ABSPATH')) {
 }
 
 // Requires
-require_once PTA_PLUGIN_DIR . 'src/DB/db-functions.php';
 use PTA\logger\Log;
+use PTA\DB\db_handler;
+use PTA\DB\functions\db_functions;
+use PTA\DB\functions\submission\submission_functions;
+use PTA\DB\functions\image\image_functions;
+use PTA\DB\functions\user\user_functions;
 
 /**
  * Class PTA_Woocommerce_Extension
@@ -26,15 +30,42 @@ class Woocommerce_Extension
 {
   private $isLoaded;
   private $log;
+  private $handler_instance;
+  private $db_functions;
+  private $submission_func;
+  private $image_func;
+  private $user_func;
   public function __construct()
   {
     $this->log = new Log(name: 'WooCommerce');
   }
 
-  public function init()
+  public function init(
+    db_handler $handler_instance = null,
+    db_functions $db_functions = null
+  )
   {
-    $this->register_hooks();
     $this->log = $this->log->getLogger();
+
+    // Get the handler instance and db functions instance
+    $this->handler_instance = $handler_instance ?? new db_handler();
+    $this->db_functions = $db_functions ?? new db_functions();
+
+    // if handler_instance is null or db_functions is null, set them
+    if ($handler_instance == null || $db_functions == null) {
+
+      // Set the functions instance in the handler, and initialize the functions
+      $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+      $this->db_functions->init(handler_instance: $this->handler_instance);
+
+    }
+
+    // Set the functions instances for the submission, image, and user functions
+    $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->image_func = $img_functions ?? new image_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+
+    $this->register_hooks();
   }
 
   public function register_hooks()
@@ -77,7 +108,7 @@ class Woocommerce_Extension
   public function display_submission_title_in_order($item_data, $cart_item)
   {
     if (isset($cart_item['submission_id'])) {
-      $submission = get_submission($cart_item['submission_id']);
+      $submission = $this->submission_func->get_submission($cart_item['submission_id'])[0];
 
       $submission_title = wp_unslash($submission['title']);
 
@@ -117,10 +148,10 @@ class Woocommerce_Extension
     $total = $order->get_total();
 
     // Check if the user exists in the custom database
-    if (!check_id_exists($user_id, 'user_info')) {
+    if (!$this->db_functions->check_id_exists('user_info', $user_id)) {
       $user = get_user_by('ID', $user_id);
-      $userPerms = format_permissions(1, 0, 0, 0);
-      register_user(email: $user->user_email, username: $user->display_name, firstName: $user->first_name, lastName: $user->last_name, permissions: $userPerms);
+      $userPerms = $this->db_functions->format_permissions(1, 0, 0, 0);
+      $this->user_func->register_user(email: $user->user_email, username: $user->display_name, firstName: $user->first_name, lastName: $user->last_name, permissions: $userPerms);
     }
 
     // Log the order
@@ -151,7 +182,7 @@ class Woocommerce_Extension
       $submission_id = $item->get_meta('submission_id');
       $quantity = $item->get_quantity();
 
-      add_submission_vote($submission_id, $quantity);
+      $this->submission_func->add_submission_vote($submission_id, $quantity);
     }
 
     // Log the order

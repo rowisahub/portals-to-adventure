@@ -4,7 +4,7 @@ file: src/plugin/pta.php
 description: Main plugin file for Portals to Adventure.
 */
 
-namespace PTA\plugin;
+namespace PTA;
 
 /* Prevent direct access */
 if (!defined('ABSPATH')) {
@@ -12,11 +12,14 @@ if (!defined('ABSPATH')) {
 }
 
 /* Require Class */
-use PTA\Enqueue;
+use PTA\enqueue\Enqueue;
 use PTA\logger\Log;
 use PTA\DB\db_handler;
 use PTA\Woocommerce\Woocommerce_Extension;
 use PTA\Update\Plugin_Updater;
+use PTA\shortcodes\Shortcodes;
+use PTA\API\AJAX;
+use PTA\API\REST;
 
 /**
  * Class PTA
@@ -32,6 +35,9 @@ class PTA
   private $logger;
   private $woocommerceExtension;
   private $update;
+  private $shortcodes;
+  private $ajax;
+  private $rest;
 
   public function __construct()
   {
@@ -44,14 +50,21 @@ class PTA
     /* Database Handler */
     $this->dbHandler = new db_handler();
 
+    /* Update */
+    $this->update = new Plugin_Updater();    
+
     /* Woocommerce Extension */
     $this->woocommerceExtension = new Woocommerce_Extension();
 
-    /* Update */
-    $this->update = new Plugin_Updater();
+    /* Shortcodes */
+    $this->shortcodes = new Shortcodes();
+
+    /* API */
+    $this->rest = new REST();
+    $this->ajax = new AJAX();
 
     /* Initialize */
-    $this->init();
+    //$this->init();
   }
 
   /**
@@ -64,20 +77,32 @@ class PTA
    */
   public function init()
   {
+    /* Logger */
+    $this->logger = $this->logger->getLogger();
+
+    //$this->logger->info(message: 'Portals to Adventure plugin is initializing...');
+
     /* Enqueue */
     $this->enqueue->add_enqueue_action();
 
     /* Database Handler */
     $this->dbHandler->init();
 
-    /* Woocommerce Extension */
-    $this->woocommerceExtension->init();
-
     /* Update WIP */
     //$this->update->init();
 
-    /* Logger */
-    $this->logger = $this->logger->getLogger();
+    /* Shortcodes */
+    $this->shortcodes->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+
+    /* Woocommerce Extension */
+    $this->woocommerceExtension->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+
+    /* API */
+    $this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+    $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+
+    //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
+
   }
 
   public function get_instance($name){

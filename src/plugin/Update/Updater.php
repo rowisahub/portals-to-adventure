@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Require the logger file
-require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
+//require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
 
 // Class for handling plugin updates
 class Updater

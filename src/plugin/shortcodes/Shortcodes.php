@@ -1,5 +1,5 @@
 <?php
-namespace PTA\shortcodes\public;
+namespace PTA\shortcodes;
 
 /* Prevent direct access */
 if (!defined('ABSPATH')) {
@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\DB\db_handler;
-use PTA\DB\db_functions;
+use PTA\DB\functions\db_functions;
 use PTA\DB\functions\submission\submission_functions;
 use PTA\DB\functions\image\image_functions;
 use PTA\DB\functions\user\user_functions;
@@ -17,13 +17,13 @@ use PTA\logger\Log;
 /**
  * Public shortcodes class for the plugin.
  */
-class shortcodes{
+class Shortcodes{
     private $logger;
-    private $submission_func;
-    private $image_func;
-    private $user_func;
-    private $handler_instance;
-    private $db_functions;
+    private $submission_func; // $this->submission_func->
+    private $image_func; // $this->image_func->
+    private $user_func; // $this->user_func->
+    private $handler_instance; // $this->handler_instance->
+    private $db_functions; // $this->db_functions->
 
 
     public function __construct() {
@@ -38,15 +38,20 @@ class shortcodes{
         db_functions $db_functions = null
     ){
         $this->logger = $this->logger->getLogger();
-        $this->logger->info('Initializing shortcodes.');
+        //$this->logger->debug('Initializing shortcodes.');
 
         // Get the handler instance and db functions instance
         $this->handler_instance = $handler_instance ?? new db_handler();
         $this->db_functions = $db_functions ?? new db_functions();
 
-        // Set the functions instance in the handler, and initialize the functions
-        $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-        $this->db_functions->init(handler_instance: $this->handler_instance);
+        // if handler_instance is null or db_functions is null, set them
+        if ($handler_instance == null || $db_functions == null) {
+
+          // Set the functions instance in the handler, and initialize the functions
+          $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+          $this->db_functions->init(handler_instance: $this->handler_instance);
+
+        }
 
         // Set the functions instances for the submission, image, and user functions
         $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
@@ -74,16 +79,16 @@ class shortcodes{
         $current_user = wp_get_current_user();
         $user_id = $current_user->ID;
     
-        if (check_user_exists($user_id) == false) {
+        if ($this->user_func->check_user_exists($user_id) == false) {
           // user is logged in but does not exist
           // error_log('User does not exist');
           // create user
-          $userPerms = format_permissions(1, 0, 0, 0);
+          $userPerms = $this->db_functions->format_permissions(1, 0, 0, 0);
     
           // get wp user data
           $user = $current_user;
     
-          $user_id = register_user(
+          $user_id = $this->user_func->register_user(
             $user->user_email,
             $user->display_name,
             $user->first_name,
@@ -99,8 +104,8 @@ class shortcodes{
         }
     
         // Fetch user-specific data
-        $in_progress_submissions = get_submission_by_state($user_id, 'In Progress');
-        $approved_submissions = get_submission_by_state($user_id, 'Approved');
+        $in_progress_submissions = $this->submission_func->get_submission_by_state($user_id, 'In Progress');
+        $approved_submissions = $this->submission_func->get_submission_by_state($user_id, 'Approved');
     
         $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     
@@ -110,7 +115,7 @@ class shortcodes{
         <div id="sidebar-container" class="sidebar-container">
           <!-- Hamburger Icon -->
           <div id="hamburger-icon" class="hamburger-icon">
-            <img src="<?php echo plugins_url('../assets/images/Hamburger_icon.png', __FILE__); ?>" alt="Menu" />
+            <img src="<?php echo plugins_url('portals-to-adventure/assets/public/images/Hamburger_icon.png'); ?>" alt="Menu" />
           </div>
     
           <!-- Sidebar -->
@@ -153,7 +158,7 @@ class shortcodes{
                         <a href="/my-in-progress-secret-doors/?edit_submission_id=<?php echo esc_attr($submission['id']); ?>"
                           class="edit-button">Edit</a>
     
-                        <!-- <a href="<?php echo get_submission_url($submission['id']); ?>">View</a>
+                        <!-- <a href="<?php echo $this->get_submission_url($submission['id']); ?>">View</a>
                         <form method="post" action="/create-edit-submissions">
                           <input type="hidden" name="edit_submission_id" value="<?php echo esc_attr($submission['id']); ?>">
                           <a href="#" class="edit-button" onclick="this.closest('form').submit(); return false;">Edit</a>
@@ -184,7 +189,7 @@ class shortcodes{
                       <div class="submission-options">
                         <!-- <a href="/view-submission?id=<?php echo esc_attr($submission['id']); ?>">View</a> -->
     
-                        <a href="<?php echo get_submission_url($submission['id']); ?>">View</a>
+                        <a href="<?php echo $this->get_submission_url($submission['id']); ?>">View</a>
     
                         <!-- <form method="post" action="/create-edit-submissions">
                           <input type="hidden" name="edit_submission_id" value="<?php echo esc_attr($submission['id']); ?>">
@@ -211,7 +216,7 @@ class shortcodes{
         <div id="sidebar-container" class="sidebar-container">
           <!-- Hamburger Icon -->
           <div id="hamburger-icon" class="hamburger-icon">
-            <img src="<?php echo plugins_url('../assets/images/Hamburger_icon.png', __FILE__); ?>" alt="Menu" />
+            <img src="<?php echo plugins_url('portals-to-adventure/assets/public/images/Hamburger_icon.png'); ?>" alt="Menu" />
           </div>
     
           <!-- Sidebar -->
@@ -267,7 +272,7 @@ class shortcodes{
       }
     
       ob_start();
-      include plugin_dir_path(__FILE__) . '../FrontEnd/HTML/Add_Submission_Page.html';
+      include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/Add_Submission_Page.html';
       return ob_get_clean();
     }
 
@@ -284,7 +289,7 @@ class shortcodes{
       }
     
       ob_start();
-      include plugin_dir_path(__FILE__) . '../FrontEnd/HTML/Edit_Submissions_Page.html';
+      include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/Edit_Submissions_Page.html';
       return ob_get_clean();
     }
 
@@ -298,7 +303,7 @@ class shortcodes{
       }
     
       ob_start();
-      include plugin_dir_path(__FILE__) . '../FrontEnd/HTML/View_Submissions_Page.html';
+      include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/View_Submissions_Page.html';
       return ob_get_clean();
     }
 
@@ -315,7 +320,7 @@ class shortcodes{
       }
     
       ob_start();
-      include plugin_dir_path(__FILE__) . '../FrontEnd/HTML/View_User_Submissions_Page.html';
+      include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/View_User_Submissions_Page.html';
       return ob_get_clean();
     }
 
@@ -328,31 +333,31 @@ class shortcodes{
       }
     
       ob_start();
-      include plugin_dir_path(__FILE__) . '../FrontEnd/HTML/View_Single_Submission_Page.html';
+      include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/View_Single_Submission_Page.html';
       return ob_get_clean();
     }
 
     public function setup_submission_metadata()
     {
       $page_id = get_the_ID();
-      if (is_pta_submission_page($page_id)) {
+      if ($this->is_pta_submission_page($page_id)) {
         if (is_page(get_option('pta_submission_view_single_page'))) {
     
           $submission_id = isset($_GET['id']) ? sanitize_text_field($_GET['id']) : '';
     
-          if (check_id_exists($submission_id, "submission_data") == true) {
+          if ($this->db_functions->check_id_exists("submission_data", $submission_id) == true) {
     
-            $submission = get_submission($submission_id);
+            $submission = $this->submission_func->get_submission($submission_id);
     
             if ($submission['state'] != 'Approved' && !current_user_can('administrator')) {
               wp_redirect(home_url());
               exit;
             }
     
-            $title = shorten_text('Portals to Adventure | ' . $submission['title'], 50);
-            $author = get_user_by_id($submission['user_owner_id'])['username'];
-            $description = shorten_text($submission['description'], 70) . ' by ' . $author;
-            $image = get_image_data($submission['image_thumbnail_id'])['image_reference'];
+            $title = $this->shorten_text('Portals to Adventure | ' . $submission['title'], 50);
+            $author = $this->user_func->get_user_by_id($submission['user_owner_id'])['username'];
+            $description = $this->shorten_text($submission['description'], 70) . ' by ' . $author;
+            $image = $this->image_func->get_image_data($submission['image_thumbnail_id'])['image_reference'];
             $url = get_permalink() . '?id=' . $submission_id;
             $article_published_time = date('c', strtotime($submission['created_at']));
     
@@ -427,5 +432,31 @@ class shortcodes{
       $text .= '...';
     
       return $text;
+    }
+
+    /**
+     * Checks if the given page ID corresponds to the PTA submission page.
+     *
+     * @param int $page_id The ID of the page to check.
+     * @return bool True if the page is the PTA submission page, false otherwise.
+     */
+    private function is_pta_submission_page($page_id)
+    {
+      $pta_submission_add_page = get_option('pta_submission_add_page');
+      $pta_submission_edit_page = get_option('pta_submission_edit_page');
+      $pta_submission_view_page = get_option('pta_submission_view_page');
+      $pta_submission_user_view_page = get_option('pta_submission_user_view_page');
+      $pta_submission_view_single_page = get_option('pta_submission_view_single_page');
+
+      if ($page_id == $pta_submission_add_page || $page_id == $pta_submission_edit_page || $page_id == $pta_submission_view_page || $page_id == $pta_submission_user_view_page || $page_id == $pta_submission_view_single_page) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    private function get_submission_url($submission_id)
+    {
+      return add_query_arg(array('submission_id' => $submission_id), "/my-submitted-secret-doors");
     }
 }

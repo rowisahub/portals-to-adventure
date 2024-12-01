@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\DB\db_handler;
-use PTA\DB\db_functions;
+use PTA\DB\functions\db_functions;
 use PTA\DB\QueryBuilder;
 use PTA\logger\Log;
 
@@ -26,15 +26,18 @@ class image_functions{
   private \wpdb $wpdb;
 
   public function __construct(db_handler $handler_instance = null, db_functions $db_functions = null) {
-    if ($db_functions == null) {
-      $this->db_functions = new db_functions();
-    }
-    if ($handler_instance == null) {
-      $this->handler_instance = new db_handler();
-    }
+    // Get the handler instance and db functions instance
+    $this->handler_instance = $handler_instance ?? new db_handler();
+    $this->db_functions = $db_functions ?? new db_functions();
 
-    $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-    $this->db_functions->init(handler_instance: $this->handler_instance);
+    // if handler_instance is null or db_functions is null
+    if ($handler_instance == null || $db_functions == null) {
+
+      // Set the functions instance in the handler, and initialize the functions
+      $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
+      $this->db_functions->init(handler_instance: $this->handler_instance);
+
+    }
     
     $this->wpdb = $this->handler_instance->get_WPDB();
 
