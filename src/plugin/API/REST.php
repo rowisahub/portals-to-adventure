@@ -209,7 +209,7 @@ class REST
       }
 
       // Get the submission
-      $submission = $this->submission_func->get_submission($submission_id);
+      $submission = $this->submission_func->get_submission($submission_id)[0];
 
       // $submission['user_owner_id] != $user_id
       // Check permissions
@@ -339,7 +339,7 @@ class REST
     //error_log('Submission: ' . print_r($submission, true));
     $user = $this->user_func->get_user_by_id($submission['user_owner_id'])[0];
 
-    //$this->logger->debug('User: ' . $user['username']);
+    //$this->logger->debug('submission: ' . print_r($submission, true));
 
     $userName = $user['username'];
     $imageFormated = $this->formate_image_data($submission['image_uploads']);

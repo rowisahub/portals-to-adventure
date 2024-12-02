@@ -23,7 +23,7 @@ const ARRAY_A = 'ARRAY_A';
 const ARRAY_N = 'ARRAY_N';
 const OBJECT = 'OBJECT';
 
-class DBHandlerTest extends TestCase
+class DBHandlernotest extends TestCase
 {
     private $dbHandler;
     private $logger;

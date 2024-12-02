@@ -136,7 +136,7 @@ class QueryBuilder
       $args = func_get_args();
       $this->select = implode(', ', array_map([$this, 'escapeField'], $args));
     }
-    
+
     return $this;
   }
 
@@ -406,6 +406,8 @@ class QueryBuilder
       $this->bindings = array_merge($this->bindings, $value);
       $operator = ($operator === 'NOT IN') ? 'NOT IN' : 'IN';
       return "{$escapedField} {$operator} ({$placeholders})";
+    } elseif (is_object($value) && isset($value->__raw)) {
+      return "{$escapedField} {$operator} {$value->__raw}";
     } else {
       $placeholder = $this->getPlaceholder($value);
       $this->bindings[] = $value;
@@ -503,6 +505,17 @@ class QueryBuilder
     $this->offset = '';
     $this->bindings = [];
     return $this;
+  }
+
+  /**
+   * Mark a value as a raw SQL expression.
+   *
+   * @param string $expression Raw SQL expression.
+   * @return object
+   */
+  public function raw($expression)
+  {
+    return (object) ['__raw' => $expression];
   }
 
 }

@@ -8,7 +8,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "PTA\\Tests\\DB\\": "tests/DB/"
+            "PTA\\Tests\\": "tests/"
         }
     },
     "require": {

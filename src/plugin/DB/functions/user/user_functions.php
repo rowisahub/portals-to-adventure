@@ -11,7 +11,8 @@ use PTA\DB\functions\db_functions;
 use PTA\DB\QueryBuilder;
 use PTA\logger\Log;
 
-class user_functions {
+class user_functions
+{
 
   private $table_path;
   private $handler_instance;
@@ -19,7 +20,8 @@ class user_functions {
   private $logger;
   private \wpdb $wpdb;
 
-  public function __construct(db_handler $handler_instance = null, db_functions $db_functions = null) {
+  public function __construct(db_handler $handler_instance = null, db_functions $db_functions = null)
+  {
     // Get the handler instance and db functions instance
     $this->handler_instance = $handler_instance ?? new db_handler();
     $this->db_functions = $db_functions ?? new db_functions();
@@ -32,7 +34,7 @@ class user_functions {
       $this->db_functions->init(handler_instance: $this->handler_instance);
 
     }
-    
+
     $this->wpdb = $this->handler_instance->get_WPDB();
 
     $this->table_path = $this->handler_instance->get_table_path('user_info');
@@ -41,7 +43,8 @@ class user_functions {
     $this->logger = $this->logger->getLogger();
   }
 
-  function register_user($email, $username, $firstName = null, $lastName = null, $verified_email = 0, $token = '', $birthday = null, $permissions = '', $payment_info = null) {
+  function register_user($email, $username, $firstName = null, $lastName = null, $verified_email = 0, $token = '', $birthday = null, $permissions = '', $payment_info = null)
+  {
 
     // also need to register user in WordPress
     $user = get_user_by('email', $email);
@@ -98,11 +101,12 @@ class user_functions {
     return $user_id;
   }
 
-  function get_user_permissions($user_id, $perm = null) {
+  function get_user_permissions($user_id, $perm = null)
+  {
     $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
     $queryBuilder->select('*')
-                 ->from($this->table_path)
-                 ->where(['id' => $user_id]);
+      ->from($this->table_path)
+      ->where(['id' => $user_id]);
 
     $result = $this->db_functions->exe_from_builder($queryBuilder);
 
@@ -113,16 +117,18 @@ class user_functions {
     return $result['permissions'];
   }
 
-  function get_user_by_id($user_id) {
+  function get_user_by_id($user_id)
+  {
     $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
     $queryBuilder->select('*')
-                 ->from($this->table_path)
-                 ->where(['id' => $user_id]);
+      ->from($this->table_path)
+      ->where(['id' => $user_id]);
 
     return $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
   }
 
-  function check_user_exists($user_id) {
+  function check_user_exists($user_id)
+  {
     $result = $this->get_user_by_id($user_id);
 
     if (!$result) {
@@ -132,9 +138,96 @@ class user_functions {
     return true;
   }
 
-  function remove_user($user_id) {
+  function remove_user($user_id)
+  {
     $this->wpdb->delete($this->table_path, ['id' => $user_id]);
     // remove user from WordPress
     wp_delete_user($user_id);
   }
+
+  /**
+   * Check the number of submissions made by a user within a specified time period.
+   *
+   * @param int $user_id The ID of the user whose submissions are being checked.
+   * @param string $time_period The time period within which to check for submissions. 
+   *                            This should be a valid time period string (e.g., '1 hour', '1 day').
+   *
+   * @return array|false The submissions made by the user within the specified time period.
+   */
+  // @return int The number of submissions made by the user within the specified time period.
+  function get_user_submissions_in_time_period($user_id, $time_period = null)
+  {
+    if ($time_period == null) {
+      /* Get time period from options */
+      $pta_number_of_submissions_per_time_period = get_option('pta_number_of_submissions_per_time_period', 1);
+      $pta_time_period = get_option('pta_time_period', 'days');
+
+      $time_period = $pta_number_of_submissions_per_time_period . ' ' . $pta_time_period;
+    }
+
+    // filter if $time_period is in hours or days
+    if (strpos($time_period, 'day') !== false || strpos($time_period, 'days') !== false) {
+      $time_period = str_replace('day', '', $time_period);
+      $time_period = str_replace('s', '', $time_period);
+      $time_period = $time_period * 24;
+    } else if (strpos($time_period, 'hour') !== false || strpos($time_period, 'hours') !== false) {
+      $time_period = str_replace('hour', '', $time_period);
+      $time_period = str_replace('s', '', $time_period);
+    } else {
+      return false;
+    }
+
+    // check if $time_period is a number
+    if (!is_numeric($time_period)) {
+      $this->logger->error('Time period is not a number: ' . $time_period);
+      return false;
+    }
+
+    /* Make the query */
+    $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
+
+    $start_time = $queryBuilder->raw("NOW() - INTERVAL $time_period HOUR");
+    //$start_time = $queryBuilder->raw("NOW() - INTERVAL 240000 HOUR");
+
+    $queryBuilder->select(['user_owner_id', 'id'])
+      ->from($this->handler_instance->get_table_path('submission_data'))
+      ->where([
+        'user_owner_id' => $user_id,
+        'created_at >=' => $start_time
+      ]);
+
+    //$this->logger->debug('Query: ' . $queryBuilder->get_sql());
+
+    // return the count of submissions
+    $result = $this->db_functions->exe_from_builder($queryBuilder);
+
+    //$this->logger->debug('Result: ' . print_r($result, true));
+
+    return $result;
+
+  }
+
+  /**
+   * Check the number of user submissions within a specified time period.
+   *
+   * @param int $user_id The ID of the user.
+   * @param string|null $time_period The time period to check submissions for. If null, defaults to a predefined period.
+   * @return bool|null True if the user has made submissions within the specified time period, false otherwise. Null if an error occurred.
+   */
+  function check_user_submissions_in_time_period($user_id, $time_period = null)
+  {
+    $result = $this->get_user_submissions_in_time_period($user_id, $time_period);
+
+    if ($result === false) {
+      $this->logger->error('Error getting user submissions in time period');
+      return null;
+    }
+
+    if (count($result) > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
 }
