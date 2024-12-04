@@ -35,7 +35,7 @@ class admin_settings extends Client
             user_functions: $user_functions,
             handler_instance: $handler_instance,
             db_functions: $db_functions,
-            admin_functions: $admin_functions ?? $this
+            admin_functions: $admin_functions
         );
 
         $this->register_hooks();
@@ -54,7 +54,7 @@ class admin_settings extends Client
             menu_title: 'PTA Admin',                  // Menu title
             capability: 'manage_options',             // Capability
             menu_slug: 'pta_admin',                  // Menu slug
-            callback: 'pta_submissions_page',       // Callback function
+            callback: [$this, 'pta_submissions_page'],       // Callback function
             icon_url: 'dashicons-admin-generic',    // Icon
             position: 6                             // Position
         );
@@ -66,7 +66,7 @@ class admin_settings extends Client
             menu_title: 'Settings',         // Menu title
             capability: 'manage_options',   // Capability
             menu_slug: 'pta_settings',     // Menu slug
-            callback: 'pta_settings_page' // Callback function
+            callback: [$this, 'pta_settings_page'] // Callback function
         );
 
         // Add 'Submissions' submenu
@@ -76,7 +76,7 @@ class admin_settings extends Client
             menu_title: 'Submissions',          // Menu title
             capability: 'manage_options',       // Capability
             menu_slug: 'pta_submissions',      // Menu slug
-            callback: 'pta_submissions_page'  // Callback function
+            callback: [$this, 'pta_submissions_page']  // Callback function
         );
 
         // Add check users submenu
@@ -96,7 +96,7 @@ class admin_settings extends Client
             menu_title: 'Database',          // Menu title
             capability: 'manage_options',       // Capability
             menu_slug: 'pta_database',      // Menu slug
-            callback: 'pta_database_page'  // Callback function
+            callback: [$this, 'pta_database_page']  // Callback function
         );
     }
 
@@ -390,10 +390,10 @@ class admin_settings extends Client
         // Retrieve submissions based on filter
         if ($status_filter == 'All') {
             //$submissions = Get_All_Submissions(); // You need to implement or adjust this function
-            $submissions = $this->submission_functions->get_all_submissions()[0];
+            $submissions = $this->submission_functions->get_all_submissions();
         } else {
             //$submissions = get_all_submissions_by_state($status_filter);
-            $submissions = $this->submission_functions->get_all_submissions_by_state($status_filter)[0];
+            $submissions = $this->submission_functions->get_all_submissions_by_state($status_filter);
         }
 
         ?>

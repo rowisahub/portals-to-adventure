@@ -106,7 +106,6 @@ class PTA
     $this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
     $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    $this->logger->info('Admin functions: ' . $this->admin);
 
     /* Admin */
     $this->admin->init(

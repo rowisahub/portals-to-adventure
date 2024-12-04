@@ -41,26 +41,25 @@ class Client
         $this->logger = $this->logger->getLogger();
 
         // Get the handler instance and db functions instance
-        $this->db_handler_instance = $handler_instance ?? new db_handler();
-        $this->db_functions = $db_functions ?? new db_functions();
+        $this->db_handler_instance = ($handler_instance instanceof db_handler) ? $handler_instance : new db_handler();
+        $this->db_functions = ($db_functions instanceof db_functions) ? $db_functions : new db_functions();
 
-        // if handler_instance is null or db_functions is null, set them
-        if ($handler_instance == null || $db_functions == null) {
+        // if handler_instance and db_functions are both not instances of their respective classes
+        if (!($handler_instance instanceof db_handler) || !($db_functions instanceof db_functions)) {
 
             // Set the functions instance in the handler, and initialize the functions
             $this->db_handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
             $this->db_functions->init(handler_instance: $this->db_handler_instance);
-
         }
 
         // Set the functions instances for the submission, image, and user functions
-        $this->submission_functions = $sub_functions ?? new submission_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
-        $this->image_functions = $img_functions ?? new image_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
-        $this->user_functions = $user_functions ?? new user_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
+        $this->submission_functions = ($sub_functions instanceof submission_functions) ? $sub_functions : new submission_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
+        $this->image_functions = ($img_functions instanceof image_functions) ? $img_functions : new image_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
+        $this->user_functions = ($user_functions instanceof user_functions) ? $user_functions : new user_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
 
-        $this->admin_functions = $admin_functions ?? new admin_functions();
+        $this->admin_functions = ($admin_functions instanceof admin_functions) ? $admin_functions : new admin_functions();
 
-        if ($admin_functions == null) {
+        if (!($admin_functions instanceof admin_functions)) {
 
             $this->admin_functions->init(
                 sub_functions: $this->submission_functions,
