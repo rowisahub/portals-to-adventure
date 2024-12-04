@@ -1,5 +1,5 @@
 <?php
-namespace PTA\shortcodes\admin;
+namespace PTA\admin;
 
 /* Prevent direct access */
 if (!defined('ABSPATH')) {
@@ -9,28 +9,45 @@ if (!defined('ABSPATH')) {
 /* Requires */
 use PTA\admin\admin_functions;
 use PTA\logger\Log;
+use PTA\client\Client;
 
 /**
  * Admin shortcodes class for the plugin.
  */
-class admin_settings{
-    private $logger;
-    private $admin_func;
-
-    public function __construct() {
-        $this->logger = new Log('Admin Shortcodes');
+class admin_settings extends Client
+{
+    public function __construct()
+    {
+        parent::__construct("Admin Settings");
     }
 
-    public function init(admin_functions $admin_functions){
-        $this->logger = $this->logger->getLogger();
-        $this->logger->info('Initializing admin shortcodes.');
+    public function init(
+        $sub_functions = null,
+        $img_functions = null,
+        $user_functions = null,
+        $handler_instance = null,
+        $db_functions = null,
+        $admin_functions = null
+    ) {
+        parent::init(
+            sub_functions: $sub_functions,
+            img_functions: $img_functions,
+            user_functions: $user_functions,
+            handler_instance: $handler_instance,
+            db_functions: $db_functions,
+            admin_functions: $admin_functions ?? $this
+        );
 
-        $this->admin_func = $admin_functions;
+        $this->register_hooks();
+    }
 
+    public function register_hooks()
+    {
         add_action('admin_menu', [$this, 'pta_add_admin_menu']);
     }
 
-    public function pta_add_admin_menu(){
+    public function pta_add_admin_menu()
+    {
         // Add top-level menu
         add_menu_page(
             page_title: 'Portals To Adventure Admin', // Page title
@@ -129,142 +146,146 @@ class admin_settings{
         <div class="wrap">
             <h1>Portals To Adventure Settings</h1>
             <form method="post" action="">
-            <?php wp_nonce_field('pta_settings_update', 'pta_settings_nonce'); ?>
-            <table class="form-table">
-                <!-- Submission Add Page -->
-                <tr>
-                <th scope="row">Submission Add Page</th>
-                <td>
-                    <select name="pta_submission_add_page">
-                    <?php foreach ($pages as $page): ?>
-                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_add_page, $page->ID); ?>>
-                        <?php echo esc_html($page->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- Submission Edit Page -->
-                <tr>
-                <th scope="row">Submission Edit Page</th>
-                <td>
-                    <select name="pta_submission_edit_page">
-                    <?php foreach ($pages as $page): ?>
-                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_edit_page, $page->ID); ?>>
-                        <?php echo esc_html($page->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- Submission View Page -->
-                <tr>
-                <th scope="row">Submission View Page</th>
-                <td>
-                    <select name="pta_submission_view_page">
-                    <?php foreach ($pages as $page): ?>
-                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_view_page, $page->ID); ?>>
-                        <?php echo esc_html($page->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- Submission User View Page -->
-                <tr>
-                <th scope="row">Submission User View Page</th>
-                <td>
-                    <select name="pta_submission_user_view_page">
-                    <?php foreach ($pages as $page): ?>
-                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_user_view_page, $page->ID); ?>>
-                        <?php echo esc_html($page->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- Submission View Single Page -->
-                <tr>
-                <th scope="row">Submission View Single Page</th>
-                <td>
-                    <select name="pta_submission_view_single_page">
-                    <?php foreach ($pages as $page): ?>
-                        <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_view_single_page, $page->ID); ?>>
-                        <?php echo esc_html($page->post_title); ?>
-                        </option>
-                    <?php endforeach; ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- develop or production env -->
-                <tr>
-                <th scope="row">Environment</th>
-                <td>
-                    <select name="pta_environment">
-                    <option value="production" <?php selected($pta_environment, 'production'); ?>>Production</option>
-                    <option value="development" <?php selected($pta_environment, 'development'); ?>>Development</option>
-                    </select>
-                </td>
-                </tr>
-                <!-- Number of submissions per time period -->
-                <tr>
-                <th scope="row">Number of Submissions Per Time Period</th>
-                <td>
-                    <!-- number of hours or days, with hour or day added on -->
-                    <input type="number" name="pta_number_of_submissions_per_time_period"
-                    value="<?php echo esc_attr($pta_number_of_submissions_per_time_period); ?>" />
-                    <select name="pta_time_period">
-                    <option value="hours" <?php selected($pta_time_period, 'hours'); ?>>Hour(s)</option>
-                    <option value="days" <?php selected($pta_time_period, 'days'); ?>>Day(s)</option>
-                    </select>
-                </td>
-                </tr>
-                <!-- check to make sure woocommerce is active, set a option to change the product id (by selecting from a list of products), and changing the id accordingly -->
-                <tr>
-                <th scope="row">WooCommerce Product</th>
-                <td>
-                    <select name="pta_woocommerce_product_id">
-                    <?php
-                    //echo '<option value="161">Default</option>';
-                    if (class_exists('WooCommerce')) {
-                        // Get woocommerce products and display them
-                        $args = array(
-                        'limit' => -1,
-                        'status' => 'publish',
-                        );
-                        $products = wc_get_products($args);
+                <?php wp_nonce_field('pta_settings_update', 'pta_settings_nonce'); ?>
+                <table class="form-table">
+                    <!-- Submission Add Page -->
+                    <tr>
+                        <th scope="row">Submission Add Page</th>
+                        <td>
+                            <select name="pta_submission_add_page">
+                                <?php foreach ($pages as $page): ?>
+                                    <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_add_page, $page->ID); ?>>
+                                        <?php echo esc_html($page->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Submission Edit Page -->
+                    <tr>
+                        <th scope="row">Submission Edit Page</th>
+                        <td>
+                            <select name="pta_submission_edit_page">
+                                <?php foreach ($pages as $page): ?>
+                                    <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_edit_page, $page->ID); ?>>
+                                        <?php echo esc_html($page->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Submission View Page -->
+                    <tr>
+                        <th scope="row">Submission View Page</th>
+                        <td>
+                            <select name="pta_submission_view_page">
+                                <?php foreach ($pages as $page): ?>
+                                    <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_view_page, $page->ID); ?>>
+                                        <?php echo esc_html($page->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Submission User View Page -->
+                    <tr>
+                        <th scope="row">Submission User View Page</th>
+                        <td>
+                            <select name="pta_submission_user_view_page">
+                                <?php foreach ($pages as $page): ?>
+                                    <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_user_view_page, $page->ID); ?>>
+                                        <?php echo esc_html($page->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Submission View Single Page -->
+                    <tr>
+                        <th scope="row">Submission View Single Page</th>
+                        <td>
+                            <select name="pta_submission_view_single_page">
+                                <?php foreach ($pages as $page): ?>
+                                    <option value="<?php echo esc_attr($page->ID); ?>" <?php selected($pta_submission_view_single_page, $page->ID); ?>>
+                                        <?php echo esc_html($page->post_title); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- develop or production env -->
+                    <tr>
+                        <th scope="row">Environment</th>
+                        <td>
+                            <select name="pta_environment">
+                                <option value="production" <?php selected($pta_environment, 'production'); ?>>Production
+                                </option>
+                                <option value="development" <?php selected($pta_environment, 'development'); ?>>Development
+                                </option>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Number of submissions per time period -->
+                    <tr>
+                        <th scope="row">Number of Submissions Per Time Period</th>
+                        <td>
+                            <!-- number of hours or days, with hour or day added on -->
+                            <input type="number" name="pta_number_of_submissions_per_time_period"
+                                value="<?php echo esc_attr($pta_number_of_submissions_per_time_period); ?>" />
+                            <select name="pta_time_period">
+                                <option value="hours" <?php selected($pta_time_period, 'hours'); ?>>Hour(s)</option>
+                                <option value="days" <?php selected($pta_time_period, 'days'); ?>>Day(s)</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- check to make sure woocommerce is active, set a option to change the product id (by selecting from a list of products), and changing the id accordingly -->
+                    <tr>
+                        <th scope="row">WooCommerce Product</th>
+                        <td>
+                            <select name="pta_woocommerce_product_id">
+                                <?php
+                                //echo '<option value="161">Default</option>';
+                                if (class_exists('WooCommerce')) {
+                                    // Get woocommerce products and display them
+                                    $args = array(
+                                        'limit' => -1,
+                                        'status' => 'publish',
+                                    );
+                                    $products = wc_get_products($args);
 
-                        foreach ($products as $product) {
-                        //$logAdmin->debug('Product: ' . $product->id . ' | ' . $product);
-                        $product_id = $product->get_id();
-                        $product_name = $product->get_name();
-                        echo '<option value="' . $product_id . '" ' . selected($pta_woocommerce_product_id, $product_id) . '>' . $product_name . '</option>';
-                        }
+                                    foreach ($products as $product) {
+                                        //$logAdmin->debug('Product: ' . $product->id . ' | ' . $product);
+                                        $product_id = $product->get_id();
+                                        $product_name = $product->get_name();
+                                        echo '<option value="' . $product_id . '" ' . selected($pta_woocommerce_product_id, $product_id) . '>' . $product_name . '</option>';
+                                    }
 
-                    } else {
-                        echo '<option value="0">WooCommerce is not active</option>';
-                    }
-                    ?>
-                    </select>
-                </td>
-                </tr>
-                <!-- Github FG Token -->
-                <tr>
-                <th scope="row">Github FG Token</th>
-                <td>
-                    <input type="text" name="pta_github_fg_token" value="<?php echo esc_attr($pta_github_fg_token); ?>" />
-                </td>
-                </tr>
-                <!-- Product Limit -->
-                <tr>
-                <th scope="row">Product Limit</th>
-                <td>
-                    <input type="number" name="wldpta_product_limit" value="<?php echo esc_attr($wldpta_product_limit); ?>" />
-                </td>
-                </tr>
+                                } else {
+                                    echo '<option value="0">WooCommerce is not active</option>';
+                                }
+                                ?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!-- Github FG Token -->
+                    <tr>
+                        <th scope="row">Github FG Token</th>
+                        <td>
+                            <input type="text" name="pta_github_fg_token"
+                                value="<?php echo esc_attr($pta_github_fg_token); ?>" />
+                        </td>
+                    </tr>
+                    <!-- Product Limit -->
+                    <tr>
+                        <th scope="row">Product Limit</th>
+                        <td>
+                            <input type="number" name="wldpta_product_limit"
+                                value="<?php echo esc_attr($wldpta_product_limit); ?>" />
+                        </td>
+                    </tr>
 
-            </table>
-            <?php submit_button(); ?>
+                </table>
+                <?php submit_button(); ?>
             </form>
         </div>
         <?php
@@ -288,63 +309,73 @@ class admin_settings{
             //error_log('Submission ID: ' . $submission_id);
 
             if ($action == 'approve') {
-            // Update submission status to 'Approved'
-            //Update_Submission($submission_id, array('status' => 'Approved'));
+                // Update submission status to 'Approved'
+                //Update_Submission($submission_id, array('status' => 'Approved'));
 
-            update_submission($submission_id, 'state', 'Approved');
+                $this->admin_functions->approve_submission($submission_id);
 
-            echo '<div class="updated"><p>Submission approved.</p></div>';
+                echo '<div class="updated"><p>Submission approved.</p></div>';
             } elseif ($action == 'pending') {
-            // Update submission status to 'In-Review'
+                // Update submission status to 'In-Review'
 
-            Update_Submission($submission_id, 'state', 'Pending Approval');
+                $this->submission_functions->update_submission($submission_id, ['state' => 'Pending Approval']);
 
-            echo '<div class="updated"><p>Submission status set to Pending Approval.</p></div>';
+                echo '<div class="updated"><p>Submission status set to Pending Approval.</p></div>';
             } elseif ($action == 'delete') {
-            // Delete submission
-            //Delete_Submission($submission_id);
-            //delete_submission($submission_id);
+                // Delete submission
+                //Delete_Submission($submission_id);
+                //delete_submission($submission_id);
 
-            remove_submission($submission_id, "Submission Removed by Admin");
+                //remove_submission($submission_id, "Submission Removed by Admin");
 
-            echo '<div class="updated"><p>Submission deleted.</p></div>';
+                $this->admin_functions->delete_submission($submission_id, "Submission Removed by Admin");
+
+                echo '<div class="updated"><p>Submission deleted.</p></div>';
             } elseif ($action == 'undelete') {
-            // Undelete submission
-            //Undelete_Submission($submission_id);
-            //undelete_submission($submission_id);
+                // Undelete submission
+                //Undelete_Submission($submission_id);
+                //undelete_submission($submission_id);
 
-            unremove_submission($submission_id);
+                //unremove_submission($submission_id);
 
-            echo '<div class="updated"><p>Submission undeleted.</p></div>';
+                $this->admin_functions->undelete_submission($submission_id);
+
+                echo '<div class="updated"><p>Submission undeleted.</p></div>';
             } elseif ($action == 'progress') {
-            // Update submission status to 'In Progress'
-            //Update_Submission($submission_id, array('status' => 'In Progress'));
+                // Update submission status to 'In Progress'
+                //Update_Submission($submission_id, array('status' => 'In Progress'));
 
-            update_submission($submission_id, 'state', 'In Progress');
+                //update_submission($submission_id, 'state', 'In Progress');
 
-            echo '<div class="updated"><p>Submission status set to In Progress.</p></div>';
+                $this->submission_functions->update_submission($submission_id, ['state' => 'In Progress']);
+
+                echo '<div class="updated"><p>Submission status set to In Progress.</p></div>';
 
             } elseif ($action == 'reject') {
-            // Update submission status to 'Rejected'
-            //Update_Submission($submission_id, array('status' => 'Rejected'));
+                // Update submission status to 'Rejected'
+                //Update_Submission($submission_id, array('status' => 'Rejected'));
 
-            set_submission_rejeced($submission_id, "This submission was rejected by admin");
+                //set_submission_rejeced($submission_id, "This submission was rejected by admin");
 
-            // get a rejectin message
+                $this->admin_functions->reject_submission($submission_id, "This submission was rejected by admin");
 
-            echo '<div class="updated"><p>Submission status set to Rejected.</p></div>';
+                // get a rejectin message
+
+                echo '<div class="updated"><p>Submission status set to Rejected.</p></div>';
             } elseif ($action == 'unreject') {
 
-            set_submission_unrejeced($submission_id);
+                //set_submission_unrejeced($submission_id);
 
-            echo '<div class="updated"><p>Submission is Unrejected</p></div>';
+                $this->admin_functions->unreject_submission($submission_id);
+
+                echo '<div class="updated"><p>Submission is Unrejected</p></div>';
             }
 
             // ad JS to update URL without reloading the page
             ?>
             <script>
-            var newURL = '/wp-admin/admin.php?page=pta_submissions';
-            history.pushState(null, null, newURL);
+                var newURL = '/wp-admin/admin.php?page=pta_submissions';
+                history.pushState(null, null, newURL);
             </script>
             <?php
 
@@ -358,9 +389,11 @@ class admin_settings{
 
         // Retrieve submissions based on filter
         if ($status_filter == 'All') {
-            $submissions = Get_All_Submissions(); // You need to implement or adjust this function
+            //$submissions = Get_All_Submissions(); // You need to implement or adjust this function
+            $submissions = $this->submission_functions->get_all_submissions()[0];
         } else {
-            $submissions = get_all_submissions_by_state($status_filter);
+            //$submissions = get_all_submissions_by_state($status_filter);
+            $submissions = $this->submission_functions->get_all_submissions_by_state($status_filter)[0];
         }
 
         ?>
@@ -369,109 +402,111 @@ class admin_settings{
 
             <!-- Filter Form -->
             <form method="get">
-            <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
-            <label for="status_filter">Filter by Status:</label>
-            <select name="status_filter" id="status_filter">
-                <option value="All" <?php selected($status_filter, 'All'); ?>>All Submissions</option>
-                <option value="Pending Approval" <?php selected($status_filter, 'Pending Approval'); ?>>Pending Approval</option>
-                <option value="Approved" <?php selected($status_filter, 'Approved'); ?>>Approved</option>
-                <option value="In Progress" <?php selected($status_filter, 'In Progress'); ?>>In Progress</option>
-                <option value="Rejected" <?php selected($status_filter, 'Rejected'); ?>>Rejected</option>
-                <option value="Removed" <?php selected($status_filter, 'Removed'); ?>>Removed</option>
-            </select>
-            <?php submit_button('Filter', 'primary', '', false); ?>
+                <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>" />
+                <label for="status_filter">Filter by Status:</label>
+                <select name="status_filter" id="status_filter">
+                    <option value="All" <?php selected($status_filter, 'All'); ?>>All Submissions</option>
+                    <option value="Pending Approval" <?php selected($status_filter, 'Pending Approval'); ?>>Pending Approval
+                    </option>
+                    <option value="Approved" <?php selected($status_filter, 'Approved'); ?>>Approved</option>
+                    <option value="In Progress" <?php selected($status_filter, 'In Progress'); ?>>In Progress</option>
+                    <option value="Rejected" <?php selected($status_filter, 'Rejected'); ?>>Rejected</option>
+                    <option value="Removed" <?php selected($status_filter, 'Removed'); ?>>Removed</option>
+                </select>
+                <?php submit_button('Filter', 'primary', '', false); ?>
             </form>
 
             <!-- Submissions Table -->
             <table class="wp-list-table widefat fixed striped">
-            <thead>
-                <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th>User ID</th>
-                <th>User Name</th>
-                <th>Was, current Rejected, Reason</th>
-                <th>Date Submitted</th>
-                <th>View</th>
-                <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!empty($submissions)): ?>
-                <?php foreach ($submissions as $submission): ?>
+                <thead>
                     <tr>
-                    <td><?php echo esc_html($submission['id']); ?></td>
-                    <td><?php echo esc_html($submission['title']); ?></td>
-                    <td><?php echo esc_html($submission['state']); ?></td>
-                    <td><?php echo esc_html($submission['user_owner_id']); ?></td>
-                    <td><?php echo esc_html(get_user_by_id($submission['user_owner_id'])['username']); ?></td>
-                    <td>
-                        <?php if ($submission['was_rejected']): ?>
-                        <?php echo "True"; ?>
-                        <?php else: ?>
-                        <?php echo "False"; ?>
-                        <?php endif; ?>
-                        <div>
-                        <?php if ($submission['is_rejected']): ?>
-                            <?php echo "True, " . esc_html($submission['rejected_reason']); ?>
-                        <?php else: ?>
-                            <?php echo "False"; ?>
-                        <?php endif; ?>
-                        </div>
-                    </td>
-                    <td><?php echo esc_html($submission['created_at']); ?></td>
-                    <td>
-                        <a
-                        href="<?php echo esc_url(add_query_arg('id', $submission['id'], get_site_url(path: 'submission'))); ?>">View</a>
-                    </td>
-                    <td>
-                        <?php if ($submission['state'] == 'Pending Approval'): ?>
-                        <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'approve', 'submission_id' => $submission['id']))); ?>">Approve</a>
-                        <?php elseif ($submission['state'] == 'In Progress'): ?>
-                        <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'pending', 'submission_id' => $submission['id']))); ?>">Set
-                            as 'Pending
-                            Approval'</a>
-                        <?php elseif ($submission['state'] == 'Approved'): ?>
-                        <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'progress', 'submission_id' => $submission['id']))); ?>">Set
-                            as 'In
-                            Progress'</a>
-                        <?php endif; ?>
-                        <!-- Add more actions as needed -->
-
-                        <div>
-                        <?php if ($submission['is_rejected']): ?>
-                            <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'unreject', 'submission_id' => $submission['id']))); ?>">Unreject</a>
-
-                        <?php else: ?>
-                            <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'reject', 'submission_id' => $submission['id']))); ?>">Reject</a>
-                        <?php endif; ?>
-
-                        </div>
-
-                        <div>
-                        <?php if ($submission['is_removed']): ?>
-                            <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'undelete', 'submission_id' => $submission['id']))); ?>">Undelete</a>
-                        <?php else: ?>
-                            <a
-                            href="<?php echo esc_url(add_query_arg(array('action' => 'delete', 'submission_id' => $submission['id']))); ?>">Delete</a>
-                        <?php endif; ?>
-                        </div>
-                    </td>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>User ID</th>
+                        <th>User Name</th>
+                        <th>Was, current Rejected, Reason</th>
+                        <th>Date Submitted</th>
+                        <th>View</th>
+                        <th>Actions</th>
                     </tr>
-                <?php endforeach; ?>
-                <?php else: ?>
-                <tr>
-                    <td colspan="6">No submissions found.</td>
-                </tr>
-                <?php endif; ?>
-            </tbody>
+                </thead>
+                <tbody>
+                    <?php if (!empty($submissions)): ?>
+                        <?php foreach ($submissions as $submission): ?>
+                            <tr>
+                                <td><?php echo esc_html($submission['id']); ?></td>
+                                <td><?php echo esc_html($submission['title']); ?></td>
+                                <td><?php echo esc_html($submission['state']); ?></td>
+                                <td><?php echo esc_html($submission['user_owner_id']); ?></td>
+                                <td><?php echo esc_html($this->user_functions->get_user_by_id($submission['user_owner_id'])[0]['username']); ?>
+                                </td>
+                                <td>
+                                    <?php if ($submission['was_rejected']): ?>
+                                        <?php echo "True"; ?>
+                                    <?php else: ?>
+                                        <?php echo "False"; ?>
+                                    <?php endif; ?>
+                                    <div>
+                                        <?php if ($submission['is_rejected']): ?>
+                                            <?php echo "True, " . esc_html($submission['rejected_reason']); ?>
+                                        <?php else: ?>
+                                            <?php echo "False"; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td><?php echo esc_html($submission['created_at']); ?></td>
+                                <td>
+                                    <a
+                                        href="<?php echo esc_url(add_query_arg('id', $submission['id'], get_site_url(path: 'submission'))); ?>">View</a>
+                                </td>
+                                <td>
+                                    <?php if ($submission['state'] == 'Pending Approval'): ?>
+                                        <a
+                                            href="<?php echo esc_url(add_query_arg(array('action' => 'approve', 'submission_id' => $submission['id']))); ?>">Approve</a>
+                                    <?php elseif ($submission['state'] == 'In Progress'): ?>
+                                        <a
+                                            href="<?php echo esc_url(add_query_arg(array('action' => 'pending', 'submission_id' => $submission['id']))); ?>">Set
+                                            as 'Pending
+                                            Approval'</a>
+                                    <?php elseif ($submission['state'] == 'Approved'): ?>
+                                        <a
+                                            href="<?php echo esc_url(add_query_arg(array('action' => 'progress', 'submission_id' => $submission['id']))); ?>">Set
+                                            as 'In
+                                            Progress'</a>
+                                    <?php endif; ?>
+                                    <!-- Add more actions as needed -->
+
+                                    <div>
+                                        <?php if ($submission['is_rejected']): ?>
+                                            <a
+                                                href="<?php echo esc_url(add_query_arg(array('action' => 'unreject', 'submission_id' => $submission['id']))); ?>">Unreject</a>
+
+                                        <?php else: ?>
+                                            <a
+                                                href="<?php echo esc_url(add_query_arg(array('action' => 'reject', 'submission_id' => $submission['id']))); ?>">Reject</a>
+                                        <?php endif; ?>
+
+                                    </div>
+
+                                    <div>
+                                        <?php if ($submission['is_removed']): ?>
+                                            <a
+                                                href="<?php echo esc_url(add_query_arg(array('action' => 'undelete', 'submission_id' => $submission['id']))); ?>">Undelete</a>
+                                        <?php else: ?>
+                                            <a
+                                                href="<?php echo esc_url(add_query_arg(array('action' => 'delete', 'submission_id' => $submission['id']))); ?>">Delete</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6">No submissions found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
             </table>
         </div>
         <?php
@@ -502,21 +537,21 @@ class admin_settings{
         <div class="wrap">
             <h1><?php _e('PTA Plugin Settings', 'pta-plugin'); ?></h1>
             <form method="post" action="">
-            <?php
-            // Add a hidden field to specify the action
-            ?>
-            <input type="hidden" name="action" value="pta_manual_backup">
-            <?php
-            // Security nonce
-            wp_nonce_field('pta_manual_backup_nonce', 'pta_nonce');
-            ?>
-            <h2><?php _e('Database Backup (WIP)', 'pta-plugin'); ?></h2>
-            <p>
-                <?php _e('Click the button below to create a manual database backup.', 'pta-plugin'); ?>
-            </p>
-            <p>
-                <input type="submit" class="button button-primary" value="<?php _e('Run Backup Now', 'pta-plugin'); ?>" />
-            </p>
+                <?php
+                // Add a hidden field to specify the action
+                ?>
+                <input type="hidden" name="action" value="pta_manual_backup">
+                <?php
+                // Security nonce
+                wp_nonce_field('pta_manual_backup_nonce', 'pta_nonce');
+                ?>
+                <h2><?php _e('Database Backup (WIP)', 'pta-plugin'); ?></h2>
+                <p>
+                    <?php _e('Click the button below to create a manual database backup.', 'pta-plugin'); ?>
+                </p>
+                <p>
+                    <input type="submit" class="button button-primary" value="<?php _e('Run Backup Now', 'pta-plugin'); ?>" />
+                </p>
             </form>
             <!-- Add more settings sections as needed -->
         </div>

@@ -58,8 +58,7 @@ class REST
     db_handler $handler_instance = null,
     db_functions $db_functions = null,
     admin_functions $admin_functions = null
-  )
-  {
+  ) {
     $this->logger = $this->logger->getLogger();
 
     // Get the handler instance and db functions instance
@@ -434,26 +433,26 @@ class REST
   {
     $cookie_name = 'submission_views';
     $current_time = time(); // Current Unix timestamp
-  
+
     // Retrieve the views from the cookie
     if (isset($_COOKIE[$cookie_name])) {
       $views = json_decode(stripslashes($_COOKIE[$cookie_name]), true);
     } else {
       $views = array();
     }
-  
+
     // Ensure $views is an array
     if (!is_array($views)) {
       $views = array();
     }
-  
+
     // Clean up old views (older than 1 hour)
     foreach ($views as $key => $timestamp) {
       if (($current_time - $timestamp) >= HOUR_IN_SECONDS) {
         unset($views[$key]);
       }
     }
-  
+
     // Check if the user has viewed this submission in the last hour
     if (isset($views[$submission_id])) {
       // Already viewed within the last hour; do nothing
@@ -463,16 +462,16 @@ class REST
       // Record the view with the current timestamp
       $views[$submission_id] = $current_time;
     }
-  
+
     // Limit the size of the $views array to prevent cookie size issues
     $max_views = 50; // Adjust as needed
     if (count($views) > $max_views) {
       // Keep only the most recent $max_views entries
       $views = array_slice($views, -$max_views, $max_views, true);
     }
-  
+
     // Update the cookie with new views data
-  // Set cookie to expire in 1 hour from now
+    // Set cookie to expire in 1 hour from now
     setcookie(
       $cookie_name,
       json_encode($views),

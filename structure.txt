@@ -67,3 +67,46 @@ composer.json                      // File   | composer file for dependencies
  - pta.code-workspace              // File   | vscode workspace file
 
 
+
+Code structure:
+
+We need to make this plugin more repeatable, 
+
+Core:
+  - API:
+    - REST.php
+      - Get Submissions
+      - Submission actions
+      - Submission edit
+      - Permissions:
+        - User:
+          - Get public submission(s)
+            - Exclude submission data regarding Removal or Rejection
+          - Get user submission(s)
+            - Get all submission data
+          - Edit user submission
+            - Edit content
+            - Edit image
+            - Edit status
+          - Delete user submission
+        - Admin:
+          - Administrator:
+            - Get all submissions
+              - Get all submission data
+            - Edit submission
+              - Will be able to edit all submission data, with reason
+            - Delete submission with reason
+            - Approve submission
+            - Reject submission with reason
+            - Remove submission
+          - Editor:
+            - Get all submissions
+              - Get all submission data
+            - Approve submission
+            - Reject submission with reason
+  - DB:
+  - Enqueue:
+  - Logger:
+  - Update:
+  - Woocommerce:
+  - PTA.php

@@ -7,55 +7,36 @@ if (!defined('ABSPATH')) {
 }
 
 /* Requires */
-use PTA\DB\db_handler;
-use PTA\DB\functions\db_functions;
-use PTA\DB\functions\submission\submission_functions;
-use PTA\DB\functions\image\image_functions;
-use PTA\DB\functions\user\user_functions;
-use PTA\logger\Log;
+use PTA\client\Client;
+
 
 /**
  * Admin functions class for the plugin.
  */
-class admin_functions{
-    private $logger;
-    private $submission_func;
-    private $image_func;
-    private $user_func;
-    private $handler_instance;
-    private $db_functions;
+class admin_functions extends Client
+{
 
-    public function __construct() {
-        $this->logger = new Log('Admin Functions');
+    public function __construct()
+    {
+        parent::__construct("Admin Functions");
     }
 
     public function init(
-        submission_functions $sub_functions,
-        image_functions $img_functions,
-        user_functions $user_functions,
-        db_handler $handler_instance = null,
-        db_functions $db_functions = null
-    ){
-        $this->logger = $this->logger->getLogger();
-        //$this->logger->info('Initializing admin functions.');
-
-        // Get the handler instance and db functions instance
-        $this->handler_instance = $handler_instance ?? new db_handler();
-        $this->db_functions = $db_functions ?? new db_functions();
-
-        // if handler_instance is null or db_functions is null, set them
-        if ($handler_instance == null || $db_functions == null) {
-
-            // Set the functions instance in the handler, and initialize the functions
-            $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-            $this->db_functions->init(handler_instance: $this->handler_instance);
-
-        }
-
-        // Set the functions instances for the submission, image, and user functions
-        $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
-        $this->image_func = $img_functions ?? new image_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
-        $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+        $sub_functions = null,
+        $img_functions = null,
+        $user_functions = null,
+        $handler_instance = null,
+        $db_functions = null,
+        $admin_functions = null
+    ) {
+        parent::init(
+            sub_functions: $sub_functions,
+            img_functions: $img_functions,
+            user_functions: $user_functions,
+            handler_instance: $handler_instance,
+            db_functions: $db_functions,
+            admin_functions: $admin_functions ?? $this
+        );
     }
 
     /**
@@ -66,12 +47,13 @@ class admin_functions{
      * @param int $submission_id The ID of the submission to be approved.
      * @return void
      */
-    public function approve_submission($submission_id){
+    public function approve_submission($submission_id)
+    {
         $this->logger->info('Approving submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Approved'
         ];
-        $this->submission_func->update_submission($submission_id, $updateData);
+        $this->submission_functions->update_submission($submission_id, $updateData);
     }
 
     /**
@@ -83,7 +65,8 @@ class admin_functions{
      * @param string $reason The reason for rejecting the submission.
      * @return void
      */
-    public function reject_submission($submission_id, $reason){
+    public function reject_submission($submission_id, $reason)
+    {
         $this->logger->info('Rejecting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Rejected',
@@ -91,7 +74,7 @@ class admin_functions{
             'is_rejected' => 1,
             'was_rejected' => 1
         ];
-        $this->submission_func->update_submission($submission_id, $updateData);
+        $this->submission_functions->update_submission($submission_id, $updateData);
     }
 
     /**
@@ -102,17 +85,18 @@ class admin_functions{
      * @param int $submission_id The ID of the submission to be unrejected.
      * @return void
      */
-    public function unreject_submission($submission_id){
+    public function unreject_submission($submission_id)
+    {
         $this->logger->info('Unrejecting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'In Progress',
             'is_rejected' => 0,
             'rejected_reason' => null
         ];
-        $this->submission_func->update_submission($submission_id, $updateData);
+        $this->submission_functions->update_submission($submission_id, $updateData);
     }
 
-    
+
     /**
      * Deletes a submission based on the provided submission ID and reason.
      *
@@ -120,14 +104,15 @@ class admin_functions{
      * @param string $reason The reason for deleting the submission.
      * @return void
      */
-    public function delete_submission($submission_id, $reason){
+    public function delete_submission($submission_id, $reason)
+    {
         $this->logger->info('Deleting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Removed',
             'removed_reason' => $reason,
             'is_removed' => 1
         ];
-        $this->submission_func->update_submission($submission_id, $updateData);
+        $this->submission_functions->update_submission($submission_id, $updateData);
     }
 
     /**
@@ -138,13 +123,14 @@ class admin_functions{
      * @param int $submission_id The ID of the submission to be undeleted.
      * @return void
      */
-    public function undelete_submission($submission_id){
+    public function undelete_submission($submission_id)
+    {
         $this->logger->info('Undeleting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'In Progress',
             'is_removed' => 0,
             'removed_reason' => null
         ];
-        $this->submission_func->update_submission($submission_id, $updateData);
+        $this->submission_functions->update_submission($submission_id, $updateData);
     }
 }

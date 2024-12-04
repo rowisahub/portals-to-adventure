@@ -20,6 +20,7 @@ use PTA\Update\Plugin_Updater;
 use PTA\shortcodes\Shortcodes;
 use PTA\API\AJAX;
 use PTA\API\REST;
+use PTA\admin\admin_settings;
 
 /**
  * Class PTA
@@ -38,6 +39,7 @@ class PTA
   private $shortcodes;
   private $ajax;
   private $rest;
+  private $admin;
 
   public function __construct()
   {
@@ -46,12 +48,12 @@ class PTA
 
     /* Logger */
     $this->logger = new log(name: 'Main', ifLogUncaught: true);
-    
+
     /* Database Handler */
     $this->dbHandler = new db_handler();
 
     /* Update */
-    $this->update = new Plugin_Updater();    
+    $this->update = new Plugin_Updater();
 
     /* Woocommerce Extension */
     $this->woocommerceExtension = new Woocommerce_Extension();
@@ -62,6 +64,9 @@ class PTA
     /* API */
     $this->rest = new REST();
     $this->ajax = new AJAX();
+
+    /* Admin */
+    $this->admin = new admin_settings();
 
     /* Initialize */
     //$this->init();
@@ -101,12 +106,21 @@ class PTA
     $this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
     $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
+    $this->logger->info('Admin functions: ' . $this->admin);
+
+    /* Admin */
+    $this->admin->init(
+      handler_instance: $this->dbHandler,
+      db_functions: $this->dbHandler->get_instance('functions')
+    );
+
     //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
 
   }
 
-  public function get_instance($name){
-    switch($name){
+  public function get_instance($name)
+  {
+    switch ($name) {
       case 'enqueue':
         return $this->enqueue;
       case 'dbHandler':
@@ -117,6 +131,14 @@ class PTA
         return $this->woocommerceExtension;
       case 'update':
         return $this->update;
+      case 'shortcodes':
+        return $this->shortcodes;
+      case 'ajax':
+        return $this->ajax;
+      case 'rest':
+        return $this->rest;
+      case 'admin':
+        return $this->admin;
       default:
         return null;
     }
