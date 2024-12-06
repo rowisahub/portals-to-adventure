@@ -12,13 +12,9 @@ if (!defined('ABSPATH')) {
 }
 
 /* Require Class */
-use PTA\logger\Log;
 use Google_Client;
-use PTA\DB\db_handler;
-use PTA\DB\functions\db_functions;
-use PTA\DB\functions\submission\submission_functions;
-use PTA\DB\functions\image\image_functions;
-use PTA\DB\functions\user\user_functions;
+use PTA\client\Client;
+
 
 /**
  * Class AJAX
@@ -27,7 +23,7 @@ use PTA\DB\functions\user\user_functions;
  *
  * @package PortalsToAdventure
  */
-class AJAX
+class AJAX extends Client
 {
   private $logger;
   private $handler_instance;
@@ -39,11 +35,7 @@ class AJAX
 
   public function __construct()
   {
-    /* Logger */
-    $this->logger = new Log(name: 'AJAX');
-
-    /* Initialize */
-    //$this->init();
+    parent::__construct("AJAX");
   }
 
   /**
@@ -52,36 +44,24 @@ class AJAX
    * This method initializes the AJAX API by calling the necessary methods.
    */
   public function init(
-    submission_functions $sub_functions = null,
-    image_functions $img_functions = null,
-    user_functions $user_functions = null,
-    db_handler $handler_instance = null,
-    db_functions $db_functions = null
-  )
-  {
-    $this->logger = $this->logger->getLogger();
-    
-    //$this->logger->log('Initializing AJAX API...');
-
-    // Get the handler instance and db functions instance
-    $this->handler_instance = $handler_instance ?? new db_handler();
-    $this->db_functions = $db_functions ?? new db_functions();
-
-    // if handler_instance is null or db_functions is null, set them
-    if ($handler_instance == null || $db_functions == null) {
-
-      // Set the functions instance in the handler, and initialize the functions
-      $this->handler_instance->set_functions(name: 'functions', function_instance: $this->db_functions);
-      $this->db_functions->init(handler_instance: $this->handler_instance);
-
-    }
-
-    // Set the functions instances for the submission, image, and user functions
-    $this->submission_func = $sub_functions ?? new submission_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
-    $this->image_func = $img_functions ?? new image_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
-    $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
+    $sub = null,
+    $img = null,
+    $user = null,
+    $handler = null,
+    $db = null,
+    $admin = null
+  ) {
+    parent::init(
+      sub_functions: $sub,
+      img_functions: $img,
+      user_functions: $user,
+      handler_instance: $handler,
+      db_functions: $db,
+      admin_functions: $admin
+    );
 
     $this->register_hooks();
+
   }
 
   public function register_hooks()
