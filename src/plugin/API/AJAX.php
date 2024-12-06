@@ -25,43 +25,9 @@ use PTA\client\Client;
  */
 class AJAX extends Client
 {
-  private $logger;
-  private $handler_instance;
-  private $db_functions;
-  private $submission_func;
-  private $image_func;
-  private $user_func;
-  
-
   public function __construct()
   {
-    parent::__construct("AJAX");
-  }
-
-  /**
-   * Initializes the AJAX API.
-   *
-   * This method initializes the AJAX API by calling the necessary methods.
-   */
-  public function init(
-    $sub = null,
-    $img = null,
-    $user = null,
-    $handler = null,
-    $db = null,
-    $admin = null
-  ) {
-    parent::init(
-      sub_functions: $sub,
-      img_functions: $img,
-      user_functions: $user,
-      handler_instance: $handler,
-      db_functions: $db,
-      admin_functions: $admin
-    );
-
-    $this->register_hooks();
-
+    parent::__construct(LogName: "AJAX", callback_after_init: $this->register_hooks());
   }
 
   public function register_hooks()
@@ -104,7 +70,7 @@ class AJAX extends Client
 
     if (!$user) {
       // User doesn't exist, create new one
-      $user_id = $this->user_func->register_user(
+      $user_id = $this->user_functions->register_user(
         $email,
         $username,
         $payload['given_name'],
@@ -141,19 +107,23 @@ class AJAX extends Client
     $submission_id = $_POST['submission_id'];
   
     // Add the product to the cart
-    if($product_id > 0){
-      $cart = WC()->cart;
-      $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: array('submission_id' => $submission_id));
-  
-      if($added){
-        wp_send_json_success(array('message' => 'Product added to cart', 'added' => $added));
+    if (class_exists('WooCommerce')) {
+      if($product_id > 0){
+        $cart = WC()->cart;
+        $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: array('submission_id' => $submission_id));
+    
+        if($added){
+          wp_send_json_success(array('message' => 'Product added to cart', 'added' => $added));
+        } else {
+          $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'added' => $added));
+          wp_send_json_error(array('message' => 'Error adding product to cart'));
+        }
+        
       } else {
-        $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'added' => $added));
-        wp_send_json_error(array('message' => 'Error adding product to cart'));
+        wp_send_json_error(array('message' => 'Invalid product ID'));
       }
-      
     } else {
-      wp_send_json_error(array('message' => 'Invalid product ID'));
+      wp_send_json_error(array('message' => 'WooCommerce not installed'));
     }
     
     wp_die();

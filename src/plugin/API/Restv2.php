@@ -24,29 +24,10 @@ class Restv2 extends Client
 
   public function __construct()
   {
-    parent::__construct("API");
+    parent::__construct(LogName: "API", callback_after_init: $this->register_hooks());
   }
 
-  public function init(
-    $sub = null,
-    $img = null,
-    $user = null,
-    $handler = null,
-    $db = null,
-    $admin = null
-  ) {
-    parent::init(
-      sub_functions: $sub,
-      img_functions: $img,
-      user_functions: $user,
-      handler_instance: $handler,
-      db_functions: $db,
-      admin_functions: $admin
-    );
-
-    $this->register_hooks();
-
-  }
+  /* init function is here, the `callback_function` runs that funciton after init is ran */
 
   public function register_hooks()
   {
