@@ -18,12 +18,12 @@ use PTA\admin\admin_functions;
 class Client
 {
     public $logger;
-    public submission_functions $submission_functions;
-    public image_functions $image_functions;
-    public user_functions $user_functions;
-    public db_handler $db_handler_instance;
-    public db_functions $db_functions;
-    public admin_functions $admin_functions;
+    protected submission_functions $submission_functions;
+    protected image_functions $image_functions;
+    protected user_functions $user_functions;
+    protected db_handler $db_handler_instance;
+    protected db_functions $db_functions;
+    protected admin_functions $admin_functions;
 
     public function __construct($LogName)
     {
