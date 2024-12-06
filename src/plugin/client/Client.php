@@ -24,10 +24,12 @@ class Client
     protected db_handler $db_handler_instance;
     protected db_functions $db_functions;
     protected admin_functions $admin_functions;
+    private $callback;
 
-    public function __construct($LogName)
+    public function __construct($LogName, $callback_function = null)
     {
         $this->logger = new Log(name: $LogName);
+        $this->callback = $callback_function;
     }
 
     public function init(
@@ -36,7 +38,8 @@ class Client
         user_functions $user_functions = null,
         db_handler $handler_instance = null,
         db_functions $db_functions = null,
-        admin_functions $admin_functions = null
+        admin_functions $admin_functions = null,
+        $callback_function = null
     ) {
         $this->logger = $this->logger->getLogger();
 
@@ -69,6 +72,10 @@ class Client
                 db_functions: $this->db_functions
             );
 
+        }
+
+        if ($this->callback != null && is_callable($this->callback)) {
+            call_user_func($this->callback);
         }
     }
 
