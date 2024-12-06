@@ -101,6 +101,16 @@ class submission_functions
     return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 
+  public function get_submission_ids_by_user($user_id)
+  {
+    $queryBuilder = new QueryBuilder($this->wpdb);
+    $queryBuilder->select('id')
+      ->from($this->table_path)
+      ->where(['user_owner_id' => $user_id]);
+
+    return $this->db_functions->exe_from_builder($queryBuilder, 'ARRAY_N');
+  }
+
   public function get_submission_value($submission_id, $key)
   {
     $queryBuilder = new QueryBuilder($this->wpdb);
@@ -113,12 +123,18 @@ class submission_functions
     return $result[$key] ?? null;
   }
 
-  public function get_submission_by_state($user_owner_id, $state, $output_type = 'ARRAY_A')
+  public function get_submission_by_state($state, $output_type = 'ARRAY_A', $limited = false)
   {
     $queryBuilder = new QueryBuilder($this->wpdb);
-    $queryBuilder->select('*')
-      ->from($this->table_path)
-      ->where(['user_owner_id' => $user_owner_id, 'state' => $state]);
+
+    if($limited){
+      $queryBuilder->select(['id', 'state', 'user_owner_id']);
+    } else {
+      $queryBuilder->select('*');
+    }
+
+    $queryBuilder->from($this->table_path)
+      ->where(['state' => $state]);
 
     return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }

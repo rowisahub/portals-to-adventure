@@ -9,18 +9,18 @@ if (!defined('ABSPATH')) {
 /* Requires */
 use PTA\client\Client;
 
+/* Requires MOVE LATER */
+use PTA\DB\QueryBuilder;
+
+/**
+ * Class Restv2
+ *
+ * API class for V2
+ *
+ * @package PortalsToAdventure
+ */
 class Restv2 extends Client
 {
-  /* Constants */
-  public const USER = 'user';
-  public const ADMIN = 'admin';
-  public const EDITOR = 'editor';
-  public const USER_PERMS = [
-    self::USER,
-    self::ADMIN,
-    self::EDITOR
-  ];
-  /* Constants */
 
   public function __construct()
   {
@@ -71,75 +71,41 @@ class Restv2 extends Client
 
     /* If an ID is provided, get the submission with that ID */
     if (isset($params['id'])) {
+      $ids = $this->get_id_from_params($params, 'id', $user, $errors);
 
-      // sanitize the id, the id is a uuid
-      $submission_id_in = sanitize_text_field($params['id']);
-
-      // check if there are multiple ids
-      if (strpos($submission_id_in, ',') !== false) { // Multiple ids
-
-        $submission_ids = explode(',', $submission_id_in);
-
-        foreach ($submission_ids as $id) {
-
-          if ($this->db_functions->check_id_exists('submission_data', $id)) {
-            $submissions[] = $this->submission_functions->get_submission($id)[0];
-          } else {
-            $errors[] = new \WP_Error('no_submission', 'Submission does not exist.', array('status' => 404, 'submission_id' => $id));
-          }
-
-        }
-        
-      } else { // Only one id
-
-        if ($this->db_functions->check_id_exists('submission_data', $submission_id_in)) {
-          $submissions[] = $this->submission_functions->get_submission($submission_id_in)[0];
-        } else {
-          $errors[] = new \WP_Error('no_submission', 'Submission does not exist.', array('status' => 404, 'submission_id' => $submission_id_in));
-        }
-
+      foreach ($ids as $id) {
+        $submissions[] = $this->submission_functions->get_submission($id);
       }
 
     }
 
     // if user_id is provided, get all submissions for that user
     if (isset($params['user_id'])) {
-      $user_id = sanitize_text_field($params['user_id']);
+      $user_ids = $this->get_id_from_params($params, 'user_id', $user, $errors);
 
-      // check if there are multiple user ids
-      if (strpos($user_id, ',') !== false) { // Multiple user ids
+      foreach ($user_ids as $user_id) {
+        $submissions[] = $this->submission_functions->get_submissions_by_user($user_id);
+      }
+    }
 
-        $user_ids = explode(',', $user_id);
+    if(isset($params['state'])) {
+      $limitedSubmssionsByState = $this->submission_functions->get_submission_by_state($params['state'], 'ARRAY_A', true);
 
-        foreach ($user_ids as $id) {
+      foreach ($limitedSubmssionsByState as $submission) {
 
-          // Check if id exists
-          if ($this->db_functions->check_id_exists('user_info', $id)) {
-            $submissions = $this->submission_functions->get_submissions_by_user($id);
-          } else {
-            $errors[] = new \WP_Error('no_user', 'User does not exist.', array('status' => 404));
-          }
-        }
-
-      } else { // Only one user id
-
-        // Check if id exists
-        if ($this->db_functions->check_id_exists('user_info', $user_id)) {
-          $submissions = $this->submission_functions->get_submissions_by_user($user_id);
+        if ($this->check_sub_perms($user, $submission)) {
+          $submissions[] = $this->submission_functions->get_submission($submission['id']);
         } else {
-          $errors[] = new \WP_Error('no_user', 'User does not exist.', array('status' => 404));
+          $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $submission['id']));
         }
 
       }
     }
 
+    $this->remove_duplicate_submissions($submissions);
+
     // End of Get Submissions
     foreach ($submissions as $key => $submission) {
-      if (!$this->check_sub_perms($user, $submission)) {
-        unset($submissions[$key]);
-        $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $submission['id']));
-      }
-
       $submissions[$key] = $this->format_response($submission);
     }
 
@@ -182,6 +148,65 @@ class Restv2 extends Client
     return true;
   }
 
+  /**
+   * Removes duplicate submissions from the provided submissions array.
+   *
+   * @param array &$submissions The array of submissions to be processed. This parameter is passed by reference.
+   */
+  private function remove_duplicate_submissions(&$submissions)
+  {
+    $ids = [];
+
+    foreach ($submissions as $key => $submission) {
+      if (in_array($submission['id'], $ids)) {
+        unset($submissions[$key]);
+      } else {
+        $ids[] = $submission['id'];
+      }
+    }
+  }
+
+  /**
+   * Retrieves the ID from the provided parameters. Also checks if the ID is valid and permissions are correct.
+   *
+   * @param array $params The parameters from which to extract the ID.
+   * @return array|null The extracted ID if found, otherwise null.
+   */
+  protected function get_id_from_params($params, $id_name, $user, &$errors)
+  {
+    $ids = sanitize_text_field($params[$id_name]);
+
+    if(!$ids){
+      $errors[] = new \WP_Error('no_id', 'No ID provided.', array('status' => 400));
+      return [];
+    }
+
+    $submissions_ids = [];
+
+    // check if there are multiple ids
+    if (strpos($ids, ',') !== false) { // Multiple ids
+
+      $submission_ids = explode(',', $ids);
+
+      foreach ($submission_ids as $id) {
+
+        if ($this->check_sub_exists($id, $user, $errors)) {
+          $submissions_ids[] = $id;
+        }
+        
+      }
+      
+    } else { // Only one id
+
+      if ($this->check_sub_exists($ids, $user, $errors)) {
+        $submissions_ids[] = $ids;
+      }
+    }
+
+    return $submissions_ids;
+    
+  }
+
   protected function check_sub_perms($user, $submission)
   {
     $user_primary_role = $this->get_user_role($user);
@@ -201,6 +226,35 @@ class Restv2 extends Client
       return true;
     }
     return false;
+  }
+
+  private function check_sub_exists($id, $user, &$errors)
+  {
+    $limitSubmission = $this->get_limitedInfo_submission_by_id($id)[0];
+    if(!$limitSubmission){
+      $errors[] = new \WP_Error('no_submission', 'Submission does not exist.', array('status' => 404, 'submission_id' => $id));
+      return false;
+    }
+
+    if(!$this->check_sub_perms($user, $limitSubmission)){
+      $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $id));
+      return false;
+    }
+
+    return true;
+  }
+
+  private function get_limitedInfo_submission_by_id($id){
+    // make query to get submission by id state and user_owner_id
+    $queryBuilder = new QueryBuilder($this->db_handler_instance->get_wpdb());
+    $queryBuilder->select(['id', 'state', 'user_owner_id'])
+      ->from($this->db_handler_instance->get_table('submission_data'))
+      ->where(['id' => $id]);
+
+    $results = $this->db_functions->exe_from_builder($queryBuilder);
+
+    return $results;
+
   }
 
   protected function get_user_role($user)
@@ -225,4 +279,15 @@ class Restv2 extends Client
     //return new \WP_REST_Response($data, 200);
     return 'Test';
   }
+
+    /* Constants */
+    public const USER = 'user';
+    public const ADMIN = 'admin';
+    public const EDITOR = 'editor';
+    public const USER_PERMS = [
+      self::USER,
+      self::ADMIN,
+      self::EDITOR
+    ];
+    /* Constants */
 }
