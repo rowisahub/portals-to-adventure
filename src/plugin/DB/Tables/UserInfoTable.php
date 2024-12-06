@@ -17,6 +17,29 @@ use PTA\logger\Log;
 
 class UserInfoTable implements TableInterface
 {
+
+  /**
+   * Generates the schema for the ImageDataTable.
+   */
+  private function table_schema()
+  {
+    // User info table
+    $sql_user_info = "CREATE TABLE $this->table_path (
+        id varchar(255) NOT NULL,
+        token varchar(255) NOT NULL,
+        email varchar(255) NOT NULL,
+        username varchar(255) NOT NULL,
+        birthday date DEFAULT NULL,
+        permissions varchar(4) DEFAULT '0000', -- 4-bit binary string for permissions (permissions to send email, is admin, can review submissions, is banned)
+        payment_info text DEFAULT NULL,
+        created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY  (id)
+      ) $this->charset_collate;";
+
+    $this->table_schema = $sql_user_info;
+
+  }
+
   private $logger;
   private $wpdb;
   private $table_name = 'user_info';
@@ -107,33 +130,6 @@ class UserInfoTable implements TableInterface
       $this->logger->error($this->wpdb->last_error);
       return false;
     }
-  }
-
-  /**
-   * Generates the schema for the ImageDataTable.
-   *
-   * This method defines the structure of the database table used to store image data.
-   * It includes the table name, columns, data types, and any constraints or indexes.
-   *
-   * @return void
-   */
-  private function table_schema()
-  {
-    // User info table
-    $sql_user_info = "CREATE TABLE $this->table_path (
-        id varchar(255) NOT NULL,
-        token varchar(255) NOT NULL,
-        email varchar(255) NOT NULL,
-        username varchar(255) NOT NULL,
-        birthday date DEFAULT NULL,
-        permissions varchar(4) DEFAULT '0000', -- 4-bit binary string for permissions (permissions to send email, is admin, can review submissions, is banned)
-        payment_info text DEFAULT NULL,
-        created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY  (id)
-      ) $this->charset_collate;";
-
-    $this->table_schema = $sql_user_info;
-
   }
 
   /**

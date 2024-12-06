@@ -17,6 +17,34 @@ use PTA\logger\Log;
 
 class ImageDataTable implements TableInterface
 {
+
+  /**
+   * Generates the schema for the ImageDataTable.
+   */
+  private function table_schema()
+  {
+
+    $user_info_path = $this->handler_instance->get_table_path('user_info');
+    $submission_data_path = $this->handler_instance->get_table_path('submission_data');
+
+    // Image data table
+    $sql_image_data = "CREATE TABLE $this->table_path (
+            image_id varchar(255) NOT NULL,
+            user_id varchar(255) NOT NULL,
+            submission_id varchar(255) NOT NULL,
+            image_reference varchar(255) NOT NULL,
+            is_thumbnail tinyint(1) DEFAULT 0,
+            is_map tinyint(1) DEFAULT 0,
+            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (image_id),
+            FOREIGN KEY  (user_id) REFERENCES $user_info_path(id) ON DELETE CASCADE,
+            FOREIGN KEY  (submission_id) REFERENCES $submission_data_path(id) ON DELETE CASCADE
+        ) $this->charset_collate;";
+
+    $this->table_schema = $sql_image_data;
+
+  }
+
   private $logger;
   private $wpdb;
   private $table_name = 'image_data';
@@ -110,38 +138,6 @@ class ImageDataTable implements TableInterface
       $this->logger->error($this->wpdb->last_error);
       return false;
     }
-  }
-
-  /**
-   * Generates the schema for the ImageDataTable.
-   *
-   * This method defines the structure of the database table used to store image data.
-   * It includes the table name, columns, data types, and any constraints or indexes.
-   *
-   * @return void
-   */
-  private function table_schema()
-  {
-
-    $user_info_path = $this->handler_instance->get_table_path('user_info');
-    $submission_data_path = $this->handler_instance->get_table_path('submission_data');
-
-    // Image data table
-    $sql_image_data = "CREATE TABLE $this->table_path (
-            image_id varchar(255) NOT NULL,
-            user_id varchar(255) NOT NULL,
-            submission_id varchar(255) NOT NULL,
-            image_reference varchar(255) NOT NULL,
-            is_thumbnail tinyint(1) DEFAULT 0,
-            is_map tinyint(1) DEFAULT 0,
-            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY  (image_id),
-            FOREIGN KEY  (user_id) REFERENCES $user_info_path(id) ON DELETE CASCADE,
-            FOREIGN KEY  (submission_id) REFERENCES $submission_data_path(id) ON DELETE CASCADE
-        ) $this->charset_collate;";
-
-    $this->table_schema = $sql_image_data;
-
   }
 
   /**

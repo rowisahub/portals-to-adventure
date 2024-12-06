@@ -17,6 +17,42 @@ use PTA\logger\Log;
 
 class SubmissionDataTable implements TableInterface
 {
+
+    /**
+     * Generates the schema for the ImageDataTable.
+     */
+    private function table_schema()
+    {
+
+        $user_info_path = $this->handler_instance->get_table_path('user_info');
+
+        // Submission data table
+        $sql_submission_data = "CREATE TABLE $this->table_path (
+            id varchar(255) NOT NULL,
+            user_owner_id varchar(255) NOT NULL,
+            registration_method varchar(50) NOT NULL,
+            title varchar(255) NOT NULL,
+            description text NOT NULL,
+            image_uploads longtext DEFAULT NULL,
+            video_link varchar(255) DEFAULT NULL,
+            image_thumbnail_id varchar(255) DEFAULT NULL,
+            views bigint(20) DEFAULT 0,
+            likes_votes bigint(20) DEFAULT 0,
+            state varchar(50) DEFAULT 'In Progress',
+            is_rejected tinyint(1) DEFAULT 0,
+            was_rejected tinyint(1) DEFAULT 0,
+            rejected_reason text DEFAULT NULL,
+            is_removed tinyint(1) DEFAULT 0,
+            removed_reason text DEFAULT NULL,
+            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            FOREIGN KEY  (user_owner_id) REFERENCES $user_info_path(id) ON DELETE CASCADE
+        ) $this->charset_collate;";
+
+        $this->table_schema = $sql_submission_data;
+
+    }
+
     private $logger;
     private $wpdb;
     private $table_name = 'submission_data';
@@ -108,46 +144,6 @@ class SubmissionDataTable implements TableInterface
             $this->logger->error($this->wpdb->last_error);
             return false;
         }
-    }
-
-    /**
-     * Generates the schema for the ImageDataTable.
-     *
-     * This method defines the structure of the database table used to store image data.
-     * It includes the table name, columns, data types, and any constraints or indexes.
-     *
-     * @return void
-     */
-    private function table_schema()
-    {
-
-        $user_info_path = $this->handler_instance->get_table_path('user_info');
-
-        // Submission data table
-        $sql_submission_data = "CREATE TABLE $this->table_path (
-            id varchar(255) NOT NULL,
-            user_owner_id varchar(255) NOT NULL,
-            registration_method varchar(50) NOT NULL,
-            title varchar(255) NOT NULL,
-            description text NOT NULL,
-            image_uploads longtext DEFAULT NULL,
-            video_link varchar(255) DEFAULT NULL,
-            image_thumbnail_id varchar(255) DEFAULT NULL,
-            views bigint(20) DEFAULT 0,
-            likes_votes bigint(20) DEFAULT 0,
-            state varchar(50) DEFAULT 'In Progress',
-            is_rejected tinyint(1) DEFAULT 0,
-            was_rejected tinyint(1) DEFAULT 0,
-            rejected_reason text DEFAULT NULL,
-            is_removed tinyint(1) DEFAULT 0,
-            removed_reason text DEFAULT NULL,
-            created_at timestamp DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY  (id),
-            FOREIGN KEY  (user_owner_id) REFERENCES $user_info_path(id) ON DELETE CASCADE
-        ) $this->charset_collate;";
-
-        $this->table_schema = $sql_submission_data;
-
     }
 
     /**
