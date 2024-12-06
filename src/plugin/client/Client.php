@@ -26,10 +26,16 @@ class Client
     protected admin_functions $admin_functions;
     private $callback;
 
-    public function __construct($LogName, $callback_function = null)
+    /**
+     * Client constructor.
+     *
+     * @param string $LogName The name of the log.
+     * @param callable|null $callback_function Optional. A callback function to be executed after initialization.
+     */
+    public function __construct($LogName, $callback_after_init = null)
     {
         $this->logger = new Log(name: $LogName);
-        $this->callback = $callback_function;
+        $this->callback = $callback_after_init;
     }
 
     public function init(
@@ -38,8 +44,7 @@ class Client
         user_functions $user_functions = null,
         db_handler $handler_instance = null,
         db_functions $db_functions = null,
-        admin_functions $admin_functions = null,
-        $callback_function = null
+        admin_functions $admin_functions = null
     ) {
         $this->logger = $this->logger->getLogger();
 
