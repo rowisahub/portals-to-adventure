@@ -93,12 +93,11 @@ Core:
           - Administrator:
             - Get all submissions
               - Get all submission data
-            - Edit submission
+            - Edit submission (maybe)
               - Will be able to edit all submission data, with reason
             - Delete submission with reason
             - Approve submission
             - Reject submission with reason
-            - Remove submission
           - Editor:
             - Get all submissions
               - Get all submission data
