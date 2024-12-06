@@ -120,6 +120,9 @@ class admin_settings extends Client
             update_option('pta_woocommerce_product_id', $_POST['pta_woocommerce_product_id']);
             update_option('pta_github_fg_token', $_POST['pta_github_fg_token']);
             update_option('wldpta_product_limit', $_POST['wldpta_product_limit']);
+            update_option('pta_clock_start_date', $_POST['pta_clock_start_date']);
+            update_option('pta_clock_end_date', $_POST['pta_clock_end_date']);
+            update_option('pta_percentage_prize_total', $_POST['pta_percentage_prize_total']);
 
             // Display a success message
             echo '<div class="updated"><p>Settings saved.</p></div>';
@@ -137,8 +140,9 @@ class admin_settings extends Client
         $pta_woocommerce_product_id = get_option('pta_woocommerce_product_id', 0);
         $pta_github_fg_token = get_option('pta_github_fg_token', '');
         $wldpta_product_limit = get_option('wldpta_product_limit', 10);
-
-        global $logAdmin;
+        $pta_clock_start_date = get_option('pta_clock_start_date', '');
+        $pta_clock_end_date = get_option('pta_clock_end_date', '');
+        $pta_percentage_prize_total = get_option('pta_percentage_prize_total', 50);
 
         // Fetch all pages
         $pages = get_pages();
@@ -251,6 +255,7 @@ class admin_settings extends Client
                                         'limit' => -1,
                                         'status' => 'publish',
                                     );
+                                    /* @phpstan-ignore-next-line */
                                     $products = wc_get_products($args);
 
                                     foreach ($products as $product) {
@@ -271,8 +276,9 @@ class admin_settings extends Client
                     <tr>
                         <th scope="row">Github FG Token</th>
                         <td>
-                            <input type="text" name="pta_github_fg_token"
+                            <input type="password" id="pta_github_fg_token" name="pta_github_fg_token"
                                 value="<?php echo esc_attr($pta_github_fg_token); ?>" />
+                            <input type="checkbox" id="toggle_github_fg_token" onclick="toggleVisibility()"> Show
                         </td>
                     </tr>
                     <!-- Product Limit -->
@@ -283,8 +289,42 @@ class admin_settings extends Client
                                 value="<?php echo esc_attr($wldpta_product_limit); ?>" />
                         </td>
                     </tr>
+                    <!-- Clock Start Date -->
+                    <tr>
+                        <th scope="row">Clock Start Date</th>
+                        <td>
+                            <input type="datetime-local" name="pta_clock_start_date"
+                                value="<?php echo esc_attr($pta_clock_start_date); ?>"
+                                min="<?php echo date('Y-m-d\TH:i'); ?>" />
+                        </td>
+                    </tr>
+                    <!-- Clock End Date -->
+                    <tr>
+                        <th scope="row">Clock End Date</th>
+                        <td>
+                            <input type="datetime-local" name="pta_clock_end_date"
+                                value="<?php echo esc_attr($pta_clock_end_date); ?>" min="<?php echo date('Y-m-d\TH:i'); ?>" />
+                        </td>
+                        <!-- Percentage Prize Total -->
+                    <tr>
+                        <th scope="row">Percentage Of Profits Displayed As Prize Total</th>
+                        <td>
+                            <input type="number" name="pta_percentage_prize_total"
+                                value="<?php echo esc_attr($pta_percentage_prize_total); ?>" max="100" />%
+                        </td>
+                    </tr>
 
                 </table>
+                <script>
+                    function toggleVisibility() {
+                        var x = document.getElementById("pta_github_fg_token");
+                        if (x.type === "password") {
+                            x.type = "text";
+                        } else {
+                            x.type = "password";
+                        }
+                    }
+                </script>
                 <?php submit_button(); ?>
             </form>
         </div>
