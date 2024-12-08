@@ -94,6 +94,13 @@ class Enqueue implements PTAEnqueueInterface
       ver: '1.0.0',
       args: true
     );
+    wp_enqueue_script(
+      handle: 'pta-api-v2',
+      src: plugins_url(path: 'portals-to-adventure/assets/public/js/api-v2.js'),
+      deps: ['jquery'],
+      ver: '1.0.0',
+      args: true
+    );
 
     /* Woocommerce */
     if (class_exists(class: 'WooCommerce')) {

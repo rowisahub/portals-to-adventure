@@ -1,7 +1,9 @@
 var PTA_API = (function ($) {
 
+    // Get 
     async function getSubmissions() {
         try {
+
             const data = await $.ajax({
                 url: pta_api_data.apiv2_url + 'submission',
                 method: 'GET',
@@ -9,7 +11,13 @@ var PTA_API = (function ($) {
                     xhr.setRequestHeader('X-WP-Nonce', pta_api_data.nonce);
                 }
             });
-            return data;
+
+            if(checkSubmissionResponse(data)) {
+                return data.submissions;
+            } else {
+                throw new Error('Invalid response from API');
+            }
+
         } catch (error) {
             console.error('Error fetching submissions:', error);
             throw error;
@@ -17,9 +25,16 @@ var PTA_API = (function ($) {
     }
 
     function checkSubmissionResponse(response) {
-        // che
+        // check if response has `submissions` and `errors` properties
+        if (!response.hasOwnProperty('submissions') || !response.hasOwnProperty('errors')) {
+            return false;
+        }
+
+        return true;
     }
 
-    //
+    return {
+        getSubmissions: getSubmissions
+    };
   
 })(jQuery);

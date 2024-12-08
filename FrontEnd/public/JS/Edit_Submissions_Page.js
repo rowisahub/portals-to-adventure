@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     var SelectList = document.getElementById('secret-doors-list');
     var submissions = await WLD_API.getUserSubmissions(pta_api_data.user_id);
 
+    var testSubmissions = await PTA_API.getSubmissions();
+
+    console.log("Test Submissions:");
+    console.log(testSubmissions);
+
     // only show submissions that are 'In Progress', 'Rejected'
     submissions = submissions.filter(function (submission) {
       return submission.state === 'In Progress' || submission.state === 'Rejected';

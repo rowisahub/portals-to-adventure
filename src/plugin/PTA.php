@@ -20,6 +20,7 @@ use PTA\Update\Plugin_Updater;
 use PTA\shortcodes\Shortcodes;
 use PTA\API\AJAX;
 use PTA\API\REST;
+use PTA\API\Restv2;
 use PTA\admin\admin_settings;
 
 /**
@@ -64,6 +65,8 @@ class PTA
     /* API */
     $this->rest = new REST();
     $this->ajax = new AJAX();
+
+    $rest_v2 = new Restv2();
 
     /* Admin */
     $this->admin = new admin_settings();

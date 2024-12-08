@@ -40,7 +40,7 @@ class Restv2 extends Client
     register_rest_route('pta/v2', '/submission', array(
       'methods' => 'GET',
       'callback' => array($this, 'submission_get'),
-      'permission_callback' => array($this, 'check_permissions'),
+      'permission_callback' => [$this, 'check_permissions'],
     ));
 
     /* This is the route for editing submissions */
@@ -101,6 +101,16 @@ class Restv2 extends Client
       }
     }
 
+    if(isset($params['limit'])){
+      $limit = sanitize_text_field($params['limit']);
+
+      if(!is_numeric($limit)){
+        $errors[] = new \WP_Error('invalid_limit', 'Limit must be a number.', array('status' => 400));
+      }
+
+      $submissions = array_slice($submissions, 0, $limit);
+    }
+
     $this->remove_duplicate_submissions($submissions);
 
     // End of Get Submissions
@@ -132,7 +142,7 @@ class Restv2 extends Client
     $params = $request->get_params();
   }
 
-  protected function check_permissions(\WP_REST_Request $request)
+  public function check_permissions(\WP_REST_Request $request)
   {
     /* Nonce check */
     $nonce = $request->get_header('X-WP-Nonce');
