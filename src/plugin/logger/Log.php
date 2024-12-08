@@ -69,9 +69,9 @@ class Log implements PTALogInterface
     // use upload directory for logs and add .htaccess file to prevent access
     $this->upload_dir = wp_upload_dir();
 
-    $this->logPath = $this->upload_dir['basedir'] . "/pta/logs/{$path}";
+    $this->logPath = $this->upload_dir['basedir'] . "/portals_to_adventure-uploads/logs/{$path}";
 
-    $this->logDir = $this->upload_dir['basedir'] . "/pta/logs";
+    $this->logDir = $this->upload_dir['basedir'] . "/portals_to_adventure-uploads/logs";
 
 
     $createLogRes = $this->createLogDir();
@@ -98,12 +98,16 @@ class Log implements PTALogInterface
   {
     if (!file_exists($this->logDir)) {
       mkdir($this->logDir, 0755, true);
-      file_put_contents($this->logDir . '/.htaccess', $this->htaccess_content());
     }
 
     if (!is_writable($this->logDir)) {
       return false;
     }
+
+    // check if the .htaccess file exists
+    // if (!file_exists($this->logDir . '/.htaccess')) {
+    //   file_put_contents($this->logDir . '/.htaccess', $this->htaccess_content());
+    // }
 
     return true;
   }
