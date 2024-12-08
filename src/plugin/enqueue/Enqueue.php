@@ -125,6 +125,7 @@ class Enqueue implements PTAEnqueueInterface
     // API
     $api_data = array(
       'api_url' => home_url(path: '/wp-json/pta/v1/'),
+      'apiv2_url' => home_url(path: '/wp-json/pta/v2/'),
       'nonce' => wp_create_nonce(action: 'wp_rest'),
       'user_id' => is_user_logged_in() ? get_current_user_id() : 0,
       'user_admin' => is_user_logged_in() ? current_user_can(capability: 'administrator') : false,

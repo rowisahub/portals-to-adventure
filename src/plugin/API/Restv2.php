@@ -62,7 +62,6 @@ class Restv2 extends Client
   public function submission_get(\WP_REST_Request $request)
   {
     $user = wp_get_current_user();
-    $user_primary_role = $this->get_user_role($user);
 
     $params = $request->get_params();
 
@@ -106,7 +105,7 @@ class Restv2 extends Client
 
     // End of Get Submissions
     foreach ($submissions as $key => $submission) {
-      $submissions[$key] = $this->format_response($submission);
+      $submissions[$key] = $this->format_submission($submission, $user);
     }
 
     $return_data = [
@@ -207,6 +206,13 @@ class Restv2 extends Client
     
   }
 
+  /**
+   * Check the permissions of a user for a specific submission.
+   *
+   * @param \WP_User $user The user object whose permissions are being checked.
+   * @param mixed $submission The submission object or data that the user is attempting to access.
+   * @return bool True if the user has the necessary permissions, false otherwise.
+   */
   protected function check_sub_perms($user, $submission)
   {
     $user_primary_role = $this->get_user_role($user);
@@ -228,6 +234,14 @@ class Restv2 extends Client
     return false;
   }
 
+  /**
+   * Checks if a submission exists and if the user has the necessary permissions to view it.
+   * 
+   * @param int $id The ID of the submission to check.
+   * @param \WP_User $user The user object whose permissions are being checked.
+   * @param array &$errors An array of errors to which any errors will be added.
+   * @return bool True if the submission exists and the user has the necessary permissions, false otherwise.
+   */
   private function check_sub_exists($id, $user, &$errors)
   {
     $limitSubmission = $this->get_limitedInfo_submission_by_id($id)[0];
@@ -244,6 +258,12 @@ class Restv2 extends Client
     return true;
   }
 
+  /**
+   * Retrieves limited information about a submission by its ID.
+   *
+   * @param int $id The ID of the submission.
+   * @return array The limited information of the submission.
+   */
   private function get_limitedInfo_submission_by_id($id){
     // make query to get submission by id state and user_owner_id
     $queryBuilder = new QueryBuilder($this->db_handler_instance->get_wpdb());
@@ -257,6 +277,12 @@ class Restv2 extends Client
 
   }
 
+  /**
+   * Retrieve the role of a given user.
+   *
+   * @param \WP_User $user The user object whose role is to be retrieved.
+   * @return string|\WP_Error The role of the user or a WP_Error object if the user is invalid.
+   */
   protected function get_user_role($user)
   {
     if (!($user instanceof \WP_User)) {
@@ -274,10 +300,103 @@ class Restv2 extends Client
     return $user_primary_role;
   }
 
-  protected function format_response($submission)
-  {
-    //return new \WP_REST_Response($data, 200);
-    return 'Test';
+  /**
+   * Formats the submission data.
+   *
+   * @param array $submission The submission data to format.
+   * @param \WP_User $user The user associated with the submission.
+   * @return array The formatted submission data.
+   */
+  private function format_submission($submission, $user){
+    $formated_images = $this->format_image($submission);
+    $thumbnail_url = $formated_images['thumbnail_url'];
+    $map_url = $formated_images['map_url'];
+    $imagesShare = $formated_images['images'];
+
+    // Title and description are unescaped
+    $title = wp_unslash($submission['title']);
+    $description = wp_unslash($submission['description']);
+
+    $userpta = $this->user_functions->get_user_by_id($submission['user_owner_id'])[0];
+    $username = $userpta['username'];
+
+    $submission_api_base = [
+      'id' => $submission['id'],
+      'title' => $title,
+      'description' => $description,
+      'video_link' => $submission['video_link'],
+      'state' => $submission['state'],
+      'views' => $submission['views'],
+      'likes' => $submission['likes_votes'],
+      'user_id' => $submission['user_owner_id'],
+      'user_name' => $username,
+      'created_at' => $submission['created_at'],
+      'images' => $imagesShare,
+      'thumbnail_url' => $thumbnail_url,
+      'map_url' => $map_url
+    ];
+
+    $user_primary_role = $this->get_user_role($user);
+
+    // check if user is an admin editor or the owner of the submission
+    if($user_primary_role === self::ADMIN || $user_primary_role === self::EDITOR || $submission['user_owner_id'] === $user->ID){
+      $submission_api_base['removed_reason'] = $submission['removed_reason'];
+      $submission_api_base['is_removed'] = $submission['is_removed'] == 1;
+      $submission_api_base['is_rejected'] = $submission['is_rejected'] == 1;
+      $submission_api_base['rejected_reason'] = $submission['rejected_reason'];
+    }
+
+    // check if user is an admin or editor
+    if($user_primary_role === self::ADMIN || $user_primary_role === self::EDITOR){
+      $submission_api_base['was_rejected'] = $submission['was_rejected'] == 1;
+    }
+
+    return $submission_api_base;
+  }
+
+  /**
+   * Formats the image data from the given submission.
+   *
+   * @param array $submission The submission data containing image information.
+   * @return array The formatted image data.
+   */
+  private function format_image($submission){
+    $image_ids = json_decode($submission['image_uploads']);
+
+    $images = [];
+
+    $thumbnail_url = '';
+    $map_url = '';
+
+    foreach ($image_ids as $image_id) {
+      $image = $this->image_functions->get_image_data($image_id)[0];
+
+      if(!$image){
+        continue;
+      }
+
+      if($image['is_thumbnail'] == 1){
+        $thumbnail_url = $image['image_reference'];
+      }
+      if($image['is_map'] == 1){
+        $map_url = $image['image_reference'];
+      }
+
+      $images[] = [
+        'id' => $image['image_id'],
+        'image_url' => $image['image_reference'],
+        'is_thumbnail' => $image['is_thumbnail'] == 1,
+        'is_map' => $image['is_map'] == 1,
+        'imageData' => $image
+      ];
+    }
+
+    return [
+      'images' => $images,
+      'thumbnail_url' => $thumbnail_url,
+      'map_url' => $map_url
+    ];
+    
   }
 
     /* Constants */
