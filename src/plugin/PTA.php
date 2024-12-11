@@ -120,6 +120,11 @@ class PTA
 
   }
 
+  public function register_activation($plugin_file)
+  {
+    $this->dbHandler->register_activation($plugin_file);
+  }
+
   public function get_instance($name)
   {
     switch ($name) {

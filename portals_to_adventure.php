@@ -28,10 +28,13 @@ try{
     /* Load the Composer autoload file */
     require_once __DIR__ . '/vendor/autoload.php';
 
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
     /* Start the plugin */
     try {
       $PTA = new PTA();
       $PTA->init();
+      $PTA->register_activation(__FILE__);
     } catch (\Exception $e) {
       add_action('admin_notices', function () use ($e) {
         ?>

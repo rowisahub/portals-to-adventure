@@ -84,7 +84,7 @@ class db_handler implements DBHandlerInterface
 
   public function init()
   {
-    $this->register_activation();
+    //$this->register_activation();
     //$this->logger = $this->logger->getLogger();
 
     $this->update->init();
@@ -92,13 +92,11 @@ class db_handler implements DBHandlerInterface
     $this->functions->init(handler_instance: $this, wpdbIn: $this->wpdb);
   }
 
-  public function register_activation()
+  public function register_activation($plugin_file)
   {
-    // check if PTA_PLUGIN_DIR is defined
-    if (!defined('PTA_PLUGIN_DIR')) {
-      return;
-    }
-    register_activation_hook(PTA_PLUGIN_DIR, [$this, 'plugin_activation']);
+    //$this->logger->info('Registering activation hook');
+
+    register_activation_hook($plugin_file, [$this, 'plugin_activation']);
   }
 
   public function get_instance($name)
@@ -147,6 +145,8 @@ class db_handler implements DBHandlerInterface
 
   public function plugin_activation()
   {
+    $this->logger->info('Plugin activated, running activation hook');
+
     $ifSuccess = false;
     foreach ($this->db_tables as $table) {
       $res = $table->create_table();
