@@ -21,7 +21,6 @@ class db_functions
   private $handler_instance;
   private $logger;
   private $wpdb;
-  private $cache;
   private $db_tables;
 
   public function __construct()
@@ -134,9 +133,32 @@ class db_functions
    * @param string $output_type The type of output to return. Defaults to ARRAY_A. Example: OBJECT or ARRAY_N
    * @return mixed The data retrieved from the database.
    */
-  public function exe_from_builder(QueryBuilder $query_builder, $output_type = ARRAY_A)
+  public function exe_from_builder(QueryBuilder $query_builder, $use_cache = false, $cache_group_name = 'db', $output_type = ARRAY_A)
   {
     $queryBuilderSQL = $query_builder->get_sql();
+
+    /* Caching */
+    if($use_cache){
+      $cache_key = 'qb_' . md5($queryBuilderSQL . $output_type);
+
+      $grounp_name = "pta_" . $cache_group_name;
+
+      $cache_result = wp_cache_get(key: $cache_key, group: $grounp_name);
+
+      if($cache_result === false){
+        
+        $results = $this->wpdb->get_results($queryBuilderSQL, $output_type);
+
+        if($results){
+          wp_cache_set(key: $cache_key, data: $results, group: $grounp_name);
+        }
+      }
+
+      return $cache_result;
+
+    }
+
+    
 
     //$this->logger->debug("Query Builder SQL:");
     //$this->logger->debug($queryBuilderSQL);
@@ -223,4 +245,6 @@ class db_functions
   {
     return $this->wpdb;
   }
+
+  
 }

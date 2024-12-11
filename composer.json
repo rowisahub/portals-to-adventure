@@ -3,7 +3,8 @@
     "autoload": {
         "psr-4": {
             "PTA\\": "src/plugin",
-            "PTA\\interfaces\\": "src/interfaces"
+            "PTA\\interfaces\\": "src/interfaces",
+            "PTA\\docs\\": "docs"
         }
     },
     "autoload-dev": {
@@ -13,7 +14,8 @@
     },
     "require": {
         "google/apiclient": "^2.18",
-        "monolog/monolog": "^3.7"
+        "monolog/monolog": "^3.7",
+        "zircote/swagger-php": "^4.0"
     },
     "scripts": {
         "pre-autoload-dump": "Google\\Task\\Composer::cleanup"

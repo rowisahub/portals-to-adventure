@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\client\Client;
+use OpenApi\Annotations as OA;
 
 /* Requires MOVE LATER */
 use PTA\DB\QueryBuilder;
@@ -57,8 +58,27 @@ class Restv2 extends Client
       'permission_callback' => [$this, 'check_permissions'],
     ));
 
+    /* OpenAPI swagger json */
+    register_rest_route('pta/v2', '/docs', array(
+      'methods' => 'GET',
+      'callback' => [$this, 'get_openapi_json'],
+      'permission_callback' => __return_true(),
+    ));
+
   }
 
+  public function get_openapi_json()
+  {
+    $swag_json = file_get_contents('bitnami/wordpress/wp-content/plugins/portals-to-adventure/docs/openapi.json');
+    return new \WP_REST_Response($swag_json, 200);
+  }
+
+  /**
+   * Retrieves the submission data based on the provided parameters.
+   * 
+   * @param \WP_REST_Request $request The request object containing the parameters.
+   * @return \WP_REST_Response The response object containing the submission data.
+  */
   public function submission_get(\WP_REST_Request $request)
   {
     $user = wp_get_current_user();
@@ -108,7 +128,12 @@ class Restv2 extends Client
         $errors[] = new \WP_Error('invalid_limit', 'Limit must be a number.', array('status' => 400));
       }
 
-      $submissions = array_slice($submissions, 0, $limit);
+      // $submissions = array_slice($submissions, 0, $limit);
+    }
+
+    // if no parameters are provided, exepct for limit, get all submissions
+    if (empty($submissions)) {
+      $submissions = $this->submission_functions->get_all_submissions_by_state('Approved');
     }
 
     $this->remove_duplicate_submissions($submissions);
@@ -140,6 +165,94 @@ class Restv2 extends Client
     $user_primary_role = $this->get_user_role($user);
 
     $params = $request->get_params();
+
+    if(empty($params['action'])){
+      return new \WP_Error('no_action', 'No action provided.', array('status' => 400));
+    }
+
+    $action = $params['action'];
+    $submission_ids = $params['id'];
+    $reason = $params['reason'];
+
+    $errors = [];
+
+
+    // check if there are multiple ids, both ways should return an array
+    $submission_ids = $this->get_id_from_params(params: $params, id_name: 'id', user: $user, errors: $errors, check_public: false);
+
+    if(empty($submission_ids)){
+      return rest_ensure_response([
+        'message' => 'No submissions found.',
+        'code' => 'no_submissions',
+        'data' => [
+          'action' => $action,
+          'reason' => $reason,
+          'errors' => $errors
+        ]
+      ]);
+    }
+
+    foreach($submission_ids as $submission_id){
+      
+      switch ($action) {
+        case 'approve':
+          $this->admin_functions->approve_submission($submission_id);
+          break;
+        case 'reject':
+          $this->admin_functions->reject_submission($submission_id, $reason);
+          break;
+        case 'delete':
+          $this->admin_functions->delete_submission($submission_id, $reason);
+          break;
+        case 'unreject':
+          $this->admin_functions->unreject_submission($submission_id);
+          break;
+        default:
+          $errors[] = new \WP_Error('invalid_action', 'Invalid action provided.', array('status' => 400));
+          break;
+      }
+
+    }
+
+    if(!empty($errors)){
+      // all submissions failed
+      if(count($errors) == count($submission_ids)){
+        return rest_ensure_response([
+          'message' => 'All submissions actions failed.',
+          'code' => 'failed_action',
+          'data' => [
+            'action' => $action,
+            'reason' => $reason,
+            'errors' => $errors
+          ]
+        ]);
+      }
+
+      // some submissions failed
+      if(count($errors) < count($submission_ids)){
+        return rest_ensure_response([
+          'message' => 'Some submissions actions failed.',
+          'code' => 'failed_action',
+          'data' => [
+            'action' => $action,
+            'reason' => $reason,
+            'errors' => $errors
+          ]
+        ]);
+      }
+    }
+
+    return rest_ensure_response([
+      'message' => 'All submissions actions were successful.',
+      'code' => 'success_action',
+      'data' => [
+        'action' => $action,
+        'reason' => $reason,
+        'errors' => $errors
+      ]
+    ]);
+   
+
   }
 
   public function check_permissions(\WP_REST_Request $request)
@@ -181,7 +294,7 @@ class Restv2 extends Client
    * @param array $params The parameters from which to extract the ID.
    * @return array|null The extracted ID if found, otherwise null.
    */
-  protected function get_id_from_params($params, $id_name, $user, &$errors)
+  protected function get_id_from_params($params, $id_name, $user, &$errors, $check_public = true)
   {
     $ids = sanitize_text_field($params[$id_name]);
 
@@ -199,7 +312,7 @@ class Restv2 extends Client
 
       foreach ($submission_ids as $id) {
 
-        if ($this->check_sub_exists($id, $user, $errors)) {
+        if ($this->check_sub_exists(id: $id, user: $user, errors: $errors, check_public: $check_public)) {
           $submissions_ids[] = $id;
         }
         
@@ -207,7 +320,7 @@ class Restv2 extends Client
       
     } else { // Only one id
 
-      if ($this->check_sub_exists($ids, $user, $errors)) {
+      if ($this->check_sub_exists(id: $ids, user: $user, errors: $errors, check_public: $check_public)) {
         $submissions_ids[] = $ids;
       }
     }
@@ -223,7 +336,7 @@ class Restv2 extends Client
    * @param mixed $submission The submission object or data that the user is attempting to access.
    * @return bool True if the user has the necessary permissions, false otherwise.
    */
-  protected function check_sub_perms($user, $submission)
+  protected function check_sub_perms($user, $submission, $check_public = true)
   {
     $user_primary_role = $this->get_user_role($user);
 
@@ -235,7 +348,11 @@ class Restv2 extends Client
         $user_primary_role === self::EDITOR
       )
       ||
-      $submission['state'] === 'Approved'
+      (
+        $check_public
+        &&
+        $submission['state'] === 'Approved'
+      )
       ||
       $submission['user_owner_id'] === $user->ID
     ) {
@@ -252,7 +369,7 @@ class Restv2 extends Client
    * @param array &$errors An array of errors to which any errors will be added.
    * @return bool True if the submission exists and the user has the necessary permissions, false otherwise.
    */
-  private function check_sub_exists($id, $user, &$errors)
+  private function check_sub_exists($id, $user, &$errors, $check_perms = true, $check_public = true)
   {
     $limitSubmission = $this->get_limitedInfo_submission_by_id($id)[0];
     if(!$limitSubmission){
@@ -260,9 +377,13 @@ class Restv2 extends Client
       return false;
     }
 
-    if(!$this->check_sub_perms($user, $limitSubmission)){
-      $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $id));
-      return false;
+    if($check_perms){
+
+      if(!$this->check_sub_perms($user, $limitSubmission, $check_public)){
+        $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $id));
+        return false;
+      }
+
     }
 
     return true;

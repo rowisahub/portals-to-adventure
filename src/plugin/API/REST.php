@@ -232,7 +232,9 @@ class REST
         return new \WP_Error('invalid_user_id', 'Invalid user ID', array('status' => 400));
       }
 
-      $submissions = $this->submission_func->get_submissions_by_user($user_id);
+      $submissions[] = $this->submission_func->get_submissions_by_user($user_id);
+
+      
 
     } else if (isset($params['requested'])) {
       // Get all submisssions exept the ones that are removed
@@ -241,14 +243,14 @@ class REST
         return new \WP_Error('forbidden', 'You do not have permission to view this submission', array('status' => 403));
       }
 
-      $submissions = $this->submission_func->get_all_submissions();
+      $submissions[] = $this->submission_func->get_all_submissions();
 
 
     } else if (isset($params['state'])) {
       $state = $params['state'];
 
       if ($state == 'Approved') {
-        $submissions = $this->submission_func->get_all_submissions_by_state($state);
+        $submissions[] = $this->submission_func->get_all_submissions_by_state($state);
       } else {
         return new \WP_Error('invalid_state', 'Invalid state', array('status' => 400));
       }
@@ -265,7 +267,7 @@ class REST
 
       // Combine and remove duplicates
       $all_submissions = array_merge($public_submissions, $user_submissions);
-      $submissions = $this->remove_duplicate_submissions($all_submissions);
+      $submissions[] = $this->remove_duplicate_submissions($all_submissions);
     }
 
     // Add full image data if requested
@@ -278,6 +280,10 @@ class REST
     //     $submissions[$key]['image_uploads'] = get_submission_images($submission['id']);
     //   }
     // }
+
+    if(empty($submissions)){
+      return rest_ensure_response('submissions is empty');
+    }
 
     //error_log($submission['image_uploads']);
     // Format the submissions
