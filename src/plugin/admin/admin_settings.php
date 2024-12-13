@@ -7,8 +7,6 @@ if (!defined('ABSPATH')) {
 }
 
 /* Requires */
-use PTA\admin\admin_functions;
-use PTA\logger\Log;
 use PTA\client\Client;
 
 /**
@@ -415,8 +413,11 @@ class admin_settings extends Client
             $submissions = $this->submission_functions->get_all_submissions();
         } else {
             //$submissions = get_all_submissions_by_state($status_filter);
-            $submissions = $this->submission_functions->get_all_submissions_by_state($status_filter);
+            $submissions = $this->submission_functions->get_all_submissions_by_state(state: $status_filter);
         }
+
+        $this->logger->debug('Status filter: ' . $status_filter);
+        $this->logger->debug('Submissions: ' . print_r($submissions, true));
 
         ?>
         <div class="wrap">
