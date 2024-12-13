@@ -108,7 +108,7 @@ class user_functions
       ->from($this->table_path)
       ->where(['id' => $user_id]);
 
-    $result = $this->db_functions->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
     if ($perm != null) {
       return $result['permissions'][$perm];
@@ -199,7 +199,7 @@ class user_functions
     //$this->logger->debug('Query: ' . $queryBuilder->get_sql());
 
     // return the count of submissions
-    $result = $this->db_functions->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
     //$this->logger->debug('Result: ' . print_r($result, true));
 

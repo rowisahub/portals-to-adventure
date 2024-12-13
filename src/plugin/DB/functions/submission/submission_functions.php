@@ -88,7 +88,7 @@ class submission_functions
       ->from($this->table_path)
       ->where(['id' => $submission_id]);
 
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   public function get_submissions_by_user($user_id, $output_type = 'ARRAY_A')
@@ -98,7 +98,7 @@ class submission_functions
       ->from($this->table_path)
       ->where(['user_owner_id' => $user_id]);
 
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   public function get_submission_ids_by_user($user_id)
@@ -108,7 +108,7 @@ class submission_functions
       ->from($this->table_path)
       ->where(['user_owner_id' => $user_id]);
 
-    return $this->db_functions->exe_from_builder($queryBuilder, 'ARRAY_N');
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: 'ARRAY_N');
   }
 
   public function get_submission_value($submission_id, $key)
@@ -118,7 +118,7 @@ class submission_functions
       ->from($this->table_path)
       ->where(['id' => $submission_id]);
 
-    $result = $this->db_functions->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
     return $result[$key] ?? null;
   }
@@ -136,7 +136,7 @@ class submission_functions
     $queryBuilder->from($this->table_path)
       ->where(['state' => $state]);
 
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   public function get_all_submissions_by_state($state, $numOfSubmissions = 10, $output_type = 'ARRAY_A')
@@ -147,7 +147,7 @@ class submission_functions
       ->where(['state' => $state])
       ->limit($numOfSubmissions);
 
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   public function get_all_submissions($output_type = 'ARRAY_A')
@@ -158,7 +158,7 @@ class submission_functions
 
       //$this->logger->debug('Query: ' . $queryBuilder->get_sql());
 
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   public function remove_submission($submission_id, $message = 'Submission Removed By User')

@@ -54,7 +54,7 @@ class image_functions{
                  ->from($this->table_path)
                  ->where(['image_id' => $image_id]);
     
-    return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
   function add_images($user_owner_id, $submission_id, $imageURL, $is_thumbnail = 0, $is_map = 0) {
@@ -94,7 +94,7 @@ class image_functions{
                  ->from($this->table_path)
                  ->where(['image_id' => $image_id]);
     
-    $result = $this->db_functions->exe_from_builder($queryBuilder);
+    $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
     if ($result === null) {
       return null;
