@@ -119,8 +119,10 @@ class Shortcodes
       }
 
       // Fetch user-specific data
-      $in_progress_submissions = $this->submission_func->get_submission_by_state($user_id, 'In Progress');
-      $approved_submissions = $this->submission_func->get_submission_by_state($user_id, 'Approved');
+      $in_progress_submissions = $this->submission_func->get_all_submissions_by_state('In Progress', 5, $user_id);
+      $approved_submissions = $this->submission_func->get_all_submissions_by_state('Approved', 5, $user_id);
+
+      //$this->logger->debug('In Progress Submissions: ' . print_r($in_progress_submissions, true));
 
       $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 

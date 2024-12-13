@@ -157,13 +157,22 @@ class user_functions
   // @return int The number of submissions made by the user within the specified time period.
   function get_user_submissions_in_time_period($user_id, $time_period = null)
   {
+    //$this->logger->debug('time period: ' . $time_period);
     if ($time_period == null) {
       /* Get time period from options */
       $pta_number_of_submissions_per_time_period = get_option('pta_number_of_submissions_per_time_period', 1);
+
       $pta_time_period = get_option('pta_time_period', 'days');
+      
+
+      if(!is_numeric($pta_number_of_submissions_per_time_period)){
+        $this->logger->error('Number of submissions per time period is not a number: ' . $pta_number_of_submissions_per_time_period);
+        return false;
+      }
 
       $time_period = $pta_number_of_submissions_per_time_period . ' ' . $pta_time_period;
     }
+    //$this->logger->debug('time period: ' . $time_period);
 
     // filter if $time_period is in hours or days
     if (strpos($time_period, 'day') !== false || strpos($time_period, 'days') !== false) {
@@ -183,6 +192,8 @@ class user_functions
       return false;
     }
 
+    //$this->logger->debug('time period: ' . $time_period);
+
     /* Make the query */
     $queryBuilder = new QueryBuilder(wpdb: $this->wpdb);
 
@@ -201,8 +212,6 @@ class user_functions
     // return the count of submissions
     $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
-    //$this->logger->debug('Result: ' . print_r($result, true));
-
     return $result;
 
   }
@@ -218,12 +227,20 @@ class user_functions
   {
     $result = $this->get_user_submissions_in_time_period($user_id, $time_period);
 
+    $pta_number_of_submissions_per_time_period = get_option('pta_number_of_submissions_per_time_period', 1);
+    if(!is_numeric($pta_number_of_submissions_per_time_period)){
+      $this->logger->error('Number of submissions per time period is not a number: ' . $pta_number_of_submissions_per_time_period);
+      return null;
+    }
+
     if ($result === false) {
       $this->logger->error('Error getting user submissions in time period');
       return null;
     }
 
-    if (count($result) > 0) {
+    $this->logger->debug('Number of submissions: ' . count($result));
+
+    if (count($result) > $pta_number_of_submissions_per_time_period) {
       return true;
     }
 

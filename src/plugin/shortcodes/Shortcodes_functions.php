@@ -38,8 +38,8 @@ class Shortcodes_functions
         db_functions $db_functions = null
     ) {
         /* Logger */
-        $this->logger = new Log(name: 'Shortcodes');
-        $this->logger = $this->logger->getLogger();
+        $inlog = new Log(name: 'Shortcodes');
+        $this->logger = $inlog->getLogger();
 
         /* Get the handler instance and db functions instance */
         $this->handler_instance = $handler_instance ?? new db_handler();
@@ -129,7 +129,10 @@ class Shortcodes_functions
                 // user has already submitted a door today
                 // redirect to the user submissions page
 
-                $this->logger->info('User has already submitted a door today', array('username' => $user->display_name));
+                // log what the instance for logger is
+                //error_log('Logger instance: ' . print_r($this->logger, true));
+
+                $this->logger->debug('User has already submitted a door today', array('username' => $user->display_name));
 
                 wp_redirect(home_url('/my-in-progress-secret-doors/?submitted_today=true'));
                 return;
