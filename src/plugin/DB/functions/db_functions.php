@@ -163,6 +163,8 @@ class db_functions
     //$this->logger->debug("Query Builder SQL:");
     //$this->logger->debug($queryBuilderSQL);
 
+    //$this->logger->debug("SQL: " . $queryBuilderSQL);
+
     $results = $this->wpdb->get_results($queryBuilderSQL, $output_type);
 
     //$this->logger->debug("Results:");

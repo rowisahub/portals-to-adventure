@@ -18,27 +18,7 @@ class admin_settings extends Client
 {
     public function __construct()
     {
-        parent::__construct("Admin Settings");
-    }
-
-    public function init(
-        $sub_functions = null,
-        $img_functions = null,
-        $user_functions = null,
-        $handler_instance = null,
-        $db_functions = null,
-        $admin_functions = null
-    ) {
-        parent::init(
-            sub_functions: $sub_functions,
-            img_functions: $img_functions,
-            user_functions: $user_functions,
-            handler_instance: $handler_instance,
-            db_functions: $db_functions,
-            admin_functions: $admin_functions
-        );
-
-        $this->register_hooks();
+        parent::__construct("Admin Settings", $this->register_hooks());
     }
 
     public function register_hooks()
@@ -426,6 +406,8 @@ class admin_settings extends Client
         $status_filter = isset($_GET['status_filter']) ? sanitize_text_field($_GET['status_filter']) : 'All';
 
         //error_log('Status filter: ' . $status_filter);
+
+        //$this->logger->debug('Status filter: ' . $status_filter);
 
         // Retrieve submissions based on filter
         if ($status_filter == 'All') {

@@ -80,15 +80,7 @@ class REST
     $this->user_func = $user_functions ?? new user_functions(handler_instance: $this->handler_instance, db_functions: $this->db_functions);
 
     // Set the functions instances for the admin functions
-    $this->admin_func = $admin_functions ?? new admin_functions();
-
-    $this->admin_func->init(
-      sub_functions: $this->submission_func,
-      img_functions: $this->image_func,
-      user_functions: $this->user_func,
-      handler_instance: $this->handler_instance,
-      db_functions: $this->db_functions
-    );
+    $this->admin_func = $admin_functions ?? new admin_functions(submission_functions: $this->submission_func);
 
     add_action('rest_api_init', array($this, 'register_routes'));
   }
@@ -141,7 +133,7 @@ class REST
         $this->logger->debug('Approve submission');
 
         if (!current_user_can('administrator')) {
-          error_log('User is not admin');
+          //error_log('User is not admin');
           return new \WP_Error('forbidden', 'You do not have permission to use action', array('status' => 403));
         }
 
@@ -152,7 +144,7 @@ class REST
         $this->logger->debug('Reject submission');
 
         if (!current_user_can('administrator')) {
-          error_log('User is not admin');
+          //error_log('User is not admin');
           return new \WP_Error('forbidden', 'You do not have permission to use action', array('status' => 403));
         }
 

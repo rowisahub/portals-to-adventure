@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   submissionChanges();
   try {
     var SelectList = document.getElementById('secret-doors-list');
-    var submissions = await WLD_API.getUserSubmissions(pta_api_data.user_id);
+    var submissions = await PTA_API.getUserSubmissions(pta_api_data.user_id);
 
     // var testSubmissions = await PTA_API.getSubmissions();
 

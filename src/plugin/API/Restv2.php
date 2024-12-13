@@ -25,18 +25,20 @@ class Restv2 extends Client
 
   public function __construct()
   {
-    parent::__construct(LogName: "API", callback_after_init: $this->register_hooks());
+    parent::__construct(LogName: "APIv2", callback_after_init: $this->register_hooks());
   }
 
   /* init function is here, the `callback_function` runs that funciton after init is ran */
 
   public function register_hooks()
   {
+    //error_log('API Hooks Registered');
     add_action('rest_api_init', array($this, 'register_routes'));
   }
 
   public function register_routes()
   {
+    //error_log('API Routes Registered');
     /* This is the route for getting submissions */
     register_rest_route('pta/v2', '/submission', array(
       'methods' => 'GET',
@@ -57,14 +59,6 @@ class Restv2 extends Client
       'callback' => [$this, 'submission_action'],
       'permission_callback' => [$this, 'check_permissions'],
     ));
-
-    /* OpenAPI swagger json */
-    register_rest_route('pta/v2', '/docs', array(
-      'methods' => 'GET',
-      'callback' => [$this, 'get_openapi_json'],
-      'permission_callback' => __return_true(),
-    ));
-
   }
 
   public function get_openapi_json()

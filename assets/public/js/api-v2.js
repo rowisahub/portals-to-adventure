@@ -137,7 +137,10 @@ var PTA_API = (function ($) {
     }
 
     return {
-        getSubmissions: getSubmissions
+        getSubmissions: getSubmissions,
+        getSubmissionDetails: getSubmissionDetails,
+        getUserSubmissions: getUserSubmissions,
+        getApprovedSubmissions: getApprovedSubmissions
     };
   
 })(jQuery);

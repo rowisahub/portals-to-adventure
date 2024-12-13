@@ -166,11 +166,11 @@ class Shortcodes_functions
                         // check if selecedMap had filename + size as value
                         if ($_POST['selecedMap'] == ($file['name'] . '+' . $file['size'])) {
                             $isMapImage = 1;
-                            error_log('Map Image: ' . $file['name']);
+                            //error_log('Map Image: ' . $file['name']);
                         }
                         if ($_POST['selecedThumbnail'] == ($file['name'] . '+' . $file['size'])) {
                             $isThumbnailImage = 1;
-                            error_log('Thumbnail Image: ' . $file['name']);
+                            //error_log('Thumbnail Image: ' . $file['name']);
                         }
 
                         $movefile = wp_handle_upload($file, $upload_overrides);

@@ -22,6 +22,7 @@ use PTA\API\AJAX;
 use PTA\API\REST;
 use PTA\API\Restv2;
 use PTA\admin\admin_settings;
+use PTA\client\Client;
 
 /**
  * Class PTA
@@ -40,7 +41,9 @@ class PTA
   private $shortcodes;
   private $ajax;
   private $rest;
+  private $rest_v2;
   private $admin;
+
 
   public function __construct()
   {
@@ -63,10 +66,10 @@ class PTA
     $this->shortcodes = new Shortcodes();
 
     /* API */
-    $this->rest = new REST();
+    //$this->rest = new REST();
     $this->ajax = new AJAX();
 
-    $rest_v2 = new Restv2();
+    $this->rest_v2 = new Restv2();
 
     /* Admin */
     $this->admin = new admin_settings();
@@ -85,16 +88,25 @@ class PTA
    */
   public function init()
   {
+
+    //error_log(message: 'Portals to Adventure plugin is initializing...');
+
     /* Logger */
     $this->logger = $this->logger->getLogger();
+
+    //error_log(message: 'Got logger');
 
     //$this->logger->info(message: 'Portals to Adventure plugin is initializing...');
 
     /* Enqueue */
     $this->enqueue->add_enqueue_action();
 
+    //error_log(message: 'Added enqueue action');
+
     /* Database Handler */
     $this->dbHandler->init();
+
+    //error_log(message: 'Initialized database handler');
 
     /* Update WIP */
     //$this->update->init();
@@ -102,19 +114,33 @@ class PTA
     /* Shortcodes */
     $this->shortcodes->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
+    //error_log(message: 'Initialized shortcodes');
+
     /* Woocommerce Extension */
     $this->woocommerceExtension->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    /* API */
-    $this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
-    $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
-
+    //error_log(message: 'Initialized Woocommerce Extension');
 
     /* Admin */
     $this->admin->init(
       handler_instance: $this->dbHandler,
       db_functions: $this->dbHandler->get_instance('functions')
     );
+
+    //error_log(message: 'Initialized Admin');
+
+    /* Client */
+
+
+    /* API */
+    //$this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+    $this->rest_v2->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+
+    //error_log(message: 'Initialized REST API');
+
+    $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+
+    //error_log(message: 'Initialized AJAX API');
 
     //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
 

@@ -18,12 +18,15 @@ if (defined(constant_name: 'PTA_PLUGIN_DIR') && strpos(haystack: PTA_PLUGIN_DIR,
   define(constant_name: 'PTA_PLUGIN_URL', value: plugin_dir_url(file: __FILE__) . "portals-to-adventure/");
 }
 
+
 /* Require Class */
 use PTA\PTA;
 
 try{
   /* Autoload classes and start plugin */
   if (file_exists(filename: __DIR__ . '/vendor/autoload.php')) {
+
+    //error_log(message: 'Portals to Adventure plugin is working');
 
     /* Load the Composer autoload file */
     require_once __DIR__ . '/vendor/autoload.php';
@@ -32,6 +35,8 @@ try{
 
     /* Start the plugin */
     try {
+      //error_log(message: 'Portals to Adventure plugin is working');
+      //error_log($_SERVER['REQUEST_URI']);
       $PTA = new PTA();
       $PTA->init();
       $PTA->register_activation(__FILE__);
@@ -54,7 +59,7 @@ try{
       ?>
       <div class="notice notice-error">
         <p>
-          <?php _e('Portals to Adventure plugin is not working Please contact the devs.', 'pta'); ?>
+          <?php _e('Portals to Adventure plugin is not working Please contact the devs. Autoload!', 'pta'); ?>
         </p>
       </div>
       <?php

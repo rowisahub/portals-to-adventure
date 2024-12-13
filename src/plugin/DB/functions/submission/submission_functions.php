@@ -156,6 +156,8 @@ class submission_functions
     $queryBuilder->select('*')
       ->from($this->table_path);
 
+      //$this->logger->debug('Query: ' . $queryBuilder->get_sql());
+
     return $this->db_functions->exe_from_builder($queryBuilder, $output_type);
   }
 

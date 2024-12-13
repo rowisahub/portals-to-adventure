@@ -7,36 +7,37 @@ if (!defined('ABSPATH')) {
 }
 
 /* Requires */
-use PTA\client\Client;
+use PTA\logger\Log;
+use PTA\DB\functions\submission\submission_functions;
 
 
 /**
  * Admin functions class for the plugin.
  */
-class admin_functions extends Client
+class admin_functions
 {
 
-    public function __construct()
-    {
-        parent::__construct("Admin Functions");
-    }
+    private $logger;
+    private $submission_functions;
+    private static $constructed = false;
 
-    public function init(
-        $sub_functions = null,
-        $img_functions = null,
-        $user_functions = null,
-        $handler_instance = null,
-        $db_functions = null,
-        $admin_functions = null
-    ) {
-        parent::init(
-            sub_functions: $sub_functions,
-            img_functions: $img_functions,
-            user_functions: $user_functions,
-            handler_instance: $handler_instance,
-            db_functions: $db_functions,
-            admin_functions: $admin_functions ?? $this
-        );
+    public function __construct(
+        submission_functions $submission_functions = null
+    )
+    {
+        if($submission_functions == null) {
+            throw new \Exception('Submission functions not provided.');
+        }
+
+        if(self::$constructed){
+            return;
+        }
+
+        $this->logger = new Log(name: 'Admin');
+        $this->logger = $this->logger->getLogger();
+        $this->submission_functions = $submission_functions;
+
+        self::$constructed = true;
     }
 
     /**

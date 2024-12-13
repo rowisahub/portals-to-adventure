@@ -33,6 +33,7 @@ if (!defined('ABSPATH')) {
  */
 class Log implements PTALogInterface
 {
+  private static $initialized = [];
   private $logger;
   private $logPath;
   private $logDir;
@@ -49,6 +50,12 @@ class Log implements PTALogInterface
    */
   public function __construct($name = "PTA", $path = 'pta-debug.log', $level = Logger::DEBUG, $ifLogUncaught = false)
   {
+    $classname = static::class . $name;
+
+    if (isset(self::$initialized[$classname]) && self::$initialized[$classname]) {
+      $this->logger = self::$initialized[$classname];
+      return;
+    }
 
     $this->logger = new Logger($name);
 
@@ -82,6 +89,10 @@ class Log implements PTALogInterface
     }
 
     $this->createLog($level, $ifLogUncaught);
+
+    self::$initialized[$classname] = true;
+
+    //$this->logger->debug('Logger initialized');
   }
 
   /**
@@ -117,6 +128,7 @@ class Log implements PTALogInterface
     $handler = new RotatingFileHandler($this->logPath, 7, $level);
     $handler->setFormatter(new LineFormatter(null, null, true, true));
     $this->logger->pushHandler($handler);
+    //$this->logger->pushHandler();
     $this->logger->pushProcessor(new IntrospectionProcessor());
 
     if ($ifLogUncaught) {

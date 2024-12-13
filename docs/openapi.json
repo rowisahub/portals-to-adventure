@@ -7,7 +7,7 @@
     },
     "servers": [
       {
-        "url": "https://example.com/wp-json/pta/v2",
+        "url": "https://dev.portals-to-adventudere.com/wp-json/pta/v2",
         "description": "Production API server"
       }
     ],
@@ -265,51 +265,6 @@
                   }
                 }
               }
-            },
-            "400": {
-              "description": "Bad request"
-            },
-            "403": {
-              "description": "Forbidden"
-            }
-          }
-        },
-        "post": {
-          "summary": "Edit a submission",
-          "description": "Edit submission data. Authentication required.",
-          "security": [
-            {
-              "X-WP-Nonce": []
-            }
-          ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "type": "string"
-                    },
-                    "state": {
-                      "type": "string"
-                    }
-                  },
-                  "required": ["id"]
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Submission successfully edited"
             },
             "400": {
               "description": "Bad request"

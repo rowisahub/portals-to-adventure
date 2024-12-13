@@ -18,6 +18,9 @@ use PTA\admin\admin_functions;
 class Client
 {
     public $logger;
+    private $logname;
+    protected static $constructed = [];
+    protected static $initialized = [];
     protected submission_functions $submission_functions;
     protected image_functions $image_functions;
     protected user_functions $user_functions;
@@ -34,6 +37,9 @@ class Client
      */
     public function __construct($LogName, $callback_after_init = null)
     {
+
+        $this->logname = $LogName;
+
         $this->logger = new Log(name: $LogName);
         $this->callback = $callback_after_init;
     }
@@ -46,6 +52,12 @@ class Client
         db_functions $db_functions = null,
         admin_functions $admin_functions = null
     ) {
+
+        $classname = static::class . $this->logname;
+        if(isset(self::$initialized[$classname]) && self::$initialized[$classname]) {
+            return;
+        }
+
         $this->logger = $this->logger->getLogger();
 
         // Get the handler instance and db functions instance
@@ -65,23 +77,13 @@ class Client
         $this->image_functions = ($img_functions instanceof image_functions) ? $img_functions : new image_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
         $this->user_functions = ($user_functions instanceof user_functions) ? $user_functions : new user_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
 
-        $this->admin_functions = ($admin_functions instanceof admin_functions) ? $admin_functions : new admin_functions();
-
-        if (!($admin_functions instanceof admin_functions)) {
-
-            $this->admin_functions->init(
-                sub_functions: $this->submission_functions,
-                img_functions: $this->image_functions,
-                user_functions: $this->user_functions,
-                handler_instance: $this->db_handler_instance,
-                db_functions: $this->db_functions
-            );
-
-        }
+        $this->admin_functions = ($admin_functions instanceof admin_functions) ? $admin_functions : new admin_functions(submission_functions: $this->submission_functions);
 
         if ($this->callback != null && is_callable($this->callback)) {
             call_user_func($this->callback);
         }
+
+        self::$initialized[$classname] = true;
     }
 
 }
