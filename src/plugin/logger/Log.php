@@ -34,6 +34,7 @@ if (!defined('ABSPATH')) {
 class Log implements PTALogInterface
 {
   private static $initialized = [];
+  private static $loggers = [];
   private $logger;
   private $logPath;
   private $logDir;
@@ -53,11 +54,13 @@ class Log implements PTALogInterface
     $classname = static::class . $name;
 
     if (isset(self::$initialized[$classname]) && self::$initialized[$classname]) {
-      $this->logger = self::$initialized[$classname];
+      $this->logger = self::$loggers[$classname];
       return;
     }
 
     $this->logger = new Logger($name);
+
+    self::$loggers[$classname] = $this->logger;
 
     // Skip file system setup if running in test environment
     if (defined('PHPUNIT_RUNNING') && PHPUNIT_RUNNING) {
