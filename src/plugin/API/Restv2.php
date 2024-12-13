@@ -84,30 +84,36 @@ class Restv2 extends Client
 
     /* If an ID is provided, get the submission with that ID */
     if (isset($params['id'])) {
+      //$this->logger->info('ID: ' . $params['id']);
+
       $ids = $this->get_id_from_params($params, 'id', $user, $errors);
 
       foreach ($ids as $id) {
-        $submissions[] = $this->submission_functions->get_submission($id);
+        $submissions[] = $this->submission_functions->get_submission($id)[0];
       }
 
     }
 
     // if user_id is provided, get all submissions for that user
     if (isset($params['user_id'])) {
-      $user_ids = $this->get_id_from_params($params, 'user_id', $user, $errors);
+      //$this->logger->info('User ID: ' . $params['user_id']);
+
+      $user_ids = $this->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_sub: false);
 
       foreach ($user_ids as $user_id) {
-        $submissions[] = $this->submission_functions->get_submissions_by_user($user_id);
+        $submissions[] = $this->submission_functions->get_submissions_by_user($user_id)[0];
       }
     }
 
     if(isset($params['state'])) {
+      //$this->logger->info('State: ' . $params['state']);
+
       $limitedSubmssionsByState = $this->submission_functions->get_submission_by_state($params['state'], 'ARRAY_A', true);
 
       foreach ($limitedSubmssionsByState as $submission) {
 
         if ($this->check_sub_perms($user, $submission)) {
-          $submissions[] = $this->submission_functions->get_submission($submission['id']);
+          $submissions[] = $this->submission_functions->get_submission($submission['id'])[0];
         } else {
           $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $submission['id']));
         }
@@ -116,6 +122,8 @@ class Restv2 extends Client
     }
 
     if(isset($params['limit'])){
+      //$this->logger->info('Limit: ' . $params['limit']);
+
       $limit = sanitize_text_field($params['limit']);
 
       if(!is_numeric($limit)){
@@ -125,9 +133,11 @@ class Restv2 extends Client
       // $submissions = array_slice($submissions, 0, $limit);
     }
 
+    //$this->logger->info('Submissions: ' . print_r($submissions, true));
+
     // if no parameters are provided, exepct for limit, get all submissions
     if (empty($submissions)) {
-      $submissions = $this->submission_functions->get_all_submissions_by_state('Approved');
+      $submissions = $this->submission_functions->get_all_submissions_by_state('Approved')[0];
     }
 
     $this->remove_duplicate_submissions($submissions);
@@ -141,6 +151,15 @@ class Restv2 extends Client
       'submissions' => $submissions,
       'errors' => $errors
     ];
+
+    $logResponce = [
+      'Request URI' => $_SERVER['REQUEST_URI'],
+      'Params' => $params,
+      'Submissions' => $submissions,
+      'Errors' => $errors
+    ];
+
+    $this->logger->info('API Response: ' . print_r($logResponce, true));
 
     return rest_ensure_response($return_data);
   }
@@ -288,7 +307,7 @@ class Restv2 extends Client
    * @param array $params The parameters from which to extract the ID.
    * @return array|null The extracted ID if found, otherwise null.
    */
-  protected function get_id_from_params($params, $id_name, $user, &$errors, $check_public = true)
+  protected function get_id_from_params($params, $id_name, $user, &$errors, $check_public = true, $check_sub = true)
   {
     $ids = sanitize_text_field($params[$id_name]);
 
@@ -301,22 +320,37 @@ class Restv2 extends Client
 
     // check if there are multiple ids
     if (strpos($ids, ',') !== false) { // Multiple ids
+      //$this->logger->info('Multiple IDs: ' . $ids);
 
       $submission_ids = explode(',', $ids);
 
-      foreach ($submission_ids as $id) {
+      if($check_sub){
 
-        if ($this->check_sub_exists(id: $id, user: $user, errors: $errors, check_public: $check_public)) {
-          $submissions_ids[] = $id;
+        foreach ($submission_ids as $id) {
+
+          if ($this->check_sub_exists(id: $id, user: $user, errors: $errors, check_public: $check_public)) {
+            $submissions_ids[] = $id;
+          }
+          
         }
-        
+
+      } else {
+        $submissions_ids[] = $submission_ids;
       }
       
     } else { // Only one id
+      //$this->logger->info('Single ID: ' . $ids);
 
-      if ($this->check_sub_exists(id: $ids, user: $user, errors: $errors, check_public: $check_public)) {
+      if($check_sub){
+
+        if ($this->check_sub_exists(id: $ids, user: $user, errors: $errors, check_public: $check_public)) {
+          $submissions_ids[] = $ids;
+        }
+
+      }else{
         $submissions_ids[] = $ids;
       }
+
     }
 
     return $submissions_ids;
