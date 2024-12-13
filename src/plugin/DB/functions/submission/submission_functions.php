@@ -204,16 +204,49 @@ class submission_functions
   public function remove_image_from_submission($submission_id, $image_id)
   {
     $submission = $this->get_submission($submission_id)[0];
-    $image_uploads = $submission['image_uploads'];
+    
+    $image_uploads = json_decode($submission['image_uploads'], true);
 
-    $this->logger->debug('Image Uploads before: ' . $image_uploads);
+    // $this->logger->debug('Image Uploads before', $image_uploads);
 
-    $image_uploads = explode(',', $image_uploads);
     $image_uploads = array_diff($image_uploads, [$image_id]);
-    $image_uploads = implode(',', $image_uploads);
 
-    $this->logger->debug('Image Uploads after: ' . $image_uploads);
+    // $this->logger->debug('Image Uploads after', $image_uploads);
+
+    $encoded_images = json_encode($image_uploads);
+
+    $this->update_submission($submission_id, ['image_uploads' => $encoded_images]);
+
+    // $this->logger->debug('Encoded Images: ' . $encoded_images);
+
 
     //$this->update_submission($submission_id, ['image_uploads' => $image_uploads]);
+  }
+
+  public function add_image_to_submission($submission_id, $image_id)
+  {
+    $submission = $this->get_submission($submission_id)[0];
+
+    $image_uploads = [];
+
+    $deco_images = json_decode($submission['image_uploads'], true);
+
+    // $this->logger->debug('Decoded Images', $deco_images);
+
+    if ($deco_images != null) {
+      foreach($deco_images as $image){
+        $image_uploads[] = $image;
+      }
+    }
+
+    // $this->logger->debug('Image Uploads before', $image_uploads);
+
+    $image_uploads[] = $image_id;
+
+    // $this->logger->debug('Image Uploads after',$image_uploads);
+
+    $encoded_images = json_encode($image_uploads);
+
+    $this->update_submission($submission_id, ['image_uploads' => $encoded_images]);
   }
 }

@@ -315,6 +315,7 @@ class Shortcodes_functions
 
             //error_log("Handling edit form submission");
             //error_log('POST: ' . print_r($_POST, true));
+            $this->logger->debug('Handling edit form submission', array('POST' => $_POST));
 
             $user_id = get_current_user_id();
             $submission_id = $_POST['submission_id'];
@@ -352,18 +353,29 @@ class Shortcodes_functions
                 'video_link' => $video_link
             ]);
 
+            // Handle image removals
+            if (!empty($_POST['remove_image'])) {  // $_POST['remove_image'] = [\"fed0e51e-f388-4499-950a-9ebc768a7dec\"]
+
+                // $_POST['remove_image'] to array
+                // $remove_images = json_decode($_POST['remove_image'], true);
+                //error_log('Remove Images: ' . $_POST['remove_image']);
+
+                $remove_images = explode(',', $_POST['remove_image']);
+
+                foreach ($remove_images as $image_id) {
+                    //error_log('Removing image: ' . $image_id);
+                    $this->submission_func->remove_image_from_submission(submission_id: $submission['id'], image_id: $image_id);
+                }
+            }
+
+            // Image file-name to id
+            $file_map_id = [];
 
             // Handle image uploads
             if (!empty($_FILES['new_images']['name'][0])) {
                 require_once(ABSPATH . 'wp-admin/includes/file.php');
                 $uploaded_files = $_FILES['new_images'];
                 $upload_overrides = array('test_form' => false);
-
-                // Get current image IDs
-                $images_IDs = $this->submission_func->get_submission_value($submission['id'], 'image_uploads');
-                if (is_string($images_IDs)) {
-                    $images_IDs = json_decode($images_IDs, true);
-                }
 
                 $imageCount = 1;
                 foreach ($uploaded_files['name'] as $key => $value) {
@@ -379,24 +391,6 @@ class Shortcodes_functions
                         $isMapImage = 0;
                         $isThumbnailImage = 0;
 
-                        // check if selecedMap had filename + size as value
-                        if (isset($_POST['set_map'])) {
-
-                            if ($_POST['set_map'] == ($file['name'] . '+' . $file['size'])) {
-                                $isMapImage = 1;
-                                //error_log('Map Image: ' . $file['name']);
-                            }
-
-                        }
-                        if (isset($_POST['set_thumbnail'])) {
-
-                            if ($_POST['set_thumbnail'] == ($file['name'] . '+' . $file['size'])) {
-                                $isThumbnailImage = 1;
-                                //error_log('Thumbnail Image: ' . $file['name']);
-                            }
-
-                        }
-
                         $movefile = wp_handle_upload($file, $upload_overrides);
 
                         if ($movefile && !isset($movefile['error'])) {
@@ -411,7 +405,29 @@ class Shortcodes_functions
 
                             //error_log('Images: ' . print_r($images_IDs, true));
 
-                            $imageCount++;
+                            // check if selecedMap had filename + size as value
+                            // if (isset($_POST['set_map'])) {
+
+                            //     if ($_POST['set_map'] == ($file['name'] . '+' . $file['size'])) {
+                            //         $_POST['set_map'] = $image_id;
+                            //     }
+
+                            // }
+                            // if (isset($_POST['set_thumbnail'])) {
+
+                            //     if ($_POST['set_thumbnail'] == ($file['name'] . '+' . $file['size'])) {
+                            //         $_POST['set_thumbnail'] = $image_id;
+                            //     }
+
+                            // }
+
+                            $file_name = $file['name'] . '+' . $file['size'];
+
+                            $file_map_id[$file_name] = $image_id;
+
+                            $this->submission_func->add_image_to_submission($submission_id, $image_id);
+
+                            // $imageCount++;
                         } else {
                             echo "Error uploading file: " . $movefile['error'];
                         }
@@ -419,14 +435,28 @@ class Shortcodes_functions
                 }
                 // add image ids to submission
                 // $this->submission_func->update_submission($submission_id, 'image_uploads', json_encode($images_IDs));
-                $this->submission_func->update_submission($submission_id, ['image_uploads' => json_encode($images_IDs)]);
+                // $this->logger->debug('Images IDs', array('images_IDs' => $images_IDs));
+                //$this->submission_func->update_submission($submission_id, ['image_uploads' => json_encode($images_IDs)]);
+                // $this->submission_func->add_image_to_submission($submission_id, $images_IDs);
             }
+
+            //$this->logger->debug('File Map ID', array('file_map_id' => $file_map_id));
 
             // Handle setting a new thumbnail
             if (isset($_POST['set_thumbnail'])) {
                 //error_log('Setting Thumbnail: ' . $_POST["set_thumbnail"]);
 
                 $thumbnail_id = $_POST["set_thumbnail"];
+
+                //$this->logger->debug('Setting Thumbnail', array('thumbnail_id' => $thumbnail_id));
+
+                // check if thumbnail id is in the file_map_id array
+                if (array_key_exists($thumbnail_id, $file_map_id)) {
+                    $thumbnail_id = $file_map_id[$thumbnail_id];
+                }
+
+                //$this->logger->debug('Thumbnail ID', array('thumbnail_id' => $thumbnail_id));
+
                 //error_log('Thumbnail ID: ' . $_POST["set_thumbnail"]);
                 // First reset all thumbnails
                 $this->image_func->image_reset_thumbnail($submission['id']);
@@ -439,6 +469,16 @@ class Shortcodes_functions
                 //error_log('Setting Map: ' . $_POST["set_map"]);
 
                 $map_id = $_POST["set_map"];
+
+                //$this->logger->debug('Setting Map', array('map_id' => $map_id));
+
+                // check if map id is in the file_map_id array
+                if (array_key_exists($map_id, $file_map_id)) {
+                    $map_id = $file_map_id[$map_id];
+                }
+
+                //$this->logger->debug('Map ID', array('map_id' => $map_id));
+
                 //error_log('Map ID: ' . $_POST["set_map"]);
                 // First reset all thumbnails
                 $this->image_func->image_reset_map($submission['id']);
@@ -450,21 +490,6 @@ class Shortcodes_functions
             if (isset($_POST['video_link'])) {
                 // $this->submission_func->update_submission($submission['id'], 'video_link', $_POST['video_link']);
                 $this->submission_func->update_submission($submission['id'], ['video_link' => $_POST['video_link']]);
-            }
-
-            // Handle image removals
-            if (!empty($_POST['remove_image'])) {  // $_POST['remove_image'] = [\"fed0e51e-f388-4499-950a-9ebc768a7dec\"]
-
-                // $_POST['remove_image'] to array
-                // $remove_images = json_decode($_POST['remove_image'], true);
-                //error_log('Remove Images: ' . $_POST['remove_image']);
-
-                $remove_images = explode(',', $_POST['remove_image']);
-
-                foreach ($remove_images as $image_id) {
-                    //error_log('Removing image: ' . $image_id);
-                    $this->submission_func->remove_image_from_submission(submission_id: $submission['id'], image_id: $image_id);
-                }
             }
 
             // handle Save and Publish
