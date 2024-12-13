@@ -155,11 +155,11 @@ class Restv2 extends Client
     $logResponce = [
       'Request URI' => $_SERVER['REQUEST_URI'],
       'Params' => $params,
-      'Submissions' => $submissions,
+      'Submissions_count' => count($submissions),
       'Errors' => $errors
     ];
 
-    $this->logger->info('API Response: ' . print_r($logResponce, true));
+    //$this->logger->info('API Response: ' . print_r($logResponce, true));
 
     return rest_ensure_response($return_data);
   }
