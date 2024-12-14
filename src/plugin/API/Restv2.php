@@ -8,7 +8,6 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\client\Client;
-use OpenApi\Annotations as OA;
 
 /* Requires MOVE LATER */
 use PTA\DB\QueryBuilder;
