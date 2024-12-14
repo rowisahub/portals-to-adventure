@@ -98,9 +98,23 @@ class Enqueue implements PTAEnqueueInterface
       handle: 'pta-api-v2',
       src: plugins_url(path: 'portals-to-adventure/assets/public/js/api-v2.js'),
       deps: ['jquery'],
-      ver: '1.0.0',
+      ver: '1.0.2',
       args: true
     );
+
+    /* Admin */
+    // $current_user = wp_get_current_user();
+    // $allowed_roles = array('administrator', 'editor');
+    // if (!empty(array_intersect($current_user->roles, $allowed_roles))) {
+    //   //error_log(message: 'Enqueuing admin scripts');
+    //   wp_enqueue_style(
+    //     handle: 'pta-api-v2-admin',
+    //     src: plugins_url(path: 'portals-to-adventure/assets/admin/js/api-v2-admin.js'),
+    //     deps: ['jquery'],
+    //     ver: '1.0.0',
+    //     media: 'all'
+    //   );
+    // }
 
     /* Woocommerce */
     if (class_exists(class: 'WooCommerce')) {

@@ -56,10 +56,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 //function to get all submissions
 async function getAllSubmissions() {
   try {
-    var submissions;
-    if (ifAdmin) {
-      submissions = await WLD_API.getAllSubmissions();
+    var submissions = await PTA_API.getApprovedSubmissions();
 
+    console.log("Submissions:", submissions);
+
+    if (ifAdmin) {
       // only show aprroved and pending approval submissions, and show pending approval submissions first
       submissions = submissions.filter(submission => submission.state === 'Approved' || submission.state === 'Pending Approval');
       submissions = submissions.sort((a, b) => {
@@ -69,8 +70,6 @@ async function getAllSubmissions() {
       });
 
       document.getElementById('admin-filter-dropdown').classList.remove('hide');
-    } else {
-      submissions = await WLD_API.getApprovedSubmissions();
     }
 
     loadedSubmissions = submissions;
@@ -269,7 +268,7 @@ function fillTemplate(submission) {
     // Set button data attributes
     submissionClone.querySelectorAll('.share-btn').forEach(btn => {
       btn.onclick = function () {
-        WLD_API.shareSubmission(btn.getAttribute('data-platform'), submission);
+        PTA_API.shareSubmission(btn.getAttribute('data-platform'), submission);
       }
     });
   } else {
@@ -286,7 +285,7 @@ function fillTemplate(submission) {
   voteSubBtn.setAttribute('data-id', submission.id);
 
   voteSubBtn.onclick = function () {
-    WLD_API.voteSubmission(submission.id, voteSubBtn);
+    PTA_API.voteSubmission(submission.id, voteSubBtn);
   }
 
   submissionClone.querySelector('.admin-bar-pta').style.display = ifAdmin ? 'block' : 'none';
@@ -340,7 +339,7 @@ document.addEventListener('submissionsLoaded', async function () {
       const submissionID = voteBtn.getAttribute('data-id');
       //const productID = voteBtn.getAttribute('data-product-id');
       
-      var responce = await WLD_API.voteSubmission(submissionID);
+      var responce = await PTA_API.voteSubmission(submissionID);
 
       console.log("Vote responce:", responce);
 
@@ -378,7 +377,7 @@ async function adminAction(action, submissionID, button) {
       button.disabled = true;
 
       try {
-        var admin_result = await WLD_API.admin_submission('approve', submissionID);
+        var admin_result = await PTA_API.admin_submission('approve', submissionID);
 
         console.log("Admin Result:", admin_result);
 
@@ -403,7 +402,7 @@ async function adminAction(action, submissionID, button) {
       }
 
       try {
-        var admin_result = await WLD_API.admin_submission('reject', submissionID, reason);
+        var admin_result = await PTA_API.admin_submission('reject', submissionID, reason);
 
         console.log("Admin Result:", admin_result);
 
@@ -428,7 +427,7 @@ async function adminAction(action, submissionID, button) {
       }
 
       try {
-        var admin_result = await WLD_API.admin_submission('delete', submissionID, reason);
+        var admin_result = await PTA_API.admin_submission('delete', submissionID, reason);
 
         console.log("Admin Result:", admin_result);
 
@@ -447,7 +446,7 @@ async function adminAction(action, submissionID, button) {
       button.disabled = true;
 
       try {
-        var admin_result = await WLD_API.admin_submission('unreject', submissionID);
+        var admin_result = await PTA_API.admin_submission('unreject', submissionID);
 
         console.log("Admin Result:", admin_result);
 

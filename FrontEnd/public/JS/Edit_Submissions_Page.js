@@ -189,6 +189,8 @@ function addImageToPreview(image) {
     submissionChanges();
     // Set the image as the thumbnail
 
+    console.log(image);
+
     if (previewDiv.classList.contains('map')) {
       previewDiv.classList.remove('map');
       selMap.value = '';
@@ -210,6 +212,8 @@ function addImageToPreview(image) {
 
   mapBtn.addEventListener('click', function () {
     submissionChanges();
+
+    console.log(image);
 
     // Set the image as the map
     // This will be implemented in the future

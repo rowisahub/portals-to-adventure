@@ -107,8 +107,14 @@ var PTA_API = (function ($) {
      */
     async function getApprovedSubmissions() {
         try {
+
+            var api_url = pta_api_data.apiv2_url + 'submission?state=approved';
+            if(pta_api_data.user_admin){
+                api_url += '&requested=' + user_data.user_name;
+            }
+
             const data = await $.ajax({
-                url: pta_api_data.apiv2_url + 'submission?status=approved',
+                url: api_url,
                 method: 'GET',
                 beforeSend: function (xhr) {
                     xhr.setRequestHeader('X-WP-Nonce', pta_api_data.nonce);
@@ -127,6 +133,83 @@ var PTA_API = (function ($) {
         }
     }
 
+    /**
+     * Sends an admin submission request to the server.
+     *
+     * @param {string} action - The action to be performed.
+     * @param {number} id - The ID associated with the action.
+     * @param {string} reason - Optional. The reason for the action.
+     * @returns {Promise<void>} - A promise that resolves when the request is complete.
+     * @throws {Error} - Throws an error if the request fails.
+     */
+    async function admin_submission_action(action, id, reason = 'Change requested by admin') {
+        try {
+            const data = await $.ajax({
+                url: pta_api_data.apiv2_url + 'submission/action',
+                method: 'POST',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', pta_api_data.nonce);
+                },
+                data: {
+                    action: action,
+                    id: id,
+                    reason: reason
+                }
+            });
+            return data;
+        } catch (error) {
+            console.error('Error performing admin submission action:', error);
+            console.error('Error responce:', error.responseJSON);
+            throw error;
+        }
+    }
+
+    /**
+     * Shares a submission on a specified social media platform. Opens a new window to share the submission.
+     *
+     * @param {string} platform - The social media platform to share the submission on. Valid values are 'facebook' and 'twitter'.
+     * @param {Object} submission - The submission object containing details to be shared.
+     */
+    function shareSubmission(platform, submission) {
+        console.log("Sharing submission:", submission.id, "on platform:", platform);
+
+        const shareURL = window.location.origin + `/submission?id=${submission.id}`;
+        const shareText = "Check out this Adventure on Portal to Adventure: " + submission.title;
+
+        switch (platform) {
+            case 'facebook':
+                const fbShareURL = `https://www.facebook.com/sharer/sharer.php?u=${shareURL}`;
+                window.open(fbShareURL, '_blank');
+                break;
+            case 'twitter':
+                const twShareURL = `https://twitter.com/intent/tweet?url=${shareURL}&text=${shareText}`;
+                window.open(twShareURL, '_blank');
+                break;
+            default:
+                console.error("Invalid platform:", platform);
+                break;
+        }
+    }
+
+    async function voteSubmission(submissionId) {
+        try{
+          const data = await $.ajax({
+            url: ajax_object.ajax_url,
+            method: 'POST',
+            data: {
+              action: 'wldpta_vote_add_to_cart',
+              //product_id: productId,
+              nonce: ajax_object.nonce,
+              submission_id: submissionId
+            }
+          });
+          return data;
+        } catch (error) {
+          console.error('Error voting submission:', error);
+          throw error;
+        }
+      }
+
     function checkSubmissionResponse(response) {
         // check if response has `submissions` and `errors` properties
         if (!response.hasOwnProperty('submissions') || !response.hasOwnProperty('errors')) {
@@ -140,7 +223,11 @@ var PTA_API = (function ($) {
         getSubmissions: getSubmissions,
         getSubmissionDetails: getSubmissionDetails,
         getUserSubmissions: getUserSubmissions,
-        getApprovedSubmissions: getApprovedSubmissions
+        getApprovedSubmissions: getApprovedSubmissions,
+        checkSubmissionResponse: checkSubmissionResponse,
+        admin_submission: admin_submission_action,
+        shareSubmission: shareSubmission,
+        voteSubmission: voteSubmission
     };
   
 })(jQuery);

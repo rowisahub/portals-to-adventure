@@ -151,6 +151,8 @@ class submission_functions
       $queryBuilder->where(['user_owner_id' => $user_id]);
     }
 
+    //$this->logger->debug('Query: ' . $queryBuilder->get_sql());
+
     return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 

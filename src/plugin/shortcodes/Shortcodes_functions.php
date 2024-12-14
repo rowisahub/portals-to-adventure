@@ -80,7 +80,7 @@ class Shortcodes_functions
      */
     public function handle_submission_upload()
     {
-        if (isset($_POST['submit_submission'])) {
+        if (isset($_POST['submit_submission']) || isset($_POST['submission_upload_form'])) {
             if (!is_user_logged_in()) {
                 return;
             }
@@ -308,7 +308,7 @@ class Shortcodes_functions
      */
     function handle_edit_form()
     {
-        if (isset($_POST['update_submission'])) {
+        if (isset($_POST['update_submission']) || isset($_POST['submission_edit_form'])) {
             if (!is_user_logged_in()) {
                 return;
             }

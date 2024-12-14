@@ -3,7 +3,7 @@ var loadedSubmissions = null;
 document.addEventListener('DOMContentLoaded', async function () {
   try {
     var SelectList = document.getElementById('secret-doors-list');
-    var submissions = await WLD_API.getUserSubmissions(pta_api_data.user_id);
+    var submissions = await PTA_API.getUserSubmissions(pta_api_data.user_id);
     loadedSubmissions = submissions;
     console.log(submissions);
 

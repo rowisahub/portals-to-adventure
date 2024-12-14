@@ -101,7 +101,13 @@ class Restv2 extends Client
       $user_ids = $this->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_sub: false);
 
       foreach ($user_ids as $user_id) {
-        $submissions[] = $this->submission_functions->get_submissions_by_user($user_id)[0];
+        $user_submissions = $this->submission_functions->get_submissions_by_user($user_id);
+        foreach($user_submissions as $submission){
+          if($this->check_sub_perms($user, $submission)){
+            $submissions[] = $submission;
+          }
+        }
+        //$submissions[];
       }
     }
 
@@ -109,6 +115,8 @@ class Restv2 extends Client
       //$this->logger->info('State: ' . $params['state']);
 
       $limitedSubmssionsByState = $this->submission_functions->get_submission_by_state($params['state'], 'ARRAY_A', true);
+
+      //$this->logger->info('Limited Submissions: ' . print_r($limitedSubmssionsByState, true));
 
       foreach ($limitedSubmssionsByState as $submission) {
 
@@ -118,6 +126,17 @@ class Restv2 extends Client
           $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $submission['id']));
         }
 
+      }
+    }
+
+    if(isset($params['requested'])){
+
+      $pendingSubmissions = $this->submission_functions->get_all_submissions_by_state('Pending Approval');
+
+      //$this->logger->info('Pending Submissions: ' . print_r($pendingSubmissions, true));
+
+      foreach ($pendingSubmissions as $submission) {
+        $submissions[] = $submission;
       }
     }
 
@@ -137,7 +156,9 @@ class Restv2 extends Client
 
     // if no parameters are provided, exepct for limit, get all submissions
     if (empty($submissions)) {
-      $submissions = $this->submission_functions->get_all_submissions_by_state('Approved')[0];
+        foreach ($this->submission_functions->get_all_submissions_by_state('Approved') as $submission){
+          $submissions[] = $submission;
+        }
     }
 
     $this->remove_duplicate_submissions($submissions);
@@ -156,10 +177,11 @@ class Restv2 extends Client
       'Request URI' => $_SERVER['REQUEST_URI'],
       'Params' => $params,
       'Submissions_count' => count($submissions),
+      // 'submissions' => $submissions,
       'Errors' => $errors
     ];
 
-    //$this->logger->info('API Response: ' . print_r($logResponce, true));
+   //$this->logger->debug('API Response: ' . print_r($logResponce, true));
 
     return rest_ensure_response($return_data);
   }
@@ -177,7 +199,14 @@ class Restv2 extends Client
     $user = wp_get_current_user();
     $user_primary_role = $this->get_user_role($user);
 
+    // check if user is an admin or editor
+    if($user_primary_role !== self::ADMIN && $user_primary_role !== self::EDITOR){
+      return new \WP_Error('no_perms', 'User does not have permissions to perform this action.', array('status' => 403));
+    }
+
     $params = $request->get_params();
+
+    $this->logger->debug('Action Params: ' . print_r($params, true));
 
     if(empty($params['action'])){
       return new \WP_Error('no_action', 'No action provided.', array('status' => 400));
@@ -189,9 +218,12 @@ class Restv2 extends Client
 
     $errors = [];
 
+    // $this->logger->info('Action: ' . $params);
 
     // check if there are multiple ids, both ways should return an array
-    $submission_ids = $this->get_id_from_params(params: $params, id_name: 'id', user: $user, errors: $errors, check_public: false);
+    $submission_ids = $this->get_id_from_params(params: $params, id_name: 'id', user: $user, errors: $errors, check_sub: false);
+
+    $this->logger->debug('Submission IDs: ' . print_r($submission_ids, true));
 
     if(empty($submission_ids)){
       return rest_ensure_response([
@@ -204,6 +236,8 @@ class Restv2 extends Client
         ]
       ]);
     }
+
+    $this->logger->debug('Action: ' . $action);
 
     foreach($submission_ids as $submission_id){
       
@@ -226,6 +260,8 @@ class Restv2 extends Client
       }
 
     }
+
+    $this->logger->debug('Errors: ' . print_r($errors, true));
 
     if(!empty($errors)){
       // all submissions failed
@@ -254,6 +290,8 @@ class Restv2 extends Client
         ]);
       }
     }
+
+    $this->logger->debug('All Submissions Actions Successful');
 
     return rest_ensure_response([
       'message' => 'All submissions actions were successful.',
@@ -427,7 +465,7 @@ class Restv2 extends Client
     // make query to get submission by id state and user_owner_id
     $queryBuilder = new QueryBuilder($this->db_handler_instance->get_wpdb());
     $queryBuilder->select(['id', 'state', 'user_owner_id'])
-      ->from($this->db_handler_instance->get_table('submission_data'))
+      ->from($this->db_handler_instance->get_table_path('submission_data'))
       ->where(['id' => $id]);
 
     $results = $this->db_functions->exe_from_builder($queryBuilder);

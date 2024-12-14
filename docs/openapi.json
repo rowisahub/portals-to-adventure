@@ -8,6 +8,10 @@
     "servers": [
       {
         "url": "https://dev.portals-to-adventudere.com/wp-json/pta/v2",
+        "description": "Dev API server"
+      },
+      {
+        "url": "https://wp.portals-to-adventure.com/wp-json/pta/v2",
         "description": "Production API server"
       }
     ],

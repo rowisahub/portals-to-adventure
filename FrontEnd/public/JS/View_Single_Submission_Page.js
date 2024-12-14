@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async function () {
       return;
     }
 
-    var submission = await WLD_API.getSubmissionDetails(submissionId);
+    var submission = await PTA_API.getSubmissionDetails(submissionId);
 
 
     loadedSubmission = submission;

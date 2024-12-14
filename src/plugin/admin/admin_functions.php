@@ -29,15 +29,15 @@ class admin_functions
             throw new \Exception('Submission functions not provided.');
         }
 
-        if(self::$constructed){
-            return;
-        }
+        // if(self::$constructed){
+        //     return;
+        // }
 
-        $this->logger = new Log(name: 'Admin');
-        $this->logger = $this->logger->getLogger();
+        $newLog = new Log(name: 'Admin');
+        $this->logger = $newLog->getLogger();
         $this->submission_functions = $submission_functions;
 
-        self::$constructed = true;
+        // self::$constructed = true;
     }
 
     /**
@@ -50,7 +50,7 @@ class admin_functions
      */
     public function approve_submission($submission_id)
     {
-        $this->logger->info('Approving submission with ID: ' . $submission_id);
+        //$this->logger->debug('Approving submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Approved'
         ];
@@ -68,7 +68,7 @@ class admin_functions
      */
     public function reject_submission($submission_id, $reason)
     {
-        $this->logger->info('Rejecting submission with ID: ' . $submission_id);
+        //$this->logger->info('Rejecting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Rejected',
             'rejected_reason' => $reason,
@@ -88,7 +88,7 @@ class admin_functions
      */
     public function unreject_submission($submission_id)
     {
-        $this->logger->info('Unrejecting submission with ID: ' . $submission_id);
+        //$this->logger->info('Unrejecting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'In Progress',
             'is_rejected' => 0,
@@ -107,7 +107,7 @@ class admin_functions
      */
     public function delete_submission($submission_id, $reason)
     {
-        $this->logger->info('Deleting submission with ID: ' . $submission_id);
+        //$this->logger->info('Deleting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'Removed',
             'removed_reason' => $reason,
@@ -126,7 +126,7 @@ class admin_functions
      */
     public function undelete_submission($submission_id)
     {
-        $this->logger->info('Undeleting submission with ID: ' . $submission_id);
+        //$this->logger->info('Undeleting submission with ID: ' . $submission_id);
         $updateData = [
             'state' => 'In Progress',
             'is_removed' => 0,
