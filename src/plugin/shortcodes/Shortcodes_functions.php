@@ -331,6 +331,12 @@ class Shortcodes_functions
             // Get submission data
             $submission = $this->submission_func->get_submission($submission_id)[0];
 
+            // Check if user is the owner of the submission
+            if ($submission['user_owner_id'] != $user_id) {
+                //error_log('User is not the owner of the submission');
+                return;
+            }
+
             // Check if submission is being deleted
             if ($_POST['update_submission'] == 'Delete') {
                 //delete_submission($submission_id);
