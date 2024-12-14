@@ -8,6 +8,7 @@ if (!defined('ABSPATH')) {
 
 /* Requires */
 use PTA\logger\Log;
+use Monolog\Logger;
 use PTA\DB\functions\submission\submission_functions;
 use PTA\DB\functions\image\image_functions;
 use PTA\DB\functions\user\user_functions;
@@ -17,7 +18,7 @@ use PTA\admin\admin_functions;
 
 class Client
 {
-    public $logger;
+    public Log|Logger $logger;
     private $logname;
     protected static $constructed = [];
     protected static $initialized = [];
