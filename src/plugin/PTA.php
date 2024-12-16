@@ -22,7 +22,6 @@ use PTA\API\AJAX;
 use PTA\API\REST;
 use PTA\API\Restv2;
 use PTA\admin\admin_settings;
-use PTA\client\Client;
 
 /**
  * Class PTA
@@ -51,7 +50,7 @@ class PTA
     $this->enqueue = new Enqueue();
 
     /* Logger */
-    $this->logger = new log(name: 'Main', ifLogUncaught: true);
+    $this->logger = new Log(name: 'Main', ifLogUncaught: true);
 
     /* Database Handler */
     $this->dbHandler = new db_handler();
@@ -89,60 +88,66 @@ class PTA
   public function init()
   {
 
-    //error_log(message: 'Portals to Adventure plugin is initializing...');
+    try{
 
-    /* Logger */
-    $this->logger = $this->logger->getLogger();
+      //error_log(message: 'Portals to Adventure plugin is initializing...');
 
-    //error_log(message: 'Got logger');
+      /* Logger */
+      $this->logger = $this->logger->getLogger();
 
-    //$this->logger->info(message: 'Portals to Adventure plugin is initializing...');
+      //error_log(message: 'Got logger');
 
-    /* Enqueue */
-    $this->enqueue->add_enqueue_action();
+      //$this->logger->info(message: 'Portals to Adventure plugin is initializing...');
 
-    //error_log(message: 'Added enqueue action');
+      /* Enqueue */
+      $this->enqueue->add_enqueue_action();
 
-    /* Database Handler */
-    $this->dbHandler->init();
+      //error_log(message: 'Added enqueue action');
 
-    //error_log(message: 'Initialized database handler');
+      /* Database Handler */
+      $this->dbHandler->init();
 
-    /* Update WIP */
-    //$this->update->init();
+      //error_log(message: 'Initialized database handler');
 
-    /* Shortcodes */
-    $this->shortcodes->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+      /* Update WIP */
+      //$this->update->init();
 
-    //error_log(message: 'Initialized shortcodes');
+      /* Shortcodes */
+      $this->shortcodes->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    /* Woocommerce Extension */
-    $this->woocommerceExtension->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+      //error_log(message: 'Initialized shortcodes');
 
-    //error_log(message: 'Initialized Woocommerce Extension');
+      /* Woocommerce Extension */
+      $this->woocommerceExtension->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    /* Admin */
-    $this->admin->init(
-      handler_instance: $this->dbHandler,
-      db_functions: $this->dbHandler->get_instance('functions')
-    );
+      //error_log(message: 'Initialized Woocommerce Extension');
 
-    //error_log(message: 'Initialized Admin');
+      /* Admin */
+      $this->admin->init(
+        handler_instance: $this->dbHandler,
+        db_functions: $this->dbHandler->get_instance('functions')
+      );
 
-    /* Client */
+      //error_log(message: 'Initialized Admin');
+
+      /* Client */
 
 
-    /* API */
-    //$this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
-    $this->rest_v2->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+      /* API */
+      //$this->rest->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+      $this->rest_v2->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    //error_log(message: 'Initialized REST API');
+      //error_log(message: 'Initialized REST API');
 
-    $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
+      $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
-    //error_log(message: 'Initialized AJAX API');
+      //error_log(message: 'Initialized AJAX API');
 
-    //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
+      //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
+
+    } catch (\Exception $e) {
+      $this->logger->error('Portals to Adventure plugin encountered an error: ' . $e->getMessage());
+    }
 
   }
 
