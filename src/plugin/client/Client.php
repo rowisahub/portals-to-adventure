@@ -21,14 +21,13 @@ class Client
     public Logger $logger;
     private $pre_log;
     private $logname;
-    protected static $constructed = [];
-    protected static $initialized = [];
-    protected submission_functions $submission_functions;
-    protected image_functions $image_functions;
-    protected user_functions $user_functions;
-    protected db_handler $db_handler_instance;
-    protected db_functions $db_functions;
-    protected admin_functions $admin_functions;
+    private static $initialized = [];
+    public submission_functions $submission_functions;
+    public image_functions $image_functions;
+    public user_functions $user_functions;
+    public db_handler $db_handler_instance;
+    public db_functions $db_functions;
+    public admin_functions $admin_functions;
     private $callback;
 
     /**
