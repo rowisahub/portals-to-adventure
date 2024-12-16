@@ -35,7 +35,7 @@ class Log implements PTALogInterface
 {
   private static $initialized = [];
   private static $loggers = [];
-  private $logger;
+  private Logger $logger;
   private $logPath;
   private $logDir;
   private $upload_dir;
