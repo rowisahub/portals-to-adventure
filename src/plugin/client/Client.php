@@ -18,7 +18,8 @@ use PTA\admin\admin_functions;
 
 class Client
 {
-    public Log|Logger $logger;
+    public Logger $logger;
+    private $pre_log;
     private $logname;
     protected static $constructed = [];
     protected static $initialized = [];
@@ -41,7 +42,7 @@ class Client
 
         $this->logname = $LogName;
 
-        $this->logger = new Log(name: $LogName);
+        $this->pre_log = new Log(name: $LogName);
         $this->callback = $callback_after_init;
     }
 
@@ -59,7 +60,7 @@ class Client
             return;
         }
 
-        $this->logger = $this->logger->getLogger();
+        $this->logger = $this->pre_log->getLogger();
 
         // Get the handler instance and db functions instance
         $this->db_handler_instance = ($handler_instance instanceof db_handler) ? $handler_instance : new db_handler();
