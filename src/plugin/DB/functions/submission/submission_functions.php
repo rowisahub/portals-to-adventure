@@ -251,4 +251,14 @@ class submission_functions
 
     $this->update_submission($submission_id, ['image_uploads' => $encoded_images]);
   }
+
+  public function get_total_approved_submissions()
+  {
+    $queryBuilder = new QueryBuilder($this->wpdb);
+    $queryBuilder->select('COUNT(*)')
+      ->from($this->table_path)
+      ->where(['state' => 'Approved']);
+
+    return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: 'ARRAY_N')[0][0];
+  }
 }
