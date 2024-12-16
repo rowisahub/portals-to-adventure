@@ -1,267 +1,305 @@
 {
-    "openapi": "3.0.3",
-    "info": {
-      "title": "PTA V2 API",
-      "version": "2.0.0",
-      "description": "API for handling submissions in PortalsToAdventure V2"
+  "openapi": "3.0.3",
+  "info": {
+    "title": "PTA V2 API",
+    "version": "2.0.0",
+    "description": "API for handling submissions in PortalsToAdventure V2"
+  },
+  "servers": [
+    {
+      "url": "https://dev.portals-to-adventure.com/wp-json/pta/v2",
+      "description": "Dev API server"
     },
-    "servers": [
-      {
-        "url": "https://dev.portals-to-adventudere.com/wp-json/pta/v2",
-        "description": "Dev API server"
-      },
-      {
-        "url": "https://wp.portals-to-adventure.com/wp-json/pta/v2",
-        "description": "Production API server"
+    {
+      "url": "https://wp.portals-to-adventure.com/wp-json/pta/v2",
+      "description": "Production API server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "X-WP-Nonce": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-WP-Nonce",
+        "description": "WordPress REST API Nonce for authenticated requests"
       }
-    ],
-    "components": {
-      "securitySchemes": {
-        "X-WP-Nonce": {
-          "type": "apiKey",
-          "in": "header",
-          "name": "X-WP-Nonce",
-          "description": "WordPress REST API Nonce for authenticated requests"
-        }
-      },
-      "schemas": {
-        "Submission": {
-          "type": "object",
-          "description": "A single submission object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "description": "The unique submission ID"
-            },
-            "title": {
-              "type": "string",
-              "description": "The title of the submission"
-            },
-            "description": {
-              "type": "string",
-              "description": "A description of the submission"
-            },
-            "video_link": {
-              "type": "string",
-              "nullable": true,
-              "description": "A link to a video related to the submission"
-            },
-            "state": {
-              "type": "string",
-              "description": "The current state of the submission (e.g., 'Approved')"
-            },
-            "views": {
-              "type": "integer",
-              "description": "Number of times this submission has been viewed"
-            },
-            "likes": {
-              "type": "integer",
-              "description": "Number of 'likes' for this submission"
-            },
-            "user_id": {
-              "type": "integer",
-              "description": "The ID of the user who owns this submission"
-            },
-            "user_name": {
-              "type": "string",
-              "description": "The username of the owner"
-            },
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the submission was created"
-            },
-            "images": {
-              "type": "array",
-              "description": "An array of images associated with this submission",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "integer",
-                    "description": "Image ID"
-                  },
-                  "image_url": {
-                    "type": "string",
-                    "description": "URL of the image"
-                  },
-                  "is_thumbnail": {
-                    "type": "boolean",
-                    "description": "Whether this image is the thumbnail"
-                  },
-                  "is_map": {
-                    "type": "boolean",
-                    "description": "Whether this image is a map image"
-                  }
+    },
+    "schemas": {
+      "Submission": {
+        "type": "object",
+        "description": "A single submission object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique submission ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the submission"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the submission"
+          },
+          "video_link": {
+            "type": "string",
+            "nullable": true,
+            "description": "A link to a video related to the submission"
+          },
+          "state": {
+            "type": "string",
+            "description": "The current state of the submission (e.g., 'Approved')"
+          },
+          "views": {
+            "type": "integer",
+            "description": "Number of times this submission has been viewed"
+          },
+          "likes": {
+            "type": "integer",
+            "description": "Number of 'likes' for this submission"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "The ID of the user who owns this submission"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "The username of the owner"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the submission was created"
+          },
+          "images": {
+            "type": "array",
+            "description": "An array of images associated with this submission",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "description": "Image ID"
+                },
+                "image_url": {
+                  "type": "string",
+                  "description": "URL of the image"
+                },
+                "is_thumbnail": {
+                  "type": "boolean",
+                  "description": "Whether this image is the thumbnail"
+                },
+                "is_map": {
+                  "type": "boolean",
+                  "description": "Whether this image is a map image"
                 }
               }
-            },
-            "thumbnail_url": {
-              "type": "string",
-              "nullable": true,
-              "description": "URL to the thumbnail image"
-            },
-            "map_url": {
-              "type": "string",
-              "nullable": true,
-              "description": "URL to the map image"
-            },
-            "removed_reason": {
-              "type": "string",
-              "nullable": true,
-              "description": "Reason the submission was removed, if applicable"
-            },
-            "is_removed": {
-              "type": "boolean",
-              "nullable": true,
-              "description": "Whether the submission is removed"
-            },
-            "is_rejected": {
-              "type": "boolean",
-              "nullable": true,
-              "description": "Whether the submission is rejected"
-            },
-            "rejected_reason": {
-              "type": "string",
-              "nullable": true,
-              "description": "The reason the submission was rejected"
-            },
-            "was_rejected": {
-              "type": "boolean",
-              "nullable": true,
-              "description": "Whether the submission was rejected in the past"
+            }
+          },
+          "thumbnail_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL to the thumbnail image"
+          },
+          "map_url": {
+            "type": "string",
+            "nullable": true,
+            "description": "URL to the map image"
+          },
+          "removed_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason the submission was removed, if applicable"
+          },
+          "is_removed": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the submission is removed"
+          },
+          "is_rejected": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the submission is rejected"
+          },
+          "rejected_reason": {
+            "type": "string",
+            "nullable": true,
+            "description": "The reason the submission was rejected"
+          },
+          "was_rejected": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Whether the submission was rejected in the past"
+          }
+        }
+      },
+      "ContestInfo": {
+        "type": "object",
+        "description": "Information about the contest",
+        "properties": {
+          "contest_date_start": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date of the contest"
+          },
+          "contest_date_end": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end date of the contest"
+          },
+          "total_approved_submissions": {
+            "type": "integer",
+            "description": "Total number of approved submissions"
+          },
+          "prize_total_usd_estimate": {
+            "type": "number",
+            "description": "Estimated prize total in USD"
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
       }
-    },
-    "paths": {
-      "/submission/action": {
-        "post": {
-          "summary": "Perform an action on one or more submissions",
-          "description": "Actions: approve, reject, delete, unreject.",
-          "security": [
-            {
-              "X-WP-Nonce": []
+    }
+  },
+  "paths": {
+    "/submission/action": {
+      "post": {
+        "summary": "Perform an action on one or more submissions",
+        "description": "Actions: approve, reject, delete, unreject.",
+        "security": [
+          {
+            "X-WP-Nonce": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": ["approve","reject","delete","unreject"]
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "Submission ID(s)"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": ["action","id"]
+              }
             }
-          ],
-          "requestBody": {
-            "required": true,
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action applied successfully"
+          },
+          "400": {
+            "description": "Invalid action or missing parameters"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Submission not found"
+          }
+        }
+      }
+    },
+    "/submission": {
+      "get": {
+        "summary": "Retrieve submissions",
+        "description": "Retrieve submission data based on optional filters: id, user_id, state, limit.",
+        "security": [
+          {
+            "X-WP-Nonce": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Single or multiple submission IDs (comma-separated)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "123,124"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "description": "Single or multiple user IDs (comma-separated)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "10,11"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "description": "Filter submissions by state (e.g. 'Approved')",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "Approved"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limit the number of submissions returned",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of submissions and any errors.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "action": {
-                      "type": "string",
-                      "enum": ["approve","reject","delete","unreject"]
+                    "submissions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Submission"
+                      }
                     },
-                    "id": {
-                      "type": "string",
-                      "description": "Submission ID(s)"
-                    },
-                    "reason": {
-                      "type": "string",
-                      "nullable": true
-                    }
-                  },
-                  "required": ["action","id"]
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Action applied successfully"
-            },
-            "400": {
-              "description": "Invalid action or missing parameters"
-            },
-            "403": {
-              "description": "Forbidden"
-            },
-            "404": {
-              "description": "Submission not found"
-            }
-          }
-        }
-      },
-      "/submission": {
-        "get": {
-          "summary": "Retrieve submissions",
-          "description": "Retrieve submission data based on optional filters: id, user_id, state, limit.",
-          "security": [
-            {
-              "X-WP-Nonce": []
-            }
-          ],
-          "parameters": [
-            {
-              "name": "id",
-              "in": "query",
-              "description": "Single or multiple submission IDs (comma-separated)",
-              "required": false,
-              "schema": {
-                "type": "string",
-                "example": "123,124"
-              }
-            },
-            {
-              "name": "user_id",
-              "in": "query",
-              "description": "Single or multiple user IDs (comma-separated)",
-              "required": false,
-              "schema": {
-                "type": "string",
-                "example": "10,11"
-              }
-            },
-            {
-              "name": "state",
-              "in": "query",
-              "description": "Filter submissions by state (e.g. 'Approved')",
-              "required": false,
-              "schema": {
-                "type": "string",
-                "example": "Approved"
-              }
-            },
-            {
-              "name": "limit",
-              "in": "query",
-              "description": "Limit the number of submissions returned",
-              "required": false,
-              "schema": {
-                "type": "integer",
-                "example": 10
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "A list of submissions and any errors.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "submissions": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/components/schemas/Submission"
-                        }
-                      },
-                      "errors": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "code": {
-                              "type": "string"
-                            },
-                            "message": {
-                              "type": "string"
-                            }
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
                           }
                         }
                       }
@@ -269,16 +307,40 @@
                   }
                 }
               }
-            },
-            "400": {
-              "description": "Bad request"
-            },
-            "403": {
-              "description": "Forbidden"
             }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/contest/info": {
+      "get": {
+        "summary": "Retrieve contest information",
+        "description": "Retrieve information about the contest including start and end dates, total approved submissions, and prize total estimate.",
+        "responses": {
+          "200": {
+            "description": "Contest information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContestInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     }
   }
-  
+}
