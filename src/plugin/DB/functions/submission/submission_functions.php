@@ -120,7 +120,7 @@ class submission_functions
 
     $result = $this->db_functions->exe_from_builder(query_builder: $queryBuilder);
 
-    return $result[$key] ?? null;
+    return $result[0][$key] ?? null;
   }
 
   public function get_submission_by_state($state, $output_type = 'ARRAY_A', $limited = false)
