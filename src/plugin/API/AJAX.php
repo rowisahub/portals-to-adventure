@@ -111,8 +111,12 @@ class AJAX extends Client
       if($product_id > 0){
         $cart = WC()->cart;
         $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: array('submission_id' => $submission_id));
+        //$cart->check_cart_item_validity();
+
+        $this->logger->debug('Cart valid', array('valid' => $cart->check_cart_item_validity()));
     
         if($added){
+          $this->logger->debug('Product added to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'added' => $added));
           wp_send_json_success(array('message' => 'Product added to cart', 'added' => $added));
         } else {
           $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'added' => $added));
