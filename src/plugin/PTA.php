@@ -15,12 +15,12 @@ if (!defined('ABSPATH')) {
 use PTA\enqueue\Enqueue;
 use PTA\logger\Log;
 use PTA\DB\db_handler;
-use PTA\Woocommerce\Woocommerce_Extension;
+//use PTA\Woocommerce\Woocommerce_Extension;
 use PTA\Woocommerce\Woocom_Ext;
 use PTA\Update\Plugin_Updater;
 use PTA\shortcodes\Shortcodes;
 use PTA\API\AJAX;
-use PTA\API\REST;
+//use PTA\API\REST;
 use PTA\API\Restv2;
 use PTA\admin\admin_settings;
 
