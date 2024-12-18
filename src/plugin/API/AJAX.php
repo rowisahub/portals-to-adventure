@@ -105,12 +105,35 @@ class AJAX extends Client
   
     $product_id = get_option('pta_woocommerce_product_id');
     $submission_id = $_POST['submission_id'];
+
+    // ecsape the submission id
+    $submission_id = sanitize_text_field($submission_id);
+
+    $submission_data = $this->get_submission_data($submission_id);
+
+    $submission_title = $submission_data['submission_title'];
+    $submission_image = $submission_data['submission_thumbnail_url'];
+
+    $this->logger->debug('Adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'submission_title' => $submission_title));
+
   
     // Add the product to the cart
     if (class_exists('WooCommerce')) {
+
+      //$this->logger->debug($_POST['quantity']);
+      $passed = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
+
+      if(!$passed){
+        wp_send_json_error(['notices' => wc_get_notices('error')]);
+      }
+
       if($product_id > 0){
         $cart = WC()->cart;
-        $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: array('submission_id' => $submission_id));
+        $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: [
+          'submission_id' => $submission_id, 
+          'submission_title' => $submission_title,
+          'submission_image' => $submission_image
+        ]);
         //$cart->check_cart_item_validity();
 
         $this->logger->debug('Cart valid', array('valid' => $cart->check_cart_item_validity()));
@@ -132,6 +155,21 @@ class AJAX extends Client
     
     wp_die();
   
+  }
+
+  private function get_submission_data($submission_id){
+    // Get submission title, thumbnail
+    $submission = $this->submission_functions->get_submission($submission_id)[0];
+    $submission_title = $submission['title'];
+
+    $submission_thumbnail_id = $submission['image_thumbnail_id'];
+
+    $submission_thumbnail = $this->image_functions->get_image_data($submission_thumbnail_id)[0];
+
+    $submission_thumbnail_url = $submission_thumbnail['image_reference'];
+
+    return ['submission_title' => $submission_title, 'submission_thumbnail_url' => $submission_thumbnail_url];
+
   }
 
 }
