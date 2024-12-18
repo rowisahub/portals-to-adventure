@@ -16,6 +16,7 @@ use PTA\enqueue\Enqueue;
 use PTA\logger\Log;
 use PTA\DB\db_handler;
 use PTA\Woocommerce\Woocommerce_Extension;
+use PTA\Woocommerce\Woocom_Ext;
 use PTA\Update\Plugin_Updater;
 use PTA\shortcodes\Shortcodes;
 use PTA\API\AJAX;
@@ -59,7 +60,8 @@ class PTA
     $this->update = new Plugin_Updater();
 
     /* Woocommerce Extension */
-    $this->woocommerceExtension = new Woocommerce_Extension();
+    //$this->woocommerceExtension = new Woocommerce_Extension();
+    $this->woocommerceExtension = new Woocom_Ext();
 
     /* Shortcodes */
     $this->shortcodes = new Shortcodes();
