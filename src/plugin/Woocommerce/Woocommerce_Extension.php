@@ -75,6 +75,9 @@ class Woocommerce_Extension
 
   public function prefix_woocommerce_loaded()
   {
+
+    //$this->log->info('WooCommerce is loaded loaded');
+
     $this->isLoaded = true;
 
     // Display submission title in order
@@ -86,7 +89,9 @@ class Woocommerce_Extension
     // Order status completed
     add_action(hook_name: 'woocommerce_order_status_completed', callback: array($this, 'wldpta_order_status_completed'));
     // Add to cart quantity validation
-    add_filter(hook_name: 'woocommerce_add_to_cart_validation', callback: array($this, 'add_to_cart_quantity_validation_pta'), accepted_args: 3);
+    add_filter(hook_name: 'woocommerce_add_to_cart_validation', callback: array($this, 'add_to_cart_quantity_validation_pta'), accepted_args: 3, priority: 10);
+    // Check cart items quantity
+    //add_action(hook_name: 'woocommerce_check_cart_items', callback: array($this, 'check_cart_items_quantity'));
   }
 
   /**
@@ -113,7 +118,7 @@ class Woocommerce_Extension
       $submission_title = wp_unslash($submission['title']);
 
       $item_data[] = array(
-        'key' => __('Submission Title', 'your-text-domain'),
+        'key' => __('Submission Title', 'portals-to-adventure'),
         'value' => $submission_title,
         'display' => '',
       );
@@ -199,28 +204,125 @@ class Woocommerce_Extension
    */
   public function add_to_cart_quantity_validation_pta($passed, $product_id, $quantity)
   {
-    $prod_limit = get_option('wldpta_product_limit');
+    $prod_limit = get_option('wldpta_product_limit', 10);
 
     $this->log->debug('Product limit: ' . $prod_limit);
 
     // set limit on product quantity when adding to cart
-    if ($prod_limit > 0) {
-      $cart = WC()->cart->get_cart();
-      $cart_count = 0;
-      foreach ($cart as $cart_item_key => $cart_item) {
-        if ($cart_item['product_id'] == $product_id) {
-          $cart_count += $cart_item['quantity'];
-        }
-      }
-      $cart_count += $quantity;
-      if ($cart_count > $prod_limit) {
-        wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' of this product.', 'wldpta'), 'error');
-        return false;
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+      $product_id = $cart_item['product_id'];
+      $quantity = $cart_item['quantity'];
+      $submission_id = $cart_item->get_meta('submission_id');
+
+      $sub_title = $this->submission_func->get_submission_value($submission_id, 'title');
+
+      // Get the total quantity purchased by the user
+      $user_id = get_current_user_id();
+      $total_purchased = $this->get_user_product_purchase_count($user_id, $submission_id);
+
+      // if ($quantity + $total_purchased > $prod_limit) {
+      //   wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' of this product.', 'wldpta'), 'error');
+      //   WC()->cart->remove_cart_item($cart_item_key);
+      // }
+      if ($quantity + $total_purchased > $prod_limit) {
+        wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' votes for ' . $sub_title . '.', 'portals-to-adventure'), 'error');
+        WC()->cart->remove_cart_item($cart_item_key);
       }
     }
 
     return $passed;
 
+  }
+
+  public function check_cart_items_quantity()
+  {
+    $prod_limit = get_option('wldpta_product_limit', 10);
+
+    $this->log->debug('Checking cart items quantity');
+
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+      $product_id = $cart_item['product_id'];
+      $quantity = $cart_item['quantity'];
+      $submission_id = $cart_item->get_meta('submission_id');
+
+      // Get the total quantity purchased by the user
+      $user_id = get_current_user_id();
+      $total_purchased = $this->get_user_product_purchase_count($user_id, $submission_id);
+
+      // if ($quantity + $total_purchased > $prod_limit) {
+      //   wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' of this product.', 'wldpta'), 'error');
+      //   WC()->cart->remove_cart_item($cart_item_key);
+      // }
+      if ($quantity + $total_purchased > $prod_limit) {
+        wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' votes for this submission.', 'portals-to-adventure'), 'error');
+        WC()->cart->remove_cart_item($cart_item_key);
+      }
+    }
+  }
+
+  public function get_user_submissions_vote_purchased($user_id)
+  {
+    $prod_limit = get_option('wldpta_product_limit', 10);
+   
+    $this->log->debug('Getting user submission count', array('user_id' => $user_id));
+
+    $total_submissions = [];
+
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
+      $product_id = $cart_item['product_id'];
+      $quantity = $cart_item['quantity'];
+      $submission_id = $cart_item->get_meta('submission_id');
+
+      if(!isset($submission_id)){
+        continue;
+      }
+
+      // Get the total quantity purchased by the user
+      $user_id = get_current_user_id();
+      $total_purchased = $this->get_user_product_purchase_count($user_id, $submission_id);
+
+      // if ($quantity + $total_purchased > $prod_limit) {
+      //   wc_add_notice(__('You can only purchase a maximum of ' . $prod_limit . ' of this product.', 'wldpta'), 'error');
+      //   WC()->cart->remove_cart_item($cart_item_key);
+      // }
+      $total_submissions[$submission_id] = $quantity + $total_purchased;
+    }
+    
+  }
+
+  /**
+   * Checks if a user has purchased a specific product.
+   *
+   * @param int $user_id The ID of the user.
+   * @param int $submission_id The ID of the submission.
+   * @param int $product_id The ID of the product.
+   * @return int The total quantity of the product by submission purchased by the user.
+   */
+  public function get_user_product_purchase_count($user_id, $submission_id, $product_id = null)
+  {
+    $this->log->debug('Getting user product purchase count', array('user_id' => $user_id, 'product_id' => $product_id, 'submission_id' => $submission_id));
+
+    $product_id = $product_id ?? get_option('pta_woocommerce_product_id');;
+
+    $orders = wc_get_orders(array(
+      'customer_id' => $user_id,
+      'status' => array('completed', 'processing')
+    ));
+
+    $total_quantity = 0;
+
+    foreach ($orders as $order) {
+      // Get the order items
+      foreach ($order->get_items() as $item) {
+        $submission_id_check = $item->get_meta('submission_id');
+
+        if ($submission_id_check == $submission_id) {
+          $total_quantity += $item->get_quantity();
+        }
+      }
+    }
+
+    return $total_quantity;
   }
 
 }
