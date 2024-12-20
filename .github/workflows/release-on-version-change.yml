@@ -76,7 +76,7 @@ jobs:
         if: steps.check_release.outputs.needs_release == 'true'
         run: |
           rm -rf vendor/google/apiclient-services/src/* tests
-          rm -rf composer.json composer.lock .github .git structure.txt phpunit.xml
+          rm -rf composer.json composer.lock .github .git structure.txt phpunit.xml Tests
 
       - name: Release zip file
         id: release
