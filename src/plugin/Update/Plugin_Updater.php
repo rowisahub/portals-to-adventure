@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) {
 //require_once plugin_dir_path(__FILE__) . '../pta-logger.php';
 //require_once plugin_dir_path(__FILE__) . 'update-api.php';
 use PTA\logger\Log;
+use Monolog\Logger;
 
 
 // Class for handling plugin updates
@@ -29,15 +30,17 @@ class Plugin_Updater {
     private $api_url;
     private $api_download_url_base;
     private $access_token;
-    private $logger;
+
+    private Log $logger_int;
+    private Logger $logger;
 
     public function __construct() {
-      $this->logger = new Log('Updater');
+      $this->logger_int = new Log('Updater');
     }
 
     public function init($plugin_file, $repo_owner = null, $repo_name = null){
 
-      $this->logger = $this->logger->getLogger();
+      $this->logger = $this->logger_int->getLogger();
 
       // Set plugin details
       $this->plugin_file = $plugin_file;
@@ -91,11 +94,20 @@ class Plugin_Updater {
     }
 
     public function check_update($transient) {
+        //$this->logger->debug('Checking for updates, transient');
+        //$this->logger->debug(print_r($transient, true));
         if (empty($transient->checked)) {
+
             return $transient;
         }
 
         $github_response = $this->get_github_response();
+
+        $this->logger->debug('Github responce');
+        $this->logger->debug(print_r($github_response, true));
+
+        $this->logger->debug('Current version');
+        $this->logger->debug($this->current_version);
 
         if (!$github_response) {
             return $transient;
