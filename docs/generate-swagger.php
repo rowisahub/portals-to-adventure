@@ -10,7 +10,7 @@ $Paths = [
 
 
 
-$openapi = \OpenApi\Generator::scan($Paths);
+//$openapi = \OpenApi\Generator::scan($Paths);
 
 header('Content-Type: application/json');
-echo $openapi->toJson();
+//echo $openapi->toJson();
