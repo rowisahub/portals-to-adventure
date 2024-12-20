@@ -44,6 +44,7 @@ class PTA
   private $rest_v2;
   private $admin;
 
+  private $plugin_file;
 
   public function __construct()
   {
@@ -87,8 +88,10 @@ class PTA
    *
    * @return void
    */
-  public function init()
+  public function init($plugin_file_in)
   {
+
+    $this->plugin_file = $plugin_file_in;
 
     try{
 
@@ -105,24 +108,25 @@ class PTA
       $this->enqueue->add_enqueue_action();
 
       //error_log(message: 'Added enqueue action');
+      //$this->logger->info(message: 'Added enqueue action');
 
       /* Database Handler */
       $this->dbHandler->init();
 
       //error_log(message: 'Initialized database handler');
-
-      /* Update WIP */
-      //$this->update->init();
+      //$this->logger->info(message: 'Initialized database handler');
 
       /* Shortcodes */
       $this->shortcodes->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
       //error_log(message: 'Initialized shortcodes');
+      //$this->logger->info(message: 'Initialized shortcodes');
 
       /* Woocommerce Extension */
       $this->woocommerceExtension->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
       //error_log(message: 'Initialized Woocommerce Extension');
+      //$this->logger->info(message: 'Initialized Woocommerce Extension');
 
       /* Admin */
       $this->admin->init(
@@ -131,6 +135,7 @@ class PTA
       );
 
       //error_log(message: 'Initialized Admin');
+      //$this->logger->info(message: 'Initialized Admin');
 
       /* Client */
 
@@ -140,12 +145,20 @@ class PTA
       $this->rest_v2->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
       //error_log(message: 'Initialized REST API');
+      //$this->logger->info(message: 'Initialized REST API');
 
       $this->ajax->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
       //error_log(message: 'Initialized AJAX API');
+      //$this->logger->info(message: 'Initialized AJAX API');
 
       //$this->logger->info(message: 'Portals to Adventure plugin has been initialized.');
+
+      /* Update WIP */
+      $this->update->init($this->plugin_file);
+
+      //error_log(message: 'Initialized Update');
+      //$this->logger->info(message: 'Initialized Update');
 
     } catch (\Exception $e) {
       $this->logger->error('Portals to Adventure plugin encountered an error: ' . $e->getMessage());
@@ -153,9 +166,9 @@ class PTA
 
   }
 
-  public function register_activation($plugin_file)
+  public function register_activation()
   {
-    $this->dbHandler->register_activation($plugin_file);
+    $this->dbHandler->register_activation($this->plugin_file);
   }
 
   public function get_instance($name)
