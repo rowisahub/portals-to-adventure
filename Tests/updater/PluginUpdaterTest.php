@@ -13,7 +13,8 @@ class PluginUpdaterTest extends TestCase
     {
         parent::setUp();
         
-        $this->updater = new Plugin_Updater(
+        $this->updater = new Plugin_Updater();
+        $this->updater->init(
             __DIR__ . '/test-plugin.php',
             'test-user',
             'test-repo'

@@ -38,7 +38,7 @@ class Plugin_Updater {
     public function init($plugin_file, $repo_owner = null, $repo_name = null){
 
       $this->logger = $this->logger->getLogger();
-      
+
       // Set plugin details
       $this->plugin_file = $plugin_file;
       $this->repo_owner = $repo_owner ?? $this->repo_owner;
@@ -70,7 +70,7 @@ class Plugin_Updater {
         if (!function_exists('get_plugin_data')) {
             require_once(ABSPATH . 'wp-admin/includes/plugin.php');
         }
-        $plugin_data = get_plugin_data(plugin_file: $this->plugin_file, translate: false);
+        $plugin_data = get_plugin_data($this->plugin_file, true, false);
         return $plugin_data['Version'];
     }
 
