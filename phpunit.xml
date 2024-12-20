@@ -1,4 +1,5 @@
-<phpunit bootstrap="tests/bootstrap.php"
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="Tests/bootstrap.php"
          colors="true"
          stopOnFailure="false">
     <php>
@@ -8,7 +9,7 @@
     </php>
     <testsuites>
         <testsuite name="PTA Plugin Test Suite">
-            <directory>./tests</directory>
+            <directory>./Tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>
