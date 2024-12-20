@@ -85,7 +85,7 @@ jobs:
           VERSION=${{ steps.current_version.outputs.current_version }}
           PLUGIN_DIR=.
           # Create zip file
-          ZIP_NAME="pta-v${VERSION}.zip"
+          ZIP_NAME="portals-to-adventure-${VERSION}.zip"
           zip -r "$ZIP_NAME" "$PLUGIN_DIR"
           echo "zip_name=$ZIP_NAME" >> "$GITHUB_OUTPUT"
 
