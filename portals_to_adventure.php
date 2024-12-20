@@ -38,14 +38,14 @@ try{
       //error_log(message: 'Portals to Adventure plugin is working');
       //error_log($_SERVER['REQUEST_URI']);
       $PTA = new PTA();
-      $PTA->init();
-      $PTA->register_activation(__FILE__);
+      $PTA->init(__FILE__);
+      $PTA->register_activation();
     } catch (\Exception $e) {
       add_action('admin_notices', function () use ($e) {
         ?>
         <div class="notice notice-error">
           <p>
-            <?php _e('Portals to Adventure plugin encountered an error: ' . $e->getMessage(), 'pta'); ?>
+            <?php _e('Portals to Adventure plugin encountered an error: ' . $e->getMessage()); ?>
           </p>
         </div>
         <?php
