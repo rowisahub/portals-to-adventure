@@ -57,6 +57,10 @@ class Plugin_Updater {
 
       $this->access_token = get_option('pta_github_fg_token');
 
+      if(!$this->access_token){
+        $this->logger->warning('No access token found');
+        return;
+      }
 
       $this->register_hooks();
 
@@ -103,8 +107,8 @@ class Plugin_Updater {
 
         $github_response = $this->get_github_response();
 
-        $this->logger->debug('Github responce');
-        $this->logger->debug(print_r($github_response, true));
+       // $this->logger->debug('Github responce');
+        //$this->logger->debug(print_r($github_response, true));
 
         $this->logger->debug('Current version');
         $this->logger->debug($this->current_version);
@@ -114,6 +118,7 @@ class Plugin_Updater {
         }
 
         $latest_version = ltrim($github_response->tag_name, 'v');
+        $zip_url = $github_response->assets[0]->browser_download_url;
 
         if (version_compare($this->current_version, $latest_version, '<')) {
             $plugin = array(
@@ -121,7 +126,7 @@ class Plugin_Updater {
                 'plugin' => $this->plugin_slug,
                 'new_version' => $latest_version,
                 'url' => $github_response->html_url,
-                'package' => $github_response->zipball_url
+                'package' => $zip_url
             );
 
             $transient->response[$this->plugin_slug] = (object) $plugin;
