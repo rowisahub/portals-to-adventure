@@ -121,6 +121,8 @@ class Plugin_Updater {
         $zip_url = $github_response->assets[0]->browser_download_url;
 
         if (version_compare($this->current_version, $latest_version, '<')) {
+            $this->logger->info('Update available: ' . $latest_version);
+            
             $plugin = array(
                 'slug' => $this->plugin_slug,
                 'plugin' => $this->plugin_slug,
@@ -150,13 +152,15 @@ class Plugin_Updater {
             return $false;
         }
 
+        $zip_url = $github_response->assets[0]->browser_download_url;
+
         $plugin_info = array(
             'name' => basename($this->plugin_slug, '.php'),
             'slug' => basename($this->plugin_slug, '.php'),
             'version' => ltrim($github_response->tag_name, 'v'),
             'author' => $github_response->author->login,
             'homepage' => $github_response->html_url,
-            'download_link' => $github_response->zipball_url,
+            'download_link' => $zip_url,
             'requires' => '5.0',
             'tested' => get_bloginfo('version'),
             'last_updated' => $github_response->published_at,
@@ -201,6 +205,8 @@ class Plugin_Updater {
         if (strpos($package, 'api.github.com') === false) {
             return $reply;
         }
+
+        $this->logger->debug('Downloading package from GitHub...');
 
         $upgrader->strings['downloading_package'] = 'Downloading package from GitHub...';
 
