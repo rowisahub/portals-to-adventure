@@ -46,7 +46,7 @@ class SubmissionDataTable implements TableInterface
             removed_reason text DEFAULT NULL,
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
-            FOREIGN KEY  (user_owner_id) REFERENCES $user_info_path(id) ON DELETE CASCADE
+            KEY user_owner_id (user_owner_id)
         ) $this->charset_collate;";
 
         $this->table_schema = $sql_submission_data;
@@ -156,18 +156,30 @@ class SubmissionDataTable implements TableInterface
      * @return bool True if the table was upgraded, false otherwise.
      */
     public function upgrade_table()
-    {
-        //$this->logger->debug('Upgrading submission data table');
+  {
+    //$this->logger->debug('Upgrading image data table');
 
-        $result = dbDelta($this->table_schema);
+    // Store original error counts
+    $initial_errors = $this->wpdb->num_queries ? count($this->wpdb->queries_errors) : 0;
 
-        if (!empty($this->wpdb->last_error)) {
-            $this->logger->error($this->wpdb->last_error);
-            return false;
-        }
+    $result = dbDelta($this->table_schema);
 
-        //$this->logger->info('Image submission data upgraded');
-
-        return true;
+    // Check for new errors
+    if ($this->wpdb->last_error) {
+      $this->logger->error("Error upgrading {$this->table_name} table: " . $this->wpdb->last_error);
+      return false;
     }
+
+
+    // Log changes if any were made
+    if (!empty($result)) {
+      $this->logger->info("Changes made to {$this->table_name} table: " . print_r($result, true));
+    } else {
+        $this->logger->debug("No changes required for {$this->table_name} table");
+    }
+
+    //$this->logger->info('Image data table upgraded');
+
+    return true;
+  }
 }

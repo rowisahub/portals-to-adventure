@@ -37,8 +37,8 @@ class ImageDataTable implements TableInterface
             is_map tinyint(1) DEFAULT 0,
             created_at timestamp DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (image_id),
-            FOREIGN KEY  (user_id) REFERENCES $user_info_path(id) ON DELETE CASCADE,
-            FOREIGN KEY  (submission_id) REFERENCES $submission_data_path(id) ON DELETE CASCADE
+            KEY user_id (user_id),
+            KEY submission_id (submission_id)
         ) $this->charset_collate;";
 
     $this->table_schema = $sql_image_data;
@@ -153,11 +153,23 @@ class ImageDataTable implements TableInterface
   {
     //$this->logger->debug('Upgrading image data table');
 
+    // Store original error counts
+    $initial_errors = $this->wpdb->num_queries ? count($this->wpdb->queries_errors) : 0;
+
     $result = dbDelta($this->table_schema);
 
-    if (!empty($this->wpdb->last_error)) {
-      $this->logger->error($this->wpdb->last_error);
+    // Check for new errors
+    if ($this->wpdb->last_error) {
+      $this->logger->error("Error upgrading {$this->table_name} table: " . $this->wpdb->last_error);
       return false;
+    }
+
+
+    // Log changes if any were made
+    if (!empty($result)) {
+      $this->logger->info("Changes made to {$this->table_name} table: " . print_r($result, true));
+    } else {
+        $this->logger->debug("No changes required for {$this->table_name} table");
     }
 
     //$this->logger->info('Image data table upgraded');

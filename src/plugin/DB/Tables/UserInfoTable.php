@@ -143,16 +143,28 @@ class UserInfoTable implements TableInterface
    */
   public function upgrade_table()
   {
-    //$this->logger->debug('Upgrading user info table');
+    //$this->logger->debug('Upgrading image data table');
+
+    // Store original error counts
+    $initial_errors = $this->wpdb->num_queries ? count($this->wpdb->queries_errors) : 0;
 
     $result = dbDelta($this->table_schema);
 
-    if (!empty($this->wpdb->last_error)) {
-      $this->logger->error($this->wpdb->last_error);
+    // Check for new errors
+    if ($this->wpdb->last_error) {
+      $this->logger->error("Error upgrading {$this->table_name} table: " . $this->wpdb->last_error);
       return false;
     }
 
-    //$this->logger->info('Image user info upgraded');
+
+    // Log changes if any were made
+    if (!empty($result)) {
+      $this->logger->info("Changes made to {$this->table_name} table: " . print_r($result, true));
+    } else {
+        $this->logger->debug("No changes required for {$this->table_name} table");
+    }
+
+    //$this->logger->info('Image data table upgraded');
 
     return true;
   }
