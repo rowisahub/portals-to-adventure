@@ -143,7 +143,7 @@ class UserInfoTable implements TableInterface
    */
   public function upgrade_table()
   {
-    $this->logger->debug('Upgrading user info table');
+    //$this->logger->debug('Upgrading user info table');
 
     $result = dbDelta($this->table_schema);
 
@@ -152,7 +152,7 @@ class UserInfoTable implements TableInterface
       return false;
     }
 
-    $this->logger->info('Image user info upgraded');
+    //$this->logger->info('Image user info upgraded');
 
     return true;
   }

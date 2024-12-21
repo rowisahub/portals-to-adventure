@@ -151,7 +151,7 @@ class ImageDataTable implements TableInterface
    */
   public function upgrade_table()
   {
-    $this->logger->debug('Upgrading image data table');
+    //$this->logger->debug('Upgrading image data table');
 
     $result = dbDelta($this->table_schema);
 
@@ -160,7 +160,7 @@ class ImageDataTable implements TableInterface
       return false;
     }
 
-    $this->logger->info('Image data table upgraded');
+    //$this->logger->info('Image data table upgraded');
 
     return true;
   }
