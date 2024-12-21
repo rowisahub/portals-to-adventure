@@ -157,7 +157,7 @@ class SubmissionDataTable implements TableInterface
      */
     public function upgrade_table()
     {
-        $this->logger->info('Upgrading image data table');
+        $this->logger->debug('Upgrading image data table');
 
         $result = dbDelta($this->table_schema);
 
