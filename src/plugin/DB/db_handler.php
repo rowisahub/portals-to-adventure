@@ -33,7 +33,7 @@ class db_handler implements DBHandlerInterface
   private $functions;
 
   // Database version
-  private $db_version = '1.0';
+  private $db_version = '1.0.3';
 
   // Tables
   private $wld_prefix = 'wld_pta_';
@@ -78,7 +78,7 @@ class db_handler implements DBHandlerInterface
     $this->logger = $this->logger->getLogger();
 
     $this->update = $update ?? new db_update($this);
-    $this->backup = $backup ?? new db_backup();
+    $this->backup = $backup ?? new db_backup($this->wpdb);
     $this->functions = $functions ?? new db_functions();
   }
 

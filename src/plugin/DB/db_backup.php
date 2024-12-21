@@ -30,15 +30,18 @@ class db_backup implements BackupInterface
     'image_data'
   ];
 
-  public function __construct()
+  private $wpdb;
+
+  public function __construct($wpdbIn)
   {
-    global $wpdb;
+    $this->wpdb = $wpdbIn;
+
     $upload_dir = wp_upload_dir();
-    $this->backup_dir = trailingslashit($upload_dir['basedir']) . 'pta/backups/';
+    $this->backup_dir = trailingslashit($upload_dir['basedir']) . 'portals_to_adventure-uploads/backups/';
 
     $this->log = new log('DB.Backup');
 
-    $this->full_prefix = $wpdb->prefix . $this->wld_prefix;
+    $this->full_prefix = $this->wpdb->prefix . $this->wld_prefix;
 
     //$this->log->info('Database backup class initialized');
   }
@@ -56,8 +59,10 @@ class db_backup implements BackupInterface
    */
   public function create_backup()
   {
-    $this->log->info('Creating database backup');
-    global $wpdb;
+    $this->log->debug('Creating database backup');
+    //global $wpdb;
+
+    $wpdb = $this->wpdb;
 
     $backup = '';
     foreach ($this->tables_to_backup as $table) {
@@ -99,7 +104,7 @@ class db_backup implements BackupInterface
       }
     }
 
-    $this->log->info('Database backup created');
+    $this->log->debug('Database backup created');
 
     return $backup;
   }
@@ -113,13 +118,14 @@ class db_backup implements BackupInterface
    */
   public function save_backup($sql, $compress = false)
   {
-    $this->log->info('Saving database backup to file');
+    $this->log->debug('Saving database backup to file');
     $backup_file = $this->backup_dir . 'backup-' . date('Y-m-d-H-i-s') . '.sql';
 
     // Check if the backup directory exists
     if (!file_exists($this->backup_dir)) {
       if (!wp_mkdir_p($this->backup_dir)) {
-        wp_die(__('Failed to create backup directory.', 'pta-plugin'));
+        //wp_die(__('Failed to create backup directory.', 'portals-to-adventure'));
+        return false;
       }
       $this->log->info('Backup directory created');
     }
@@ -148,7 +154,7 @@ class db_backup implements BackupInterface
 
     }
 
-    $this->log->info("Backup saved successfully at {$backup_file}");
+    $this->log->debug("Backup saved successfully at {$backup_file}");
 
     return $backup_file;
 
@@ -172,6 +178,8 @@ class db_backup implements BackupInterface
       $this->log->error('Failed to save database backup');
       return false;
     }
+
+    $this->log->info('Database backup process completed successfully');
 
     return true;
   }

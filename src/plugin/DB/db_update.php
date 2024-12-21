@@ -46,13 +46,14 @@ class db_update implements UpdateInterface
 
   public function after_plugin_load()
   {
+    //$this->logger->debug('Checking for database updates');
+
     $IfUpdate = $this->check_for_updates();
     if ($IfUpdate) {
 
       $this->logger->info('New database updates found');
 
       if ($this->backup_db()) {
-        $this->logger->debug('Database backup created successfully');
 
         $this->update_db();
 
@@ -71,18 +72,21 @@ class db_update implements UpdateInterface
    */
   private function backup_db()
   {
-    return $this->handler_instance->get_instance('backup')->create_backup();
+    return $this->handler_instance->get_instance('backup')->perform_backup();
+    //return false;
   }
 
   private function update_db()
   {
-    global $wpdb;
     $current_table_schemas = $this->handler_instance->get_table('all');
 
-    foreach ($current_table_schemas as $table_name) {
+    foreach ($current_table_schemas as $table) {
+      $table_name = $table->get_table_name();
+
       $this->logger->debug('Checking table: ' . $table_name);
 
-      $result = $table_name->update_table();
+      
+      $result = $table->upgrade_table();
 
       if ($result === false) {
         $this->logger->error("Failed to update table: {$table_name}");
