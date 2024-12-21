@@ -154,7 +154,7 @@ class ImageDataTable implements TableInterface
     //$this->logger->debug('Upgrading image data table');
 
     // Store original error counts
-    $initial_errors = $this->wpdb->num_queries ? count($this->wpdb->queries_errors) : 0;
+    //$initial_errors = $this->wpdb->num_queries ? count($this->wpdb->queries_errors) : 0;
 
     $result = dbDelta($this->table_schema);
 
