@@ -154,10 +154,19 @@ class Enqueue implements PTAEnqueueInterface
     );
     $api_data_json = wp_json_encode($api_data);
 
+    // Contest data
+    $contest_data = [
+      'is_contest_active' => $this->check_contest_date(),
+      'contest_state' => $this->check_contest_state(),
+      'contest_start_date' => get_option('pta_clock_start_date'),
+      'contest_end_date' => get_option('pta_clock_end_date')
+    ];
+    $contest_data_json = json_encode($contest_data);
+
     /* Enqueue inlined scripts */
     wp_add_inline_script(
       handle: 'pta-api',
-      data: "const pta_api_data = $api_data_json; const ajax_object = $ajax_object_json; const user_data = $user_data_json;",
+      data: "const pta_api_data = $api_data_json; const ajax_object = $ajax_object_json; const user_data = $user_data_json; const contest_data = $contest_data_json;",
       position: 'before'
     );
 
@@ -168,5 +177,39 @@ class Enqueue implements PTAEnqueueInterface
     */
 
     //
+  }
+
+  private function check_contest_date()
+  {
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    if ($pta_clock_start_date && $pta_clock_end_date) {
+      $current_date = date('Y-m-d H:i:s');
+      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private function check_contest_state()
+  {
+    // return 'active', 'pre', 'post'
+
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    if ($pta_clock_start_date && $pta_clock_end_date) {
+      $current_date = date('Y-m-d H:i:s');
+      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        return 'active';
+      } else if ($current_date < $pta_clock_start_date) {
+        return 'pre';
+      } else {
+        return 'post';
+      }
+    }
   }
 }

@@ -2,6 +2,36 @@ var loadedSubmissions = null;
 
 
 document.addEventListener('DOMContentLoaded', async function () {
+
+  if(!contest_data.is_contest_active){
+    // Show the contest over message with alert
+    var contestState = contest_data.contest_state; // active, pre, post
+    var contest_start_date = new Date(contest_data.contest_start_date);
+    var contest_end_date = new Date(contest_data.contest_end_date);
+  
+    var contestOverMessage = document.createElement('div');
+    contestOverMessage.classList.add('contest-warning');
+    contestOverMessage.classList.add('text-center');
+    contestOverMessage.classList.add('mt-4');
+    contestOverMessage.classList.add('mb-4');
+    contestOverMessage.innerHTML = '';
+
+    if(contestState === 'pre'){
+      contestOverMessage.innerHTML = 'The contest has not started. Please come back ' + contest_start_date.toLocaleString();
+    } else if(contestState === 'post'){
+      contestOverMessage.innerHTML = 'The contest ended ' + contest_end_date.toLocaleString() + '. Thank you for participating.';
+    }
+
+    // add the message to 'entry-content' as the first child
+    document.getElementsByClassName('entry-content')[0].insertBefore(contestOverMessage, document.getElementsByClassName('entry-content')[0].firstChild);
+
+    if(!pta_api_data.user_admin){
+      document.getElementsByClassName('form-container')[0].classList.add('hide');
+
+      return;
+    }
+  }
+
   submissionChanges();
   try {
     var SelectList = document.getElementById('secret-doors-list');

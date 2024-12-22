@@ -2,6 +2,7 @@
 namespace PTA\API\REST;
 
 use PTA\API\Restv2;
+use PTA\DB\QueryBuilder;
 
 class Contest
 {
@@ -92,6 +93,39 @@ class Contest
     $return_data['errors'] = $errors;
 
     return rest_ensure_response($return_data);
+  }
+
+  public function get_leaderboard(\WP_REST_Request $request)
+  {
+    $user = wp_get_current_user();
+    //$user_primary_role = $this->restv2->permissionChecker->get_user_role($user);
+
+    $errors = [];
+
+    $return_data = [];
+
+    // Get the Highest Rated Submissions with the ability to filter by date range
+    
+
+    //return rest_ensure_response($return_data);
+  }
+
+  private function get_submissions_leaderboard()
+  {
+    $query = new QueryBuilder($this->restv2->db_handler_instance->get_wpdb());
+    
+    $query->select(['id', 'views', 'likes_votes', 'state', 'user_owner_id'])
+      ->from($this->restv2->db_handler_instance->get_table_path('submission_data'))
+      ->where(['state' => 'Approved'])
+      ->limit(10);
+    
+    
+
+    //return $submissions;
+  }
+
+  private function get_most_voted_submission_24h(){
+    
   }
 
   private function get_total_woocommerce_net_sales()

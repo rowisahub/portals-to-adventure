@@ -28,6 +28,15 @@ class PermissionChecker
             return new \WP_Error('invalid_nonce', 'Invalid nonce.', array('status' => 403));
         }
 
+        /* Date check */
+        if (!$this->check_contest_date()) {
+            if(!current_user_can('administrator') && !current_user_can('editor')){
+                return new \WP_Error('contest_inactive', 'Contest is not active.', array('status' => 403));
+            } else {
+                return true;
+            }
+        }
+
         return true;
     }
 
@@ -131,5 +140,20 @@ class PermissionChecker
 
     return $results;
 
+  }
+
+  private function check_contest_date()
+  {
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    if ($pta_clock_start_date && $pta_clock_end_date) {
+      $current_date = date('Y-m-d H:i:s');
+      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

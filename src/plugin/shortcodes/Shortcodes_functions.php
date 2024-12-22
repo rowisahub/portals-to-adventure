@@ -85,6 +85,10 @@ class Shortcodes_functions
                 return;
             }
 
+            if(!$this->check_contest_date() && !current_user_can('administrator') && !current_user_can('editor')){
+                return;
+            }
+
             //error_log('POST: ' . print_r($_POST, true));
 
             $user_id = get_current_user_id();
@@ -310,6 +314,10 @@ class Shortcodes_functions
     {
         if (isset($_POST['update_submission']) || isset($_POST['submission_edit_form'])) {
             if (!is_user_logged_in()) {
+                return;
+            }
+
+            if(!$this->check_contest_date() && !current_user_can('administrator') && !current_user_can('editor')){
                 return;
             }
 
@@ -540,4 +548,37 @@ class Shortcodes_functions
         }
     }
 
+    private function check_contest_date()
+  {
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    if ($pta_clock_start_date && $pta_clock_end_date) {
+      $current_date = date('Y-m-d H:i:s');
+      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private function check_contest_state()
+  {
+    // return 'active', 'pre', 'post'
+
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    if ($pta_clock_start_date && $pta_clock_end_date) {
+      $current_date = date('Y-m-d H:i:s');
+      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        return 'active';
+      } else if ($current_date < $pta_clock_start_date) {
+        return 'pre';
+      } else {
+        return 'post';
+      }
+    }
+  }
 }
