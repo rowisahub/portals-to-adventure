@@ -115,6 +115,11 @@ class Shortcodes
           null
         );
 
+        if($user_id == null){
+          // error_log('Error creating user');
+          //return '<p>Error creating user.</p>';
+        }
+
         // error_log('Added user to db: ' . $user_id);
       }
 
