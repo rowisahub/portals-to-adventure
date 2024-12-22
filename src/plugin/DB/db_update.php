@@ -91,7 +91,7 @@ class db_update implements UpdateInterface
       if ($result === false) {
         $this->logger->error("Failed to update table: {$table_name}");
       } else {
-        $this->logger->info("Table {$table_name} updated successfully");
+        $this->logger->debug("Table {$table_name} updated successfully");
       }
     }
 
