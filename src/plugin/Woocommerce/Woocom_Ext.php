@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
   
 /* Requires */
 use PTA\client\Client;
+use PTA\API\SSE;
 
 /**
  * Class Woocom_Ext
@@ -21,6 +22,7 @@ class Woocom_Ext extends Client{
     public bool $isWooCommerceActive = false;
     private Woocom_order_status $order_status;
     private Woocom_cart $cart;
+    public SSE $sse;
 
     public function __construct()
     {
@@ -30,6 +32,9 @@ class Woocom_Ext extends Client{
     public function register_hooks()
     {
         add_action(hook_name: 'woocommerce_loaded', callback: array($this, 'woocommerce_loaded'));
+
+        // $this->sse = new SSE();
+        // $this->sse = $this->sse->get_instance();
     }
 
     public function woocommerce_loaded()
@@ -183,14 +188,59 @@ class Woocom_cart {
     }
 
     public function add_to_cart_validation($passed, $product_id, $quantity){
-        $this->woocom_ext->logger->debug('Adding to cart validation');
+        $max_quantity = 10; // Set your maximum quantity here
+
+        // Get the current quantity of the product in the cart
+        $cart = WC()->cart->get_cart();
+        $current_quantity = 0;
+        foreach ($cart as $cart_item) {
+            if ($cart_item['product_id'] == $product_id) {
+                $current_quantity += $cart_item['quantity'];
+            }
+        }
+
+        // Check if the total quantity exceeds the maximum quantity
+        if (($current_quantity + $quantity) > $max_quantity) {
+            wc_add_notice(__('You can only purchase a maximum of ' . $max_quantity . ' of this product.', 'portals-to-adventure'), 'error');
+            return false;
+        }
 
         return $passed;
     }
 
     public function add_to_cart($cart){
-        $this->woocom_ext->logger->debug('Adding to cart');
+        //$this->woocom_ext->logger->debug('Adding to cart');
         // works
+        // show the The submission ID and qunitity of the items in the cart
+        foreach($cart->get_cart() as $cart_item){
+            $submission_id = $cart_item['submission_id'];
+            $quantity = $cart_item['quantity'];
+            //$this->woocom_ext->logger->debug('Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
+
+            if($quantity > 10){
+
+                wc_add_notice(__('You can only purchase up to 10 of each submission.', 'portals-to-adventure'), 'error');
+
+                $cart_item_key = $cart_item['key'];
+
+                $cart->set_quantity($cart_item_key, 10);
+
+                $this->woocom_ext->sse->send_message('You can only purchase up to 10 of each submission.', 'error');
+                
+                // update mini cart
+                //$cart->calculate_totals();
+
+                // update cart
+                //$cart->calculate_totals();
+                //WC()->cart->calculate_totals();
+                //WC_AJAX::get_refreshed_fragments();
+
+
+
+            }
+        }
+
+        //
     }
 
 }

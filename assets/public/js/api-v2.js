@@ -219,6 +219,75 @@ var PTA_API = (function ($) {
         return true;
     }
 
+    const sseConnect = () => {
+        if ('EventSource' in window) {
+            const eventSource = new EventSource(
+                `${ajax_object.ajax_url}?action=wldpta_sse`,
+                { withCredentials: true }
+            );
+
+            console.log('Initial ReadyState:', eventSource.readyState);
+
+            console.log('EventSource:', eventSource);
+
+            const checkState = () => {
+                switch(eventSource.readyState) {
+                    case EventSource.CONNECTING: // 0
+                        console.log('Connecting...');
+                        break;
+                    case EventSource.OPEN: // 1
+                        console.log('Connection established');
+                        break;
+                    case EventSource.CLOSED: // 2
+                        console.log('Connection closed');
+                        break;
+                }
+            };
+        
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Received:', data);
+                // Handle event data here
+            };
+        
+            eventSource.onerror = (error) => {
+                console.error('SSE Error:', error);
+                eventSource.close();
+            };
+        
+            eventSource.addEventListener('message', (event) => {
+                const data = JSON.parse(event.data);
+                console.log('Received2:', data);
+                // Handle event data here
+            });
+        
+            eventSource.addEventListener('error', (error) => {
+                console.error('SSE Error2:', error);
+                eventSource.close();
+            });
+        
+            eventSource.addEventListener('open', (event) => {
+                console.log('SSE Connection opened:', event);
+            });
+            
+            eventSource.addEventListener('close', (event) => {
+                console.log('SSE Connection closed:', event);
+            });
+
+            // every 5 seconds, check the state of the connection
+            setInterval(checkState, 5000);
+
+            return eventSource;
+    
+        }
+    };
+
+    // Initialize SSE when document is ready
+    // $(document).ready(() => {
+    //     console.log('Document ready');
+    //     sseConnect();
+    // });
+
     return {
         getSubmissions: getSubmissions,
         getSubmissionDetails: getSubmissionDetails,
