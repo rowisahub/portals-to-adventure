@@ -35,6 +35,7 @@ class Woocom_Ext extends Client{
 
         // $this->sse = new SSE();
         // $this->sse = $this->sse->get_instance();
+        // $this->sse->register_hooks();
     }
 
     public function woocommerce_loaded()

@@ -6,6 +6,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Requires
+use PTA\logger\Log;
+
 /**
  * Class SSE
  *
@@ -15,9 +18,14 @@ if (!defined('ABSPATH')) {
  */
 class SSE {
     private static $instance = null;
+    private $logger;
 
     public function __construct()
     {
+
+        $log = new Log(name: "SSE");
+        $this->logger = $log->getLogger();
+
         if (self::$instance == null) {
             self::$instance = $this;
         }
@@ -30,31 +38,90 @@ class SSE {
     }
 
     public function wldpta_sse() {
-        try {
-            header('Content-Type: text/event-stream');
-            header('Cache-Control: no-cache');
-            header('Connection: keep-alive');
-            header('X-Accel-Buffering: no'); 
+        $this->logger->debug('SSE request received');
 
+        try {
+
+            // Close session early to prevent blocking
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            // Set execution parameters safely
+            ignore_user_abort(true);
+            set_time_limit(0);
+
+            // Force PHP to send headers immediately
+            // ini_set('implicit_flush', 1);
+            // ini_set('output_buffering', 'Off');
+
+            nocache_headers(); // WordPress function for cache control
+            header('X-Accel-Buffering: no'); 
+            header('Content-Type: text/event-stream');
+            //header('Cache-Control: no-cache');
+            header('Connection: keep-alive');
+
+            // header('Pragma: no-cache');
+            // header('Expires: 0');
+            
+            // Turn off output buffering completely
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+            
             // Send initial connection event
             echo "event: connection\n";
             echo "data: " . json_encode(['status' => 'connected']) . "\n\n";
-            ob_end_flush();
+            ob_flush();
             flush();
 
+            $counter = 0;
+            $lastPingTime = time();
+            // Keep connection alive
             while (true) {
-                if (connection_aborted()) break;
-        
-                $data = [
-                    'timestamp' => time(),
-                    'type' => 'heartbeat'
-                ];
-        
-                echo "data: " . json_encode($data) . "\n\n";
-                flush();
+                if (connection_aborted()) {
+                    $this->logger->debug('Connection aborted');
+                    
+                    break;
+                }
+
+                // Send heartbeat every 5 seconds
+                if ((time() - $lastPingTime) >= 5) {
+                    $this->logger->debug('Sending heartbeat');
+                    $lastPingTime = time();
+
+                    echo "event: heartbeat\n";
+                    echo "data: " . json_encode(['time' => time()]) . "\n\n";
+                    ob_flush();
+                    flush();
+                    
+
+                    if($counter == 3) {
+                        $this->logger->debug('Ending connection');
+                        echo "event: close\n";
+                        echo "data: " . json_encode(['status' => 'disconnected']) . "\n\n";
+                        ob_flush();
+                        flush();
+                        
+                        break;
+                    }
+
+                    $counter++;
+                }
+
+                // Small sleep to prevent CPU overload
+                
+
+                // if($counter == 10) {
+                //     $this->logger->debug('Ending connection');
+                //     echo "event: close\n";
+                //     echo "data: " . json_encode(['status' => 'disconnected']) . "\n\n";
+                //     flush();
+                // }
+            
+                //usleep(100000); // 100ms delay
                 sleep(1);
             }
-            exit();
         } catch (\Exception $e) {
             error_log('SSE Error: ' . $e->getMessage());
             http_response_code(500);
