@@ -9,7 +9,6 @@ if (!defined('ABSPATH')) {
   
 /* Requires */
 use PTA\client\Client;
-use PTA\API\SSE;
 
 /**
  * Class Woocom_Ext
@@ -22,7 +21,6 @@ class Woocom_Ext extends Client{
     public bool $isWooCommerceActive = false;
     private Woocom_order_status $order_status;
     private Woocom_cart $cart;
-    public SSE $sse;
 
     public function __construct()
     {
@@ -32,10 +30,6 @@ class Woocom_Ext extends Client{
     public function register_hooks()
     {
         add_action(hook_name: 'woocommerce_loaded', callback: array($this, 'woocommerce_loaded'));
-
-        // $this->sse = new SSE();
-        // $this->sse = $this->sse->get_instance();
-        // $this->sse->register_hooks();
     }
 
     public function woocommerce_loaded()
@@ -226,7 +220,7 @@ class Woocom_cart {
 
                 $cart->set_quantity($cart_item_key, 10);
 
-                $this->woocom_ext->sse->send_message('You can only purchase up to 10 of each submission.', 'error');
+                //$this->woocom_ext->sse->send_message('You can only purchase up to 10 of each submission.', 'error');
                 
                 // update mini cart
                 //$cart->calculate_totals();
