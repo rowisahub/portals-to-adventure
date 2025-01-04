@@ -102,6 +102,8 @@ class admin_settings extends Client
             update_option('pta_clock_end_date', $_POST['pta_clock_end_date']);
             update_option('pta_percentage_prize_total', $_POST['pta_percentage_prize_total']);
 
+
+
             // Display a success message
             echo '<div class="updated"><p>Settings saved.</p></div>';
         }
@@ -283,7 +285,8 @@ class admin_settings extends Client
                             <input type="datetime-local" name="pta_clock_end_date"
                                 value="<?php echo esc_attr($pta_clock_end_date); ?>" min="<?php echo date('Y-m-d\TH:i'); ?>" />
                         </td>
-                        <!-- Percentage Prize Total -->
+                    </tr>
+                    <!-- Percentage Prize Total -->
                     <tr>
                         <th scope="row">Percentage Of Profits Displayed As Prize Total</th>
                         <td>
@@ -291,7 +294,15 @@ class admin_settings extends Client
                                 value="<?php echo esc_attr($pta_percentage_prize_total); ?>" max="100" />%
                         </td>
                     </tr>
-
+                    <!-- Generate database backup key -->
+                    <tr>
+                        <th scope="row">Generate Database Backup Key</th>
+                        <!-- Have a button that will display 'base64_encode(sodium_crypto_secretbox_keygen())' -->
+                        <td>
+                            <button type="button" id="generate_key">Generate Key</button>
+                        </td>
+                        
+                    </tr>
                 </table>
                 <script>
                     function toggleVisibility() {
@@ -302,6 +313,11 @@ class admin_settings extends Client
                             x.type = "password";
                         }
                     }
+
+                    document.getElementById("generate_key").addEventListener("click", function () {
+                        var key = "<?php echo base64_encode(sodium_crypto_secretbox_keygen()); ?>";
+                        alert("!!REMEMBER TO SAVE THIS KEY PHYSICALLY!! Please copy this key and paste it into the wp-config.php file. | " + "define('PTA_BACKUP_ENCRYPTION_KEY', '" + key + "');");
+                    });
                 </script>
                 <?php submit_button(); ?>
             </form>
@@ -554,16 +570,53 @@ class admin_settings extends Client
             // } else {
             //   echo '<div class="error"><p>Backup failed.</p></div>';
             // }
+
+            // only run backup if run backup is clicked
+            if(isset($_POST['action']) && $_POST['action'] == 'Run Backup Now') {
+                // Run the backup
+                $compression = isset($_POST['compression']) ? true : false;
+                $encryption = isset($_POST['encryption']) ? true : false;
+
+                $backup_result = $this->db_handler_instance->get_instance('backup')->perform_backup($compression, $encryption);
+
+                if ($backup_result) {
+                    echo '<div class="updated"><p>Backup completed successfully.</p></div>';
+                } else {
+                    echo '<div class="error"><p>Backup failed.</p></div>';
+                }
+            } elseif(isset($_POST['action']) && $_POST['action'] == 'Restore Backup') {
+                // Restore the backup
+                // check if a file is uploaded
+
+                //$this->logger->debug('Restore Backup', $_FILES);
+
+                if(!empty($_FILES['backup_file']['name'][0])) {
+
+                    $backup_file = $_FILES['backup_file'];
+                    $restore_result = $this->db_handler_instance->get_instance('backup')->restore_backup($backup_file);
+
+                    if ($restore_result) {
+                        echo '<div class="updated"><p>Backup restored successfully.</p></div>';
+                    } else {
+                        echo '<div class="error"><p>Backup restore failed.</p></div>';
+                    }
+                } else {
+                    echo '<div class="error"><p>No backup file selected.</p></div>';
+                }
+            }
+
+
+            // check action for backing up or restoring by submission name
+
         }
 
         ?>
         <div class="wrap">
             <h1><?php _e('PTA Plugin Settings', 'pta-plugin'); ?></h1>
-            <form method="post" action="">
+            <form method="post" enctype="multipart/form-data">
                 <?php
                 // Add a hidden field to specify the action
                 ?>
-                <input type="hidden" name="action" value="pta_manual_backup">
                 <?php
                 // Security nonce
                 wp_nonce_field('pta_manual_backup_nonce', 'pta_nonce');
@@ -573,11 +626,37 @@ class admin_settings extends Client
                     <?php _e('Click the button below to create a manual database backup.', 'pta-plugin'); ?>
                 </p>
                 <p>
-                    <input type="submit" class="button button-primary" value="<?php _e('Run Backup Now', 'pta-plugin'); ?>" />
+                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Run Backup Now', 'pta-plugin'); ?>" />
+                    <!-- input for compression or encryption -->
+                    <input type="checkbox" name="compression" value="true" /> <?php _e('Compress backup', 'pta-plugin'); ?>
+                    <input type="checkbox" name="encryption" value="true" /> <?php _e('Encrypt backup', 'pta-plugin'); ?>
+                </p>
+
+                <!-- File input for decrypting -->
+                <h2><?php _e('Database Restore (WIP)', 'pta-plugin'); ?></h2>
+                <p>
+                    <?php _e('Select a backup file to restore.', 'pta-plugin'); ?>
+                </p>
+                <p>
+                    <input type="file" name="backup_file" max=1 />
+                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Restore Backup', 'pta-plugin'); ?>" />
                 </p>
             </form>
             <!-- Add more settings sections as needed -->
         </div>
+        <script>
+            // only allow one checkbox to be checked at a time
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox) => {
+                checkbox.addEventListener('change', function () {
+                    checkboxes.forEach((cb) => {
+                        if (cb !== this) {
+                            cb.checked = false;
+                        }
+                    });
+                });
+            });
+        </script>
         <?php
 
     }

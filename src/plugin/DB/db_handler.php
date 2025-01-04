@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 use PTA\interfaces\DB\DBHandlerInterface;
 
 use PTA\DB\db_update;
-use PTA\DB\db_backup;
+use PTA\DB\backup\db_backup;
 use PTA\DB\functions\db_functions;
 
 use PTA\DB\Tables\UserInfoTable;
