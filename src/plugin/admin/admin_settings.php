@@ -581,10 +581,13 @@ class admin_settings extends Client
                     $backup_file = $_FILES['backup_file'];
                     $restore_result = $this->db_handler_instance->get_instance('backup')->restore_backup($backup_file);
 
-                    if ($restore_result) {
-                        echo '<div class="updated"><p>Backup restored successfully.</p></div>';
-                    } else {
+                    if(!$restore_result) {
                         echo '<div class="error"><p>Backup restore failed.</p></div>';
+                    } else {
+                        echo '<div class="updated"><p>Backup restored successfully.</p></div>';
+                        // $restore_result will return the file path of the restored backup
+                        // add button to download the restored backup
+                        // echo '<a href="' . $restore_result . '" class="button button-primary">Download Restored Backup</a>';
                     }
                 } else {
                     echo '<div class="error"><p>No backup file selected.</p></div>';
@@ -618,9 +621,9 @@ class admin_settings extends Client
                 </p>
 
                 <!-- File input for decrypting -->
-                <h2><?php _e('Database Restore ', 'portals-to-adventure'); ?></h2>
+                <h2><?php _e('Backup Restore', 'portals-to-adventure'); ?></h2>
                 <p>
-                    <?php _e('Select a encrypted backup file to restore.', 'portals-to-adventure'); ?>
+                    <?php _e('Select a encrypted backup file to restore to sql. This will not replace current database.', 'portals-to-adventure'); ?>
                 </p>
                 <p>
                     <input type="file" name="backup_file" max=1 />
@@ -628,7 +631,7 @@ class admin_settings extends Client
                 </p>
             </form>
             <!-- Generate database backup key -->
-            <h2><?php _e('Generate Database Backup Key', 'portals-to-adventure'); ?></h2>
+            <h2><?php _e('Generate Database Backup Encryption Key', 'portals-to-adventure'); ?></h2>
             <p>Save this key physically! The default way to use this key is to put it in wp-config.php. Adding more ways to store the key in the future.
                 <br><strong>If you lose this key, you will not be able to decrypt your backups.</strong>
             </p>
