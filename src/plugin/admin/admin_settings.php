@@ -561,10 +561,9 @@ class admin_settings extends Client
             // only run backup if run backup is clicked
             if(isset($_POST['action']) && $_POST['action'] == 'Run Backup Now') {
                 // Run the backup
-                $compression = isset($_POST['compression']) ? true : false;
                 $encryption = isset($_POST['encryption']) ? true : false;
 
-                $backup_result = $this->db_handler_instance->get_instance('backup')->perform_backup($compression, $encryption);
+                $backup_result = $this->db_handler_instance->get_instance('backup')->perform_backup(false, $encryption);
 
                 if ($backup_result) {
                     echo '<div class="updated"><p>Backup completed successfully.</p></div>';
@@ -615,7 +614,6 @@ class admin_settings extends Client
                 <p>
                     <input type="submit" name="action" class="button button-primary" value="<?php _e('Run Backup Now', 'portals-to-adventure'); ?>" />
                     <!-- input for compression or encryption -->
-                    <input type="checkbox" name="compression" value="true" /> <?php _e('Compress backup', 'portals-to-adventure'); ?>
                     <input type="checkbox" name="encryption" value="true" checked /> <?php _e('Encrypt backup', 'portals-to-adventure'); ?>
                 </p>
 
@@ -632,7 +630,7 @@ class admin_settings extends Client
             <!-- Generate database backup key -->
             <h2><?php _e('Generate Database Backup Key', 'portals-to-adventure'); ?></h2>
             <p>Save this key physically! The default way to use this key is to put it in wp-config.php. Adding more ways to store the key in the future.
-                <br> If you lose this key, you will not be able to decrypt your backups.
+                <br><strong>If you lose this key, you will not be able to decrypt your backups.</strong>
             </p>
             <button type="button" id="generate_key">Generate Key</button>
 
