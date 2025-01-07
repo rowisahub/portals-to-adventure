@@ -616,7 +616,7 @@ class admin_settings extends Client
                     <input type="submit" name="action" class="button button-primary" value="<?php _e('Run Backup Now', 'portals-to-adventure'); ?>" />
                     <!-- input for compression or encryption -->
                     <input type="checkbox" name="compression" value="true" /> <?php _e('Compress backup', 'portals-to-adventure'); ?>
-                    <input type="checkbox" name="encryption" value="true" /> <?php _e('Encrypt backup', 'portals-to-adventure'); ?>
+                    <input type="checkbox" name="encryption" value="true" checked /> <?php _e('Encrypt backup', 'portals-to-adventure'); ?>
                 </p>
 
                 <!-- File input for decrypting -->
