@@ -18,6 +18,7 @@ use PTA\logger\Log;
 use PTA\interfaces\DB\DBHandlerInterface;
 use PTA\interfaces\DB\BackupInterface;
 use PTA\DB\backup\encryption;
+use PTA\DB\backup\storage;
 
 class db_backup implements BackupInterface
 {
@@ -34,6 +35,7 @@ class db_backup implements BackupInterface
   private $wpdb;
 
   private encryption $encryption_instance;
+  private storage $storage_instance;
 
   public function __construct($wpdbIn)
   {
@@ -47,6 +49,7 @@ class db_backup implements BackupInterface
     $this->full_prefix = $this->wpdb->prefix . $this->wld_prefix;
 
     $this->encryption_instance = new encryption();
+    $this->storage_instance = new storage();
 
     //$this->log->info('Database backup class initialized');
   }
@@ -54,7 +57,8 @@ class db_backup implements BackupInterface
   public function init()
   {
     $this->log = $this->log->getLogger();
-
+    $this->encryption_instance->init();
+    $this->storage_instance->init();
   }
 
   /**
@@ -232,7 +236,7 @@ class db_backup implements BackupInterface
     if($encryption && !$compression){
       $sql = file_get_contents($temp_file);
 
-      $sql_decrypt = $this->encryption_instance->libsodium_decrypt($sql);
+      $sql_decrypt = $this->encryption_instance->decrypt_backup($sql);
       if ($sql_decrypt === false) {
         $this->log->error('Failed to decrypt database backup');
         return false;
@@ -252,7 +256,7 @@ class db_backup implements BackupInterface
       return false;
     }
 
-    $this->log->info('Database backup restored successfully, saved at: ' . $restore_file);
+    $this->log->info('Database backup restored successfully');
 
     return true;
   }
@@ -264,14 +268,22 @@ class db_backup implements BackupInterface
    */
   public function perform_backup($compression = false, $encryption = true)
   {
+
+    $this->log->debug('Starting database backup process');
+    $this->log->debug('Compresion: ' . $compression . ' Encryption: ' . $encryption);
+
     $sql = $this->create_backup();
     if ($sql === false) {
       $this->log->error('Failed to create database backup');
       return false;
     }
 
+    // hash the data with
+    $hash_data = "{$sql}portals_to_adventure";
+    $hash = hash('sha256', $hash_data);
+
     if($encryption){
-      $sql_encrypt = $this->encrypt_backup($sql);
+      $sql_encrypt = $this->encryption_instance->encrypt_backup($sql);
       if ($sql_encrypt === false) {
         $this->log->error('Failed to encrypt database backup, normal backup will be saved');
         $encryption = false;
@@ -279,7 +291,8 @@ class db_backup implements BackupInterface
       $sql = $sql_encrypt;
     }
 
-    $backup = $this->save_backup($sql, $compression, $encryption);
+    //$backup = $this->save_backup($sql, $compression, $encryption);
+    $backup = $this->storage_instance->store_backup($sql, $hash, $compression, $encryption);
     if ($backup === false) {
       $this->log->error('Failed to save database backup');
       return false;
@@ -288,18 +301,6 @@ class db_backup implements BackupInterface
     $this->log->info('Database backup process completed successfully');
 
     return true;
-  }
-
-  public function encrypt_backup($sql, $encryption_method = 'libsodium')
-  {
-    switch($encryption_method){
-      case 'libsodium':
-        return $this->encryption_instance->libsodium_encrypt($sql);
-
-      default:
-        $this->log->error('Invalid encryption method specified');
-        return false;
-    }
   }
 
 }

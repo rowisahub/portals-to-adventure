@@ -15,8 +15,7 @@ class encryption
 
   public function __construct()
   {
-    $log = new Log('DB.Encryption');
-    $this->log = $log->getLogger();
+    $this->log = new Log('DB.Encryption');
 
     $this->key = defined('PTA_BACKUP_ENCRYPTION_KEY') ? base64_decode(PTA_BACKUP_ENCRYPTION_KEY) : null;
 
@@ -24,6 +23,11 @@ class encryption
     if (empty($this->key)) {
       add_action('admin_notices', array($this, 'encryption_key_missing_notice'));
     }
+  }
+
+  public function init()
+  {
+    $this->log = $this->log->getLogger();
   }
 
   public function encryption_key_missing_notice()
@@ -46,6 +50,30 @@ class encryption
     return true;
   }
 
+  public function encrypt_backup($sql, $encryption_method = 'libsodium')
+  {
+    switch($encryption_method){
+      case 'libsodium':
+        return $this->libsodium_encrypt($sql);
+
+      default:
+        $this->log->error('Invalid encryption method specified');
+        return false;
+    }
+  }
+
+  public function decrypt_backup($data, $encryption_method = 'libsodium')
+  {
+    switch($encryption_method){
+      case 'libsodium':
+        return $this->libsodium_decrypt($data);
+
+      default:
+        $this->log->error('Invalid encryption method specified');
+        return false;
+    }
+  }
+
   public function libsodium_encrypt($data)
   {
     $this->log->debug('Encrypting data with libsodium');
@@ -65,6 +93,8 @@ class encryption
         $this->log->error('Failed to encrypt data');
         return false;
       }
+
+      $this->log->debug('Encrypted data');
 
       return base64_encode($nonce . $encrypted);
 
