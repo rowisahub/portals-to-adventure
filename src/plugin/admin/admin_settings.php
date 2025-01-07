@@ -294,15 +294,7 @@ class admin_settings extends Client
                                 value="<?php echo esc_attr($pta_percentage_prize_total); ?>" max="100" />%
                         </td>
                     </tr>
-                    <!-- Generate database backup key -->
-                    <tr>
-                        <th scope="row">Generate Database Backup Key</th>
-                        <!-- Have a button that will display 'base64_encode(sodium_crypto_secretbox_keygen())' -->
-                        <td>
-                            <button type="button" id="generate_key">Generate Key</button>
-                        </td>
-                        
-                    </tr>
+
                 </table>
                 <script>
                     function toggleVisibility() {
@@ -313,11 +305,6 @@ class admin_settings extends Client
                             x.type = "password";
                         }
                     }
-
-                    document.getElementById("generate_key").addEventListener("click", function () {
-                        var key = "<?php echo base64_encode(sodium_crypto_secretbox_keygen()); ?>";
-                        alert("!!REMEMBER TO SAVE THIS KEY PHYSICALLY!! Please copy this key and paste it into the wp-config.php file. | " + "define('PTA_BACKUP_ENCRYPTION_KEY', '" + key + "');");
-                    });
                 </script>
                 <?php submit_button(); ?>
             </form>
@@ -612,7 +599,7 @@ class admin_settings extends Client
 
         ?>
         <div class="wrap">
-            <h1><?php _e('PTA Plugin Settings', 'pta-plugin'); ?></h1>
+            <h1><?php _e('PTA Plugin Settings', 'portals-to-adventure'); ?></h1>
             <form method="post" enctype="multipart/form-data">
                 <?php
                 // Add a hidden field to specify the action
@@ -621,28 +608,34 @@ class admin_settings extends Client
                 // Security nonce
                 wp_nonce_field('pta_manual_backup_nonce', 'pta_nonce');
                 ?>
-                <h2><?php _e('Database Backup (WIP)', 'pta-plugin'); ?></h2>
+                <h2><?php _e('Database Backup', 'portals-to-adventure'); ?></h2>
                 <p>
-                    <?php _e('Click the button below to create a manual database backup.', 'pta-plugin'); ?>
+                    <?php _e('Click the button below to create a manual database backup.', 'portals-to-adventure'); ?>
                 </p>
                 <p>
-                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Run Backup Now', 'pta-plugin'); ?>" />
+                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Run Backup Now', 'portals-to-adventure'); ?>" />
                     <!-- input for compression or encryption -->
-                    <input type="checkbox" name="compression" value="true" /> <?php _e('Compress backup', 'pta-plugin'); ?>
-                    <input type="checkbox" name="encryption" value="true" /> <?php _e('Encrypt backup', 'pta-plugin'); ?>
+                    <input type="checkbox" name="compression" value="true" /> <?php _e('Compress backup', 'portals-to-adventure'); ?>
+                    <input type="checkbox" name="encryption" value="true" /> <?php _e('Encrypt backup', 'portals-to-adventure'); ?>
                 </p>
 
                 <!-- File input for decrypting -->
-                <h2><?php _e('Database Restore (WIP)', 'pta-plugin'); ?></h2>
+                <h2><?php _e('Database Restore ', 'portals-to-adventure'); ?></h2>
                 <p>
-                    <?php _e('Select a backup file to restore.', 'pta-plugin'); ?>
+                    <?php _e('Select a encrypted backup file to restore.', 'portals-to-adventure'); ?>
                 </p>
                 <p>
                     <input type="file" name="backup_file" max=1 />
-                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Restore Backup', 'pta-plugin'); ?>" />
+                    <input type="submit" name="action" class="button button-primary" value="<?php _e('Restore Backup', 'portals-to-adventure'); ?>" />
                 </p>
             </form>
-            <!-- Add more settings sections as needed -->
+            <!-- Generate database backup key -->
+            <h2><?php _e('Generate Database Backup Key', 'portals-to-adventure'); ?></h2>
+            <p>Save this key physically! The default way to use this key is to put it in wp-config.php. Adding more ways to store the key in the future.
+                <br> If you lose this key, you will not be able to decrypt your backups.
+            </p>
+            <button type="button" id="generate_key">Generate Key</button>
+
         </div>
         <script>
             // only allow one checkbox to be checked at a time
@@ -655,6 +648,11 @@ class admin_settings extends Client
                         }
                     });
                 });
+            });
+
+            document.getElementById("generate_key").addEventListener("click", function () {
+                var key = "<?php echo base64_encode(sodium_crypto_secretbox_keygen()); ?>";
+                alert("Refresh page for diff key: "+key);
             });
         </script>
         <?php
