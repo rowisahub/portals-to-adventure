@@ -118,6 +118,8 @@ class Log implements PTALogInterface
       return false;
     }
 
+    $this->hideLogDir();
+
     // check if the .htaccess file exists
     // if (!file_exists($this->logDir . '/.htaccess')) {
     //   file_put_contents($this->logDir . '/.htaccess', $this->htaccess_content());
@@ -138,6 +140,23 @@ class Log implements PTALogInterface
       ErrorHandler::register($this->logger);
     }
 
+  }
+
+  private function hideLogDir()
+  {
+    $htaccess = $this->logDir . '/.htaccess';
+    $index = $this->logDir . '/index.html';
+    $stored_path = plugin_dir_path(__FILE__) . '../../../assets/admin/';
+
+    if (!file_exists($htaccess)) {
+      $htaccess_content = file_get_contents($stored_path . '.htaccess');
+      file_put_contents($htaccess, $htaccess_content);
+    }
+
+    if (!file_exists($index)) {
+      $index_content = file_get_contents($stored_path . 'index.html');
+      file_put_contents($index, $index_content);
+    }
   }
 
   /**
