@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Portals to Adventure
-Description: PTA Plugin for custom submissions and voting.
-Version: 1.6.1.5
-Author: Rowan and Braedon
+Description: PTA Plugin for submissions and voting.
+Version: 1.6.2
+Author: Rowan W.
 */
 
 /* Prevent direct access */

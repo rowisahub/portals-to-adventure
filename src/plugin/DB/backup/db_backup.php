@@ -15,12 +15,10 @@ if (!defined('ABSPATH')) {
 
 // Requires
 use PTA\logger\Log;
-use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\interfaces\DB\BackupInterface;
 use PTA\DB\backup\encryption;
 use PTA\DB\backup\storage;
 
-class db_backup implements BackupInterface
+class db_backup
 {
   private $backup_dir;
   private $log;
@@ -266,7 +264,7 @@ class db_backup implements BackupInterface
    *
    * @return bool True on success, false on failure.
    */
-  public function perform_backup($compression = false, $encryption = true)
+  public function perform_backup($compression = false, $encryption = false)
   {
 
     $this->log->debug('Starting database backup process');

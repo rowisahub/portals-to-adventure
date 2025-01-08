@@ -16,10 +16,9 @@ if (!defined('ABSPATH')) {
 // Requires
 use PTA\logger\Log;
 use PTA\interfaces\DB\DBHandlerInterface;
-use PTA\interfaces\DB\UpdateInterface;
 
 
-class db_update implements UpdateInterface
+class db_update
 {
   private $logger;
   private $handler_instance;
@@ -53,12 +52,12 @@ class db_update implements UpdateInterface
 
       $this->logger->info('New database updates found');
 
-      if ($this->backup_db()) {
-
-        $this->update_db();
-
+      if($this->handler_instance->get_instance('backup')->perform_backup() == false){
+        //$this->logger->error('Failed to create a backup of the database');
+        return;
       }
 
+      $this->update_db();
     }
   }
 
@@ -98,7 +97,6 @@ class db_update implements UpdateInterface
     $this->logger->info('Database updated');
 
     update_option('wld_pta_db_version', $this->handler_instance->get_db_version_local());
-
   }
 
   /**

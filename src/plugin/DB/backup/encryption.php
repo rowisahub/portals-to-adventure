@@ -21,7 +21,7 @@ class encryption
 
     // show wordpress admin notice if encryption key is not set
     if (empty($this->key)) {
-      add_action('admin_notices', array($this, 'encryption_key_missing_notice'));
+      //add_action('admin_notices', array($this, 'encryption_key_missing_notice'));
     }
   }
 

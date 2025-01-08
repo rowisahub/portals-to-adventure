@@ -630,13 +630,6 @@ class admin_settings extends Client
                     <input type="submit" name="action" class="button button-primary" value="<?php _e('Restore Backup', 'portals-to-adventure'); ?>" />
                 </p>
             </form>
-            <!-- Generate database backup key -->
-            <h2><?php _e('Generate Database Backup Encryption Key', 'portals-to-adventure'); ?></h2>
-            <p>Save this key physically! The default way to use this key is to put it in wp-config.php. Adding more ways to store the key in the future.
-                <br><strong>If you lose this key, you will not be able to decrypt your backups.</strong>
-            </p>
-            <button type="button" id="generate_key">Generate Key</button>
-
         </div>
         <script>
             // only allow one checkbox to be checked at a time
@@ -649,11 +642,6 @@ class admin_settings extends Client
                         }
                     });
                 });
-            });
-
-            document.getElementById("generate_key").addEventListener("click", function () {
-                var key = "<?php echo base64_encode(sodium_crypto_secretbox_keygen()); ?>";
-                alert("Refresh page for diff key: "+key);
             });
         </script>
         <?php
