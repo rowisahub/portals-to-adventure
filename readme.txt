@@ -1,8 +1,5 @@
 ===  Portals To Adventure ===
-Contributors: Rowan W and Braedon S
-Requires at least: 5.0
-Tested up to: 6.6
-Requires PHP: 7.0
+Contributors: Rowan W
 
 == Description ==
 A user submission based voting plugin

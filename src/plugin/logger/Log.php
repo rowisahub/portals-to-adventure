@@ -49,7 +49,7 @@ class Log implements PTALogInterface
    * @param int $level The logging level. Default is Logger::DEBUG.
    * @param bool $ifLogUncaught Whether to log uncaught exceptions. Default is false.
    */
-  public function __construct($name = "PTA", $path = 'pta-debug.log', $level = Logger::DEBUG, $ifLogUncaught = false)
+  public function __construct($name = "PTA", $path = 'pta.log', $level = Logger::DEBUG, $ifLogUncaught = false)
   {
     $classname = static::class . $name;
 
