@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 use PTA\interfaces\DB\DBHandlerInterface;
 
 use PTA\DB\db_update;
-use PTA\DB\backup\db_backup;
+//use PTA\DB\backup\db_backup;
 use PTA\DB\functions\db_functions;
 
 use PTA\DB\Tables\UserInfoTable;
@@ -54,7 +54,7 @@ class db_handler implements DBHandlerInterface
   public function __construct(
     Log $logger = null,
     db_update $update = null,
-    db_backup $backup = null,
+    //db_backup $backup = null,
     db_functions $functions = null,
     UserInfoTable $userInfoTable = null,
     SubmissionDataTable $submissionDataTable = null,
@@ -78,7 +78,7 @@ class db_handler implements DBHandlerInterface
     $this->logger = $this->logger->getLogger();
 
     $this->update = $update ?? new db_update($this);
-    $this->backup = $backup ?? new db_backup($this->wpdb);
+    //$this->backup = $backup ?? new db_backup($this->wpdb);
     $this->functions = $functions ?? new db_functions();
   }
 
