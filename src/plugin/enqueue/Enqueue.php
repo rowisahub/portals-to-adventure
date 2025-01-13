@@ -127,6 +127,15 @@ class Enqueue implements PTAEnqueueInterface
       );
     }
 
+    /* Public css */
+    // wp_enqueue_style(
+    //   handle: 'pta-style',
+    //   src: plugins_url(path: 'portals-to-adventure/FrontEnd/public/CSS/pta-styles.css'),
+    //   deps: [],
+    //   ver: '1.0.0',
+    //   media: 'all'
+    // );
+
     /* Custom data to enqueue */
 
     // Ajax
