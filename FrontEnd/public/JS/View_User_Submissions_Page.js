@@ -161,7 +161,7 @@ document.getElementById("secret-doors-list").addEventListener("change", function
   ThumbnailPrv.querySelector('img').src = selectedSubmission.thumbnail_url;
 
   // change data-id attribute of the share buttons
-  var shareBtns = document.getElementsByClassName("social-buttons")[0];
+  var shareBtns = document.getElementsByClassName("share-buttons")[0];
   shareBtns.querySelectorAll('.share-btn').forEach(btn => {
     // set onclick attribute to the shareSubmission function
     btn.setAttribute("onclick", `shareSubmissionInt('${btn.dataset.platform}', '${selectedSubmission.id}')`);

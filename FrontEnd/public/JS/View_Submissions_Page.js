@@ -186,6 +186,7 @@ function renderSubmission(submission) {
 
   const submissionDiv = document.createElement('div');
   submissionDiv.classList.add('submission-view');
+  submissionDiv.classList.add('pta-container');
 
   const submissionID = submission.id;
 

@@ -1,6 +1,9 @@
-<!-- View User Submission Page HTML Start -->
+<!-- View Single Submission Page HTML Start -->
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/View_Single_Submission_Page.css'; ?>">
-<div class="form-container">
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-styles.css'; ?>">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+<div class="form-container pta-container">
 
   <div class="admin-view hide">
     <div class="admin-controls" id="admin-controls">
@@ -23,44 +26,47 @@
   </div>
 
   <!-- Adventure Author (Non-Editable) -->
-  <label>Author</label>
+  <label for="adventure-author" class="font-montserrat">Author</label>
   <!-- <input type="text" id="adventure-author" readonly style="cursor: default;"> -->
   <p id="adventure-author" class="textBox"></p>
 
   <!-- Adventure Title (Non-Editable) -->
-  <label>Adventure Title</label>
+  <label for="adventure-title" class="font-montserrat">Adventure Title</label>
   <!-- <input type="text" id="adventure-title" readonly style="cursor: default;"> -->
   <p id="adventure-title" class="textBox"></p>
 
   <!-- Adventure Text (Non-Editable) -->
-  <label>Discription</label>
+  <label for="adventure-text" class="font-montserrat">Discription</label>
   <!-- <textarea id="adventure-text" readonly rows="6" style="cursor: default;">Adventure description goes here...</textarea> -->
   <p id="adventure-text" class="textBox"></p>
 
-  <!-- Map (View-only, Clickable) -->
-  <label for="map">Map</label>
-  <div id="map-preview" class="view-only media-item" data-fancybox="">
-    <img src="" alt="Map Image" class="preview-image"></img>
-  </div>
+  <div class="pta-button-bar">
+    <!-- Map (View-only, Clickable) -->
+    <label for="map-preview">Map</label>
+    <div id="map-preview" class="view-only media-item" data-fancybox="">
+      <img src="" alt="Map Image" class="preview-image"></img>
+    </div>
 
-  <!-- Video (View-only, Clickable) -->
-  <label for="video">Video</label>
-  <div id="video-preview" class="view-only media-item" data-fancybox="">
-    <img src="" alt="Video Image" class="preview-image"></img>
-  </div>
+    <!-- Video (View-only, Clickable) -->
+    <label for="video-preview">Video</label>
+    <div id="video-preview" class="view-only media-item" data-fancybox="">
+      <img src="" alt="Video Image" class="preview-image"></img>
+    </div>
 
-  <!-- Thumbnail (View-only, Clickable) -->
-  <label for="thumbnail">Thumbnail</label>
-  <div id="thumbnail-preview" class="view-only media-item" data-fancybox="">
-    <img src="" alt="Thumbnail Image" class="preview-image"></img>
+    <!-- Thumbnail (View-only, Clickable) -->
+    <label for="thumbnail-preview">Thumbnail</label>
+    <div id="thumbnail-preview" class="view-only media-item" data-fancybox="">
+      <img src="" alt="Thumbnail Image" class="preview-image"></img>
+    </div>
+
   </div>
 
   <!-- Rest of Submission images -->
-  <label for="media-content" id="media-content" class="hide">Extra Images</label>
+  <!-- <label for="media-content" id="media-content" class="hide">Extra Images</label>
   <div class="media-content-list hide" id="media-content-list">
-  </div>
+  </div> -->
 
-  <button class="vote-btn">Vote for this Secret Door</button>
+  <button class="pta-cta-button" id="vote-btn">Vote for this Secret Door</button>
 
 
   <!-- Social Media Share Buttons -->
@@ -74,4 +80,4 @@
 <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 <script src="<?php echo plugin_dir_url(__DIR__) . 'JS/View_Single_Submission_Page.js'; ?>"></script>
-<!-- View User Submission Page HTML End -->
+<!-- View Single Submission Page HTML End -->

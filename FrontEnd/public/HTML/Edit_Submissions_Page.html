@@ -1,7 +1,10 @@
 <!-- Edit Submission Page HTML Start -->
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/Edit_Submissions_Page.css'; ?>">
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-styles.css'; ?>">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
 <!-- <form method="post" enctype="multipart/form-data"></form> -->
-<div class="form-container">
+<div class="form-container pta-container">
   <p>Edit your in-progress adventures and submit them for fan voting.</p>
 
   <!-- Warning box for if the submission is rejeected and the resaon -->
@@ -17,7 +20,7 @@
 
     <!-- Secret Doors In Progress List -->
     <label for="secret-doors-list">Secret Doors In Progress</label>
-    <select id="secret-doors-list">
+    <select id="secret-doors-list" class="pta-select">
       <option value="door1"> - Select The Door to Edit - </option>
       <!-- <option value="door2">Secret Door Title 2 (June 2, 2024)</option> -->
       <!-- More secret doors go here -->
@@ -28,7 +31,7 @@
       Title
       <span class="tooltiptext">(40 characters max)</span>
     </label>
-    <input type="text" id="title" name="submission_title" value="Secret Door Title" maxlength="40" required>
+    <input class="pta-input" type="text" id="title" name="submission_title" value="Secret Door Title" maxlength="40" required>
     <p id="title-error" class="error"></p>
 
 
@@ -37,7 +40,7 @@
       Description
       <span class="tooltiptext">(10,000 character max)</span>
     </label>
-    <textarea id="adventure-text" name="submission_description" maxlength="10000" rows="6" required>Adventure description goes here...
+    <textarea id="adventure-text" class="pta-adventure-text" name="submission_description" maxlength="10000" rows="6" required>Adventure description goes here...
     </textarea>
     <p id="text-error" class="error"></p>
 
@@ -47,7 +50,7 @@
       Video Link
       <span class="tooltiptext">For preview, use approved list! (40 char max)</span>
     </label>
-    <input type="text" id="video-link" name="video_link" maxlength="150" required>
+    <input class="pta-input" type="text" id="video-link" name="video_link" maxlength="150" required>
     <p id="video-error" class="error"></p>
 
 
@@ -56,24 +59,29 @@
       Images
       <span class="tooltiptext">Remove, Set Map, Set Thumbnail, Here!</span>
     </label>
-    <input type="file" id="images" name="new_images[]" accept="image/*" multiple>
+    <input class="pta-input" type="file" id="images" name="new_images[]" accept="image/*" multiple>
     <p id="thumbnail-error" class="error hide"></p>
     <div id="thumbnail-preview" class="thumbnail-preview"></div>
 
     <!-- Submit Button and Accept Terms -->
-    <label for="accept-terms">Accept terms of the contest</label>
-    <input type="checkbox" id="accept-terms" name="accept-terms">
+    <div class="pta-flex-row">
+      <label for="accept-terms">Accept terms of the contest</label>
+      <input type="checkbox" id="accept-terms" name="accept-terms">
+    </div>
 
-    <!-- Save Changes Button -->
-    <input type="submit" name="update_submission" value="Save" id="save-btn" disabled></input>
+    <div class="pta-flex-row">
+      <!-- Save Changes Button -->  
+      <input type="submit" name="update_submission" value="Save" id="save-btn" disabled></input>
 
-    <!-- <button type="button" id="submit-btn" disabled>Submit</button> -->
+      <!-- <button type="button" id="submit-btn" disabled>Submit</button> -->
 
-    <input type="submit" name="update_submission" value="Publish" id="submit-btn" disabled></input>
+      <input type="submit" name="update_submission" value="Publish" id="submit-btn" disabled></input>
 
-    <!-- Delete Adventure Button -->
-    <!-- <button type="button" id="delete-btn" class="delete-btn">Delete Adventure</button> -->
-    <input type="submit" name="update_submission" value="Delete Adventure" id="delete-btn" class="delete-btn"></input>
+      <!-- Delete Adventure Button -->
+      <!-- <button type="button" id="delete-btn" class="delete-btn">Delete Adventure</button> -->
+      <input type="submit" name="update_submission" value="Delete Adventure" id="delete-btn" class="delete-btn"></input>
+
+    </div>
 
     <!-- Hidden Form Fields -->
     <input type="hidden" name="set_map" id="selecedMap" value="">
