@@ -296,7 +296,7 @@ class Shortcodes_functions
             ]);
 
 
-            $this->logger->info('Submission was uploaded', array('username' => $user->display_name, 'submission_id' => $submission_id, 'title' => $title, 'description' => $description, 'video_link' => $video_link, 'images' => $images_ID));
+            $this->logger->debug('Submission was uploaded', array('username' => $user->display_name, 'submission_id' => $submission_id, 'title' => $title, 'description' => $description, 'video_link' => $video_link, 'images' => $images_ID));
 
 
             // Redirect to the user submissions page
@@ -544,7 +544,7 @@ class Shortcodes_functions
 
             $user = wp_get_current_user();
 
-            $this->logger->info('Submission was updated', array('username' => $user->display_name, 'submission_id' => $submission_id, 'title' => $title, 'description' => $description, 'images' => $submission['image_uploads']));
+            $this->logger->debug('Submission was updated', array('username' => $user->display_name, 'submission_id' => $submission_id, 'title' => $title, 'description' => $description, 'images' => $submission['image_uploads']));
         }
     }
 
