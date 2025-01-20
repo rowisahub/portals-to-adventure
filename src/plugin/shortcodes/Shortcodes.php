@@ -89,6 +89,14 @@ class Shortcodes
 
   public function wldpta_render_hamburger_menu()
   {
+    ob_start();
+    //include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/View_User_Submissions_Page.html';
+    include PTA_PLUGIN_DIR . 'assets/public/html/sidebar.html';
+    return ob_get_clean();
+  }
+
+  public function wldpta_render_hamburger_menu_old()
+  {
     // echo '<style>site-header { display: none !important; }</style>';
     if (is_user_logged_in()) {
       $current_user = wp_get_current_user();

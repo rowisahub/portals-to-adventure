@@ -148,7 +148,8 @@ class Enqueue implements PTAEnqueueInterface
     // User data
     $user_data = array(
       'is_logged_in' => is_user_logged_in(),
-      'user_name' => is_user_logged_in() ? wp_get_current_user()->display_name : ''
+      'user_name' => is_user_logged_in() ? wp_get_current_user()->display_name : '',
+      'logout_url' => wp_logout_url(),
     );
     $user_data_json = wp_json_encode($user_data);
 

@@ -74,9 +74,9 @@ body {
   flex-direction: column;
 }
 
-.sidebar-container {
+/* .sidebar-container {
   display: none;
-}
+} */
 
 .pta-button-bar {
   display: flex;

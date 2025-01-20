@@ -1,6 +1,15 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     var hamburgerIcon = document.getElementById('hamburger-icon');
     var sidebarContainer = document.getElementById('sidebar-container');
+
+    var loginButton = document.getElementById('showLogin');
+
+    loginButton.addEventListener('click', function(){
+        if(!user_data.is_logged_in){
+            var loginPopup = document.getElementById('popup');
+            loginPopup.classList.remove('hide');
+        }
+    });
 
     if (hamburgerIcon && sidebarContainer) {
         hamburgerIcon.addEventListener('click', function () {
@@ -34,5 +43,80 @@ document.addEventListener('DOMContentLoaded', function () {
         urlParams.delete('submitted_today');
         var newUrl = window.location.origin + window.location.pathname + '?' + urlParams.toString();
         window.history.replaceState({}, document.title, newUrl);
+    }
+
+    if(user_data.is_logged_in){
+        var sidebarUsername = document.getElementById('user-name');
+        sidebarUsername.textContent = user_data.user_name + "!";
+
+        loginButton.textContent = 'Logout';
+        loginButton.href = user_data.logout_url;
+
+        var sidebarListItems = document.querySelectorAll('#sidebar-container ul li');
+        sidebarListItems.forEach(function (item){
+            item.classList.remove('hide');
+        });
+
+        var userSubmissions = document.getElementById('User-submissions');
+        var userSubmissionsInProgress = document.getElementById('user-inprogress-submissions');
+        var userSubmissionsSubmitted = document.getElementById('user-submitted-submissions');
+
+        var submissions = await PTA_API.getUserSubmissions(pta_api_data.user_id);
+
+        var inProgressSubmissions = submissions.filter(function(submission){
+            return submission.state === "In Progress";
+        });
+
+        var submittedSubmissions = submissions.filter(function(submission){
+            return submission.state === 'Approved';
+        });
+
+        //
+
+        if(inProgressSubmissions.length === 0){
+            userSubmissionsInProgress.classList.add('hide');
+        } else {
+            inProgressSubmissions = inProgressSubmissions.slice(0, 5);
+
+            var ipList = document.getElementById('user-inprogress-submissions-list');
+            inProgressSubmissions.forEach(function(submission){
+                var listItem = document.createElement('li');
+                listItem.classList.add('submission-item');
+                listItem.textContent = submission.title;
+
+                // Add a link to the submission
+                var link = document.createElement('a');
+                link.classList.add('submission-options');
+                link.href = "/my-in-progress-secret-doors?edit_submission_id=" + submission.id;
+                link.textContent = 'View';
+                listItem.appendChild(link);
+
+                ipList.appendChild(listItem);
+            });
+        }
+
+        if(submittedSubmissions.length === 0){
+            userSubmissionsSubmitted.classList.add('hide');
+        } else {
+            submittedSubmissions = submittedSubmissions.slice(0, 5);
+
+            var ssList = document.getElementById('user-submitted-submissions-list');
+            submittedSubmissions.forEach(function(submission){
+                var listItem = document.createElement('li');
+                listItem.classList.add('submission-item');
+                listItem.textContent = submission.title;
+
+                // Add a link to the submission
+                var link = document.createElement('a');
+                link.classList.add('submission-options');
+                link.href = "/my-submitted-secret-doors?submission_id=" + submission.id;
+                link.textContent = 'View';
+                listItem.appendChild(link);
+
+                ssList.appendChild(listItem);
+            });
+        }
+
+        userSubmissions.classList.remove('hide');
     }
 });

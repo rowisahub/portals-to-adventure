@@ -1,0 +1,66 @@
+<div id="sidebar-container" class="sidebar-container">
+  <div id="hamburger-icon" class="hamburger-icon">
+    <img src="<?php echo plugins_url('portals-to-adventure/assets/public/images/Hamburger_icon.png'); ?>" alt="Menu" />
+  </div>
+
+  <div id="side-menu" class="side-menu">
+    <div class="side-menu-content">
+
+      <div class="user-info">
+        <h3>Hello, <span id="user-name">Guest</span></h3>
+
+        <!-- <p style="font-size: small;">Click here to login</p> -->
+
+        <div class="user-options">
+          <!-- <a href="<?php echo wp_logout_url($current_url); ?>">Logout</a> -->
+          <a id="showLogin">Login</a>
+        </div>
+
+      </div>
+
+      <div>
+        <ul id="menu-items">
+          <li class="hide"><a href="/create-a-new-secret-door/">Create New Submission</a></li>
+          <li><a href="/view-and-vote">View And Vote</a></li> <!-- This will stay if user isn't logged in -->
+          <li class="hide"><a href="/my-in-progress-secret-doors/">My In-Progress Secret Doors</a></li>
+          <li class="hide"><a href="/my-submitted-secret-doors/">My Submitted Secret Doors</a></li>
+        </ul>
+      </div>
+
+      <div id="User-submissions" class="user-submissions hide"> <!-- Only avalible when logged in -->
+        <div id="user-inprogress-submissions">
+          <h4>My In-Progress Submissions:</h4>
+          <ul id="user-inprogress-submissions-list">
+
+          </ul>
+        </div>
+
+        <div id="user-submitted-submissions">
+          <h4>My Submitted Submissions:</h4>
+          <ul id="user-submitted-submissions-list">
+
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div id="popup" class="popup hide">
+  <div class="popup-content">
+    <span id="closePopupBtn" class="close">&times;</span>
+
+    <div id="loginForm">
+      <h2>Login</h2>
+      <p>Please continue with 3rd-party</p>
+      <div id="loginGoogleBtn" class="google-signin-btn"></div>
+
+      <label for="promotionalEmails">
+        <input type="checkbox" id="promotionalEmails" name="promotionalEmails" value="promotionalEmails" checked>
+        Receive promotional emails?
+      </label>
+    </div>
+  </div>
+</div>
