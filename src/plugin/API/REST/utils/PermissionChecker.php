@@ -147,13 +147,27 @@ class PermissionChecker
     $pta_clock_start_date = get_option('pta_clock_start_date');
     $pta_clock_end_date = get_option('pta_clock_end_date');
 
+    // $this->restV2_instance->logger->info('Start Date: ' . $pta_clock_start_date);
+    // $this->restV2_instance->logger->info('End Date: ' . $pta_clock_end_date);
+
     if ($pta_clock_start_date && $pta_clock_end_date) {
       $current_date = date('Y-m-d H:i:s');
+
+      // $this->restV2_instance->logger->info('Current Date: ' . $current_date);
+
       if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+        // $this->restV2_instance->logger->debug('Contest is active.');
         return true;
       }
-    }
 
-    return false;
+      // $this->restV2_instance->logger->debug('Contest is not active.');
+      return false;
+
+    } else {
+
+      // $this->restV2_instance->logger->debug('Contest dates not set.');
+      return true;
+
+    }
   }
 }
