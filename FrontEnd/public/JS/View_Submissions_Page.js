@@ -71,12 +71,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // add the message to 'entry-content' as the first child
     document.getElementsByClassName('entry-content')[0].insertBefore(contestOverMessage, document.getElementsByClassName('entry-content')[0].firstChild);
-
-    if(!pta_api_data.user_admin){
-      document.getElementsByClassName('form-container')[0].classList.add('hide');
-
-      return;
-    }
   }
 
   ifAdmin = pta_api_data.user_admin;
