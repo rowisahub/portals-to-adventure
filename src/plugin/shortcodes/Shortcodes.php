@@ -83,8 +83,15 @@ class Shortcodes
     add_shortcode('submission_view_page', [$this, 'submission_view_page']);
     add_shortcode('submission_user_view_page', [$this, 'submission_user_view_page']);
     add_shortcode('submission_view_single_page', [$this, 'submission_view_single_page']);
+    add_shortcode('pta_styles', [$this, 'add_pta_styles']);
 
     add_action('wp', [$this, 'setup_submission_metadata']);
+  }
+
+  public function add_pta_styles(){
+    ob_start();
+    include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/pta_styles.html';
+    return ob_get_clean();
   }
 
   public function wldpta_render_hamburger_menu()
