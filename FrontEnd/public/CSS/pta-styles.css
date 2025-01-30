@@ -37,15 +37,14 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../fonts/american-slasher/AmericanSlasher-Regular.otf") format("opentype");
-  /*         */
+  src: url("/wp-content/plugins/portals-to-adventure/assets/public/arts/font/american-slasher/AmericanSlasher-Regular.otf") format("opentype");
 }
 @font-face {
   font-family: "Panther";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("../fonts/panther.woff2") format("woff2");
+  src: url("/wp-content/plugins/portals-to-adventure/assets/public/arts/font/panther.woff2") format("woff2");
 }
 body {
   background-color: var(--pta-background-color);
@@ -74,9 +73,9 @@ body {
   flex-direction: column;
 }
 
-/* .sidebar-container {
+.sidebar-container {
   display: none;
-} */
+}
 
 .pta-button-bar {
   display: flex;
@@ -263,7 +262,7 @@ textarea.pta-adventure-text {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url(../images/sandstone-banner.png);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/sandstone-banner.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
   z-index: -1;
@@ -303,12 +302,13 @@ div.pta-congratulations img {
 }
 
 .pta-footer-btn {
+  display: flex !important;
   position: relative;
   overflow: visible;
   font-size: 1.5rem;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.4666666667);
-  background-image: url(../images/sand-tile.webp);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/sand-tile.webp);
   background-blend-mode: multiply;
   background-repeat: repeat;
   background-size: 50%;
@@ -325,6 +325,12 @@ div.pta-congratulations img {
 }
 .pta-footer-btn:hover:not(:disabled) {
   background-color: rgba(0, 0, 0, 0.6666666667);
+}
+
+.pta-footer-btn a {
+	background: none !important;
+	margin: auto !important;
+	font-size: 1.5rem;
 }
 
 h1.pta-h1-panther {
@@ -359,7 +365,7 @@ div.pta-data-bar::before {
   left: -115px;
   right: -100px;
   bottom: -100px;
-  background-image: url(../images/portal-banner-sized.webp);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/portal-banner-sized.webp);
   /* background-size: ; */
   background-repeat: no-repeat;
   z-index: 0;
@@ -385,6 +391,10 @@ div.pta-data-bar p {
 .pta-wld-logo img {
   margin: 25px;
   width: 100%;
+}
+
+.pta-logo {
+	filter: drop-shadow(0px 0px 4px #000);
 }
 
 .pta-pta-logo {
@@ -417,7 +427,7 @@ div.pta-data-bar p {
   font-size: 2rem;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.2);
-  background-image: url(../images/sand-tile.webp);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/sand-tile.webp);
   background-blend-mode: multiply;
   background-repeat: repeat;
   background-size: 30%;
@@ -441,7 +451,18 @@ div.pta-data-bar p {
   font-family: "American Slasher";
   color: white;
 }
-.pta-offset-btn button {
+
+.pta-offset-btn.left-rounded {
+	border-bottom-left-radius: 25px;
+	border-top-left-radius: 25px;
+}
+
+.pta-offset-btn.right-rounded {
+	border-bottom-right-radius: 25px;
+	border-top-right-radius: 25px;
+}
+
+.pta-offset-btn a {
   all: unset;
   cursor: pointer;
   background: none;
@@ -453,6 +474,13 @@ div.pta-data-bar p {
 }
 .pta-offset-btn button:hover:not(:disabled) {
   background-color: rgba(0, 0, 0, 0.2);
+}
+
+.doors-logo {
+  background-color: black;
+  width: fit-content;
+  padding-top: 20px;
+  border-radius: 60px 60px 0 0;
 }
 
 .pta-portal-btn-container {
@@ -482,7 +510,7 @@ div.pta-data-bar p {
   right: 0;
   bottom: 0; */
   inset: -25px;
-  background-image: url(../images/button-background.png);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/button-background.png);
   background-repeat: no-repeat;
   background-size: 105% 105%;
   background-position: center;
@@ -545,7 +573,7 @@ div.pta-data-bar p {
   font-size: 1.5rem;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.2);
-  background-image: url(../images/sand-tile.webp);
+  background-image: url(/wp-content/plugins/portals-to-adventure/assets/public/arts/images/sand-tile.webp);
   background-blend-mode: multiply;
   background-repeat: repeat;
   background-size: 50%;
@@ -564,3 +592,5 @@ div.pta-data-bar p {
 }
 
 /*# sourceMappingURL=pta-styles.css.map */
+
+
