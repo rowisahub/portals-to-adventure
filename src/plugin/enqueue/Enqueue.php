@@ -102,6 +102,15 @@ class Enqueue implements PTAEnqueueInterface
       args: true
     );
 
+    /* Assets */
+    wp_enqueue_script(
+      handle: 'pta-assets',
+      src: plugins_url(path: 'portals-to-adventure/FrontEnd/public/JS/pta_scripts.js'),
+      deps: ['jquery'],
+      ver: '1.0.0',
+      args: true
+    );
+
     /* Admin */
     // $current_user = wp_get_current_user();
     // $allowed_roles = array('administrator', 'editor');
@@ -121,7 +130,7 @@ class Enqueue implements PTAEnqueueInterface
       wp_enqueue_script(
         handle: 'pta-woocommerce',
         src: plugins_url(path: 'portals-to-adventure/assets/public/js/woocommerce.js'),
-        deps: ['jquery'],
+        deps: [],
         ver: '1.0.0',
         args: true
       );
