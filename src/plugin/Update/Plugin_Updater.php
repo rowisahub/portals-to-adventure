@@ -137,40 +137,40 @@ class Plugin_Updater {
         return $transient;
     }
 
-    public function plugin_info($action, $response, $false = false) {
-        if ($action !== 'plugin_information') {
-            return $false;
+    public function plugin_info($res, $action, $args) {
+        // Check if this is the right plugin and action
+        if ($action !== 'plugin_information' || 
+            !isset($args->slug) || 
+            $args->slug !== dirname($this->plugin_slug)) {
+            return $res;
         }
-
-        if ($response->slug !== basename($this->plugin_slug)) {
-            return $false;
-        }
-
+    
         $github_response = $this->get_github_response();
-
-        if (!$github_response) {
-            return $false;
+    
+        if (!$github_response || !isset($github_response->assets[0])) {
+            return $res;
         }
-
+    
         $zip_url = $github_response->assets[0]->browser_download_url;
-
-        $plugin_info = array(
-            'name' => basename($this->plugin_slug, '.php'),
-            'slug' => basename($this->plugin_slug, '.php'),
-            'version' => ltrim($github_response->tag_name, 'v'),
-            'author' => $github_response->author->login,
-            'homepage' => $github_response->html_url,
-            'download_link' => $zip_url,
-            'requires' => '5.0',
-            'tested' => get_bloginfo('version'),
-            'last_updated' => $github_response->published_at,
-            'sections' => array(
-                'description' => $github_response->body,
-                'changelog' => $this->get_changelog()
-            )
+    
+        $plugin_info = new \stdClass();
+        $plugin_info->name = dirname($this->plugin_slug);
+        $plugin_info->slug = dirname($this->plugin_slug);
+        $plugin_info->version = ltrim($github_response->tag_name, 'v');
+        $plugin_info->author = isset($github_response->author->login) ? $github_response->author->login : '';
+        $plugin_info->homepage = $github_response->html_url;
+        $plugin_info->download_link = $zip_url;
+        $plugin_info->requires = '5.0';
+        $plugin_info->tested = get_bloginfo('version');
+        $plugin_info->last_updated = $github_response->published_at;
+        $plugin_info->sections = array(
+            'description' => $github_response->body ?? '',
+            'changelog' => $this->get_changelog()
         );
-
-        return (object) $plugin_info;
+        $plugin_info->banners = array();
+        $plugin_info->downloaded = 0;
+    
+        return $plugin_info;
     }
 
     private function get_changelog() {
