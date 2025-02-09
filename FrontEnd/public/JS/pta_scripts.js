@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const dataBar = document.getElementsByClassName('pta-data-bar')[0];
 
   var dataBarContent = document.createElement('p');
-  dataBarContent.innerHTML = 'Data Bar Content';
+  dataBarContent.innerHTML = 'Voting Start Date | February 27, 2025';
   dataBar.appendChild(dataBarContent);
 
   //  Submissions Start Date = February 20, 2025 / Voting Start Date = February 27, 2025
