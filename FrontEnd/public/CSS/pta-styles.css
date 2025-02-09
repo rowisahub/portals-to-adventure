@@ -594,3 +594,74 @@ div.pta-data-bar p {
 /*# sourceMappingURL=pta-styles.css.map */
 
 
+.pta-contact-form-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 40px auto;
+  background-color: #3a3a3a;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* Heading styles */
+.pta-form-heading h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.2em;
+  font-family: "Fantasy", cursive; /* A stylized font if you want a “fantasy” vibe */
+  text-transform: uppercase;
+}
+.pta-form-heading h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Paragraph description */
+.pta-form-description {
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* The form itself */
+.pta-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Inputs and textarea */
+.pta-contact-form input,
+.pta-contact-form textarea {
+  background-color: #555;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  color: #fff;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.pta-contact-form input::placeholder,
+.pta-contact-form textarea::placeholder {
+  color: #ccc;
+}
+
+/* Button */
+.pta-contact-form-button {
+  background-color: #b25900 !important; /* An orange‐brown color */
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease !important;
+  width: 100% !important;
+}
+
+.pta-contact-form-button:hover {
+  background-color: #cc6600 !important; /* A bit lighter on hover */
+}
