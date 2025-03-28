@@ -23,6 +23,7 @@ use PTA\API\AJAX;
 //use PTA\API\REST;
 use PTA\API\Restv2;
 use PTA\admin\admin_settings;
+use PTA\forms\Forms;
 
 /**
  * Class PTA
@@ -43,6 +44,7 @@ class PTA
   private $rest;
   private $rest_v2;
   private $admin;
+  private $forms;
 
   private $plugin_file;
 
@@ -75,6 +77,9 @@ class PTA
 
     /* Admin */
     $this->admin = new admin_settings();
+
+    /* Forms */
+    $this->forms = new Forms();
 
     /* Initialize */
     //$this->init();
@@ -159,6 +164,9 @@ class PTA
 
       //error_log(message: 'Initialized Update');
       //$this->logger->info(message: 'Initialized Update');
+
+      /* Forms */
+      $this->forms->init(handler_instance: $this->dbHandler, db_functions: $this->dbHandler->get_instance('functions'));
 
     } catch (\Exception $e) {
       $this->logger->error('Portals to Adventure plugin encountered an error: ' . $e->getMessage());

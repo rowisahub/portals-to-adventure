@@ -76,6 +76,16 @@ class admin_settings extends Client
             menu_slug: 'pta_database',      // Menu slug
             callback: [$this, 'pta_database_page']  // Callback function
         );
+
+        // Form submissions
+        add_submenu_page(
+            parent_slug: 'pta_admin',            // Parent slug
+            page_title: 'Form Submissions',          // Page title
+            menu_title: 'Form Submissions',          // Menu title
+            capability: 'manage_options',       // Capability
+            menu_slug: 'pta_form_submissions',      // Menu slug
+            callback: [$this, 'pta_form_submissions_page']  // Callback function
+        );
     }
 
     public function pta_settings_page()
@@ -647,4 +657,43 @@ class admin_settings extends Client
         <?php
 
     }
+
+  public function pta_form_submissions_page(){
+		// Query submissions (CPT: kadence_form)
+		$args = array(
+			'post_type'      => 'kadence_form',
+			'posts_per_page' => 20, // adjust as needed
+			'paged'          => isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1,
+		);
+		$query = new \WP_Query( $args );
+
+		echo '<div class="wrap"><h1>Form Submissions</h1>';
+		if ( $query->have_posts() ) {
+			echo '<table class="widefat fixed" cellspacing="0">';
+			echo '<thead><tr><th>ID</th><th>Title</th><th>Date</th></tr></thead>';
+			echo '<tbody>';
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				echo '<tr>';
+				echo '<td>' . get_the_ID() . '</td>';
+				echo '<td><a href="' . get_edit_post_link() . '">' . get_the_title() . '</a></td>';
+				echo '<td>' . get_the_date() . '</td>';
+				echo '</tr>';
+			}
+			echo '</tbody></table>';
+
+			// Pagination links.
+			echo '<div class="tablenav"><div class="tablenav-pages">';
+			echo paginate_links( array(
+				'total'   => $query->max_num_pages,
+			) );
+			echo '</div></div>';
+		} else {
+			echo '<p>No submissions found.</p>';
+		}
+		echo '</div>';
+
+		wp_reset_postdata();
+
+	}
 }
