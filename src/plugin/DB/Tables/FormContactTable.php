@@ -55,7 +55,7 @@ class FormContactTable implements TableInterface
 
   private $logger;
   private $wpdb;
-  private $table_name = 'form_contact_data';
+  private $table_name = 'form_contact';
   private $table_path;
   private $table_schema;
   private $charset_collate;

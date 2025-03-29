@@ -9,9 +9,13 @@ if (!defined('ABSPATH')) {
 /* Requires */
 use PTA\logger\Log;
 use Monolog\Logger;
+
 use PTA\DB\functions\submission\submission_functions;
 use PTA\DB\functions\image\image_functions;
 use PTA\DB\functions\user\user_functions;
+use PTA\DB\functions\form\contactForm_functions;
+use PTA\DB\functions\form\notificationForm_functions;
+
 use PTA\DB\db_handler;
 use PTA\DB\functions\db_functions;
 use PTA\admin\admin_functions;
@@ -25,6 +29,9 @@ class Client
     public submission_functions $submission_functions;
     public image_functions $image_functions;
     public user_functions $user_functions;
+    public contactForm_functions $contact_form_functions;
+    public notificationForm_functions $notification_form_functions;
+
     public db_handler $db_handler_instance;
     public db_functions $db_functions;
     public admin_functions $admin_functions;
@@ -51,7 +58,9 @@ class Client
         user_functions $user_functions = null,
         db_handler $handler_instance = null,
         db_functions $db_functions = null,
-        admin_functions $admin_functions = null
+        admin_functions $admin_functions = null,
+        contactForm_functions $contact_form_functions = null,
+        notificationForm_functions $notification_form_functions = null
     ) {
 
         $classname = static::class . $this->logname;
@@ -79,6 +88,9 @@ class Client
         $this->user_functions = ($user_functions instanceof user_functions) ? $user_functions : new user_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
 
         $this->admin_functions = ($admin_functions instanceof admin_functions) ? $admin_functions : new admin_functions(submission_functions: $this->submission_functions);
+
+        $this->contact_form_functions = ($contact_form_functions instanceof contactForm_functions) ? $contact_form_functions : new contactForm_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
+        $this->notification_form_functions = ($notification_form_functions instanceof notificationForm_functions) ? $notification_form_functions : new notificationForm_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
 
         if ($this->callback != null && is_callable($this->callback)) {
             call_user_func($this->callback);

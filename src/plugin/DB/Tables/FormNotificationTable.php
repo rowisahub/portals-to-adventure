@@ -38,7 +38,7 @@ class FormNotificationTable implements TableInterface
 
   private $logger;
   private $wpdb;
-  private $table_name = 'form_notification_data';
+  private $table_name = 'form_notification';
   private $table_path;
   private $table_schema;
   private $charset_collate;

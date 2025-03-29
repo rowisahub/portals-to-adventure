@@ -112,6 +112,9 @@ class admin_settings extends Client
             update_option('pta_clock_end_date', $_POST['pta_clock_end_date']);
             update_option('pta_percentage_prize_total', $_POST['pta_percentage_prize_total']);
 
+            update_option('pta_form_contact_id', $_POST['pta_form_contact_id']);
+            update_option('pta_form_notification_id', $_POST['pta_form_notification_id']);
+
 
 
             // Display a success message
@@ -133,6 +136,9 @@ class admin_settings extends Client
         $pta_clock_start_date = get_option('pta_clock_start_date', '');
         $pta_clock_end_date = get_option('pta_clock_end_date', '');
         $pta_percentage_prize_total = get_option('pta_percentage_prize_total', 50);
+
+        $pta_form_contact_id = get_option('pta_form_contact_id', '');
+        $pta_form_notification_id = get_option('pta_form_notification_id', '');
 
         // Fetch all pages
         $pages = get_pages();
@@ -304,6 +310,52 @@ class admin_settings extends Client
                                 value="<?php echo esc_attr($pta_percentage_prize_total); ?>" max="100" />%
                         </td>
                     </tr>
+                    <!-- Form Contact ID -->
+                     <tr>
+                        <th scope="row">Form Contact</th>
+                        <td>
+                            <!-- Get kadence_form id -->
+                            <select name="pta_form_contact_id">
+                                <?php
+                                     $args = array('post_type' => 'kadence_form');
+                                     $query = new \WP_Query($args);
+                                     if($query->have_posts()){
+                                        while($query->have_posts()){
+                                            $query->the_post();
+                                            $form_id = get_the_ID();
+                                            $form_title = get_the_title();
+                                            echo '<option value="' . $form_id . '" ' . selected($pta_form_contact_id, $form_id) . '>' . $form_title . '</option>';
+                                        }
+                                     } else {
+                                        echo '<option value="0">No Forms Found</option>';
+                                        
+                                     }
+                                ?>
+                        </td>
+                     </tr>
+                    <!-- Form Notification ID -->
+                        <tr>
+                            <th scope="row">Form Notification</th>
+                            <td>
+                                <!-- Get kadence_form id -->
+                                <select name="pta_form_notification_id">
+                                    <?php
+                                        $args = array('post_type' => 'kadence_form');
+                                        $query = new \WP_Query($args);
+                                        if($query->have_posts()){
+                                            while($query->have_posts()){
+                                                $query->the_post();
+                                                $form_id = get_the_ID();
+                                                $form_title = get_the_title();
+                                                echo '<option value="' . $form_id . '" ' . selected($pta_form_notification_id, $form_id) . '>' . $form_title . '</option>';
+                                            }
+                                        } else {
+                                            echo '<option value="0">No Forms Found</option>';
+                                            
+                                        }
+                                    ?>
+                            </td>
+                        </tr>
 
                 </table>
                 <script>
@@ -659,41 +711,63 @@ class admin_settings extends Client
     }
 
   public function pta_form_submissions_page(){
-		// Query submissions (CPT: kadence_form)
-		$args = array(
-			'post_type'      => 'kadence_form',
-			'posts_per_page' => 20, // adjust as needed
-			'paged'          => isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1,
-		);
-		$query = new \WP_Query( $args );
 
-		echo '<div class="wrap"><h1>Form Submissions</h1>';
-		if ( $query->have_posts() ) {
-			echo '<table class="widefat fixed" cellspacing="0">';
-			echo '<thead><tr><th>ID</th><th>Title</th><th>Date</th></tr></thead>';
-			echo '<tbody>';
-			while ( $query->have_posts() ) {
-				$query->the_post();
-				echo '<tr>';
-				echo '<td>' . get_the_ID() . '</td>';
-				echo '<td><a href="' . get_edit_post_link() . '">' . get_the_title() . '</a></td>';
-				echo '<td>' . get_the_date() . '</td>';
-				echo '</tr>';
-			}
-			echo '</tbody></table>';
+        // Get kadence forms, then what pressed/clicked it opens up all submissited forms under that form
 
-			// Pagination links.
-			echo '<div class="tablenav"><div class="tablenav-pages">';
-			echo paginate_links( array(
-				'total'   => $query->max_num_pages,
-			) );
-			echo '</div></div>';
-		} else {
-			echo '<p>No submissions found.</p>';
-		}
-		echo '</div>';
+        $args = array(
+            'post_type' => 'kadence_form',
+            'posts_per_page' => -1,
+        );
+        $query = new \WP_Query($args);
+        if ($query->have_posts()) {
+            echo '<div class="wrap"><h1>Form Submissions</h1>';
+            echo '<table class="widefat fixed" cellspacing="0">';
+            echo '<thead><tr><th>ID</th><th>Title</th><th>Date</th></tr></thead>';
+            echo '<tbody>';
+            while ($query->have_posts()) {
+                $query->the_post();
+                echo '<tr>';
+                echo '<td>' . get_the_ID() . '</td>';
+                echo '<td><a href="' . get_edit_post_link() . '">' . get_the_title() . '</a></td>';
+                echo '<td>' . get_the_date() . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
+            echo '</div></div>';
 
-		wp_reset_postdata();
+            // Reset post data
+            wp_reset_postdata();
+            
+        } else {
+            echo '<p>No forms found.</p>';
+        }
+
+        $contact_forms = $this->contact_form_functions->get_form_contact();
+        $notification_forms = $this->notification_form_functions->get_form_notifications();
+
+        // Display the submitted forms
+        // echo '<div class="wrap"><h1>Submitted Forms</h1>';
+        // echo '<table class="widefat fixed" cellspacing="0">';
+        // echo '<thead><tr><th>ID</th><th>Title</th><th>Date</th></tr></thead>';
+        // echo '<tbody>';
+        // foreach ($contact_forms as $form) {
+        //     echo '<tr>';
+        //     echo '<td>' . $form['id'] . '</td>';
+        //     echo '<td><a href="' . get_edit_post_link($form['id']) . '">' . $form['title'] . '</a></td>';
+        //     echo '<td>' . $form['created_at'] . '</td>';
+        //     echo '</tr>';
+        // }
+        // foreach ($notification_forms as $form) {
+        //     echo '<tr>';
+        //     echo '<td>' . $form['id'] . '</td>';
+        //     echo '<td><a href="' . get_edit_post_link($form['id']) . '">' . $form['title'] . '</a></td>';
+        //     echo '<td>' . $form['created_at'] . '</td>';
+        //     echo '</tr>';
+        // }
+        // echo '</tbody></table>';
+        // echo '</div></div>';
+        // // Reset post data
+        // wp_reset_postdata();
 
 	}
 }

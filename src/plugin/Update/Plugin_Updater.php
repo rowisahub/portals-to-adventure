@@ -117,6 +117,14 @@ class Plugin_Updater {
             return $transient;
         }
 
+        if($github_response->tag_name == null){
+            return $transient;
+        }
+        if(!isset($github_response->assets[0])) {
+            return $transient;
+        }
+        
+
         $latest_version = ltrim($github_response->tag_name, 'v');
         $zip_url = $github_response->assets[0]->browser_download_url;
 

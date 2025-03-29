@@ -24,40 +24,88 @@ class KadenceBlocksPTA
     add_action( 'kadence_blocks_advanced_form_submission', [$this, 'pta_form_submission_handler'], 10, 3 );
   }
   public function pta_form_submission_handler($form_args, $processed_fields, $post_id){
-    // Log the form post ID.
-    error_log( 'Form Post ID: ' . $post_id );
+    
+    $contact_form_id = get_option('pta_form_contact_id');
+    $pta_form_notification_id = get_option('pta_form_notification_id');
 
-    // Log overall form attributes/settings.
-    //error_log( "Form Attributes:\n" . print_r( $form_args['attributes'], true ) );
+    if($post_id == $contact_form_id){
+      $this->contact_form($processed_fields, $post_id);
+    }
+    if($post_id == $pta_form_notification_id){
+      $this->notification_form($processed_fields, $post_id);
+    }
 
-    // User
+  }
+
+  private function contact_form($processed_fields, $post_id){
     $user = wp_get_current_user();
-    $user_id = "";
+    $userid = "";
     if ( $user->exists() ) {
       // User is logged in
-      error_log( 'User ID: ' . $user->ID );
-      $user_id = $user->ID;
+      $userid = $user->ID;
     } else {
       // User is not logged in
-      error_log( 'User is not logged in.' );
-      $user_id = "guest";
+      $userid = "guest";
     }
 
-    // Time and date
-    $current_time = current_time( 'Y-m-d H:i:s' );
-    error_log( 'Current Time: ' . $current_time );
+    $name_field = "";
+    $email_field = "";
+    $message_field = "";
 
-    // Log each submitted field.
-    error_log( "Processed Fields:\n" . print_r( $processed_fields, true ) );
-
-    // Example: Loop through each field and do custom processing.
     foreach ( $processed_fields as $field ) {
-      $name  = isset( $field['name'] ) ? $field['name'] : '';
       $label = isset( $field['label'] ) ? $field['label'] : '';
       $value = isset( $field['value'] ) ? $field['value'] : '';
-
-      // Do something with each field (for example, save custom data or perform an API call)
-      error_log( "Field: $label (name: $name) has value: $value" );
+      if($label == "Name"){
+        $name_field = $value;
+      }
+      if($label == "Email"){
+        $email_field = $value;
+      }
+      if($label == "Message"){
+        $message_field = $value;
+      }
     }
+
+    $this->forms->contact_form_functions->add_completed_form(
+      form_id: $post_id,
+      user_id: $userid,
+      email: $email_field,
+      name: $name_field,
+      message: $message_field
+    );
   }
+
+  private function notification_form($processed_fields, $post_id){
+    $user = wp_get_current_user();
+    $userid = "";
+    if ( $user->exists() ) {
+      // User is logged in
+      $userid = $user->ID;
+    } else {
+      // User is not logged in
+      $userid = "guest";
+    }
+
+    $name_field = "";
+    $email_field = "";
+
+    foreach ( $processed_fields as $field ) {
+      $label = isset( $field['label'] ) ? $field['label'] : '';
+      $value = isset( $field['value'] ) ? $field['value'] : '';
+      if($label == "Name"){
+        $name_field = $value;
+      }
+      if($label == "Email"){
+        $email_field = $value;
+      }
+    }
+
+    $this->forms->notification_form_functions->add_completed_form(
+      form_id: $post_id,
+      user_id: $userid,
+      email: $email_field,
+      name: $name_field
+    );
+  }
+
 }

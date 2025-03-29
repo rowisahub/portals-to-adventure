@@ -22,6 +22,9 @@ use PTA\DB\Tables\UserInfoTable;
 use PTA\DB\Tables\SubmissionDataTable;
 use PTA\DB\Tables\ImageDataTable;
 
+use PTA\DB\Tables\FormContactTable;
+use PTA\DB\Tables\FormNotificationTable;
+
 use PTA\logger\Log;
 
 // Class
@@ -44,6 +47,10 @@ class db_handler implements DBHandlerInterface
   private $submission_data_table;
   private $image_data_table;
 
+  // Form tables
+  private $form_contact_table;
+  private $form_notification_table;
+
   // Logger
   private $logger;
 
@@ -59,6 +66,8 @@ class db_handler implements DBHandlerInterface
     UserInfoTable $userInfoTable = null,
     SubmissionDataTable $submissionDataTable = null,
     ImageDataTable $imageDataTable = null,
+    FormContactTable $formContactTable = null,
+    FormNotificationTable $formNotificationTable = null,
     \wpdb $wpdbIn = null
   ) {
     global $wpdb;
@@ -68,10 +77,15 @@ class db_handler implements DBHandlerInterface
     $this->submission_data_table = $submissionDataTable ?? new SubmissionDataTable($this, $this->wpdb);
     $this->image_data_table = $imageDataTable ?? new ImageDataTable($this, $this->wpdb);
 
+    $this->form_contact_table = $formContactTable ?? new FormContactTable($this, $this->wpdb);
+    $this->form_notification_table = $formNotificationTable ?? new FormNotificationTable($this, $this->wpdb);
+
     $this->db_tables = [
       $this->user_info_table,
       $this->submission_data_table,
-      $this->image_data_table
+      $this->image_data_table,
+      $this->form_contact_table,
+      $this->form_notification_table
     ];
 
     $this->logger = $logger ?? new log(name: 'DB.Handler');
@@ -122,6 +136,10 @@ class db_handler implements DBHandlerInterface
         return $this->submission_data_table->get_table_path();
       case 'image_data':
         return $this->image_data_table->get_table_path();
+      case 'form_contact':
+        return $this->form_contact_table->get_table_path();
+      case 'form_notification':
+        return $this->form_notification_table->get_table_path();
       default:
         return null;
     }
@@ -136,6 +154,10 @@ class db_handler implements DBHandlerInterface
         return $this->submission_data_table;
       case 'image_data':
         return $this->image_data_table;
+      case 'form_contact':
+        return $this->form_contact_table;
+      case 'form_notification':
+        return $this->form_notification_table;
       case 'all':
         return $this->db_tables;
       default:
