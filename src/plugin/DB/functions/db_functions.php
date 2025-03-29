@@ -21,8 +21,7 @@ class db_functions
   private $handler_instance;
   private $logger;
   private $wpdb;
-  private $db_tables;
-
+  
   public function __construct()
   {
     $this->logger = new log(name: 'DB.Functions');
@@ -43,12 +42,6 @@ class db_functions
     } else {
       $this->handler_instance = $handler_instance;
     }
-
-    $this->db_tables = [
-      'user_info' => $this->handler_instance->get_table('user_info'),
-      'submission_data' => $this->handler_instance->get_table('submission_data'),
-      'image_data' => $this->handler_instance->get_table('image_data')
-    ];
 
     $this->wpdb = $wpdbIn ?? $this->handler_instance->get_WPDB();
     
@@ -120,10 +113,20 @@ class db_functions
    */
   public function get_table($table_name)
   {
-    if (!isset($this->db_tables[$table_name])) {
+
+    if(!$this->handler_instance){
+      $this->logger->error("Handler instance is null");
       return false;
     }
-    return $this->db_tables[$table_name];
+
+    $table = $this->handler_instance->get_table($table_name);
+
+    if(!$table){
+      $this->logger->error("Table does not exist: " . $table_name);
+      return false;
+    }
+
+    return $table;
   }
 
   /**
