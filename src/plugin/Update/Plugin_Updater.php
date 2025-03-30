@@ -108,14 +108,22 @@ class Plugin_Updater {
         $github_response = $this->get_github_response();
 
        // $this->logger->debug('Github responce');
-        //$this->logger->debug(print_r($github_response, true));
+        // $this->logger->debug(print_r($github_response, true));
 
-        $this->logger->debug('Current version');
-        $this->logger->debug($this->current_version);
+        // $this->logger->debug('Current version');
+        // $this->logger->debug($this->current_version);
 
         if (!$github_response) {
             return $transient;
         }
+
+        if(isset($github_response->status) && $github_response->status == 401){
+            $this->logger->debug('Unauthorized access to GitHub API. Please check your access token.');
+            return $transient;
+        }
+
+        // $this->logger->debug('Github response');
+        // $this->logger->debug(print_r($github_response, true));
 
         if($github_response->tag_name == null){
             return $transient;
