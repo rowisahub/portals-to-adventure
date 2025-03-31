@@ -733,10 +733,7 @@ class admin_settings extends Client
                 echo '</tr>';
             }
             echo '</tbody></table>';
-            echo '</div></div>';
-
-            // Reset post data
-            wp_reset_postdata();
+            echo '</div>';
             
         } else {
             echo '<p>No forms found.</p>';
@@ -745,29 +742,58 @@ class admin_settings extends Client
         $contact_forms = $this->contact_form_functions->get_form_contact();
         $notification_forms = $this->notification_form_functions->get_form_notifications();
 
-        // Display the submitted forms
-        // echo '<div class="wrap"><h1>Submitted Forms</h1>';
-        // echo '<table class="widefat fixed" cellspacing="0">';
-        // echo '<thead><tr><th>ID</th><th>Title</th><th>Date</th></tr></thead>';
-        // echo '<tbody>';
-        // foreach ($contact_forms as $form) {
-        //     echo '<tr>';
-        //     echo '<td>' . $form['id'] . '</td>';
-        //     echo '<td><a href="' . get_edit_post_link($form['id']) . '">' . $form['title'] . '</a></td>';
-        //     echo '<td>' . $form['created_at'] . '</td>';
-        //     echo '</tr>';
-        // }
-        // foreach ($notification_forms as $form) {
-        //     echo '<tr>';
-        //     echo '<td>' . $form['id'] . '</td>';
-        //     echo '<td><a href="' . get_edit_post_link($form['id']) . '">' . $form['title'] . '</a></td>';
-        //     echo '<td>' . $form['created_at'] . '</td>';
-        //     echo '</tr>';
-        // }
-        // echo '</tbody></table>';
-        // echo '</div></div>';
-        // // Reset post data
-        // wp_reset_postdata();
+        // $this->logger->debug('Contact Forms: ' . print_r($contact_forms, true));
+        // $this->logger->debug('Notification Forms: ' . print_r($notification_forms, true));
+
+
+        // New table for contact forms
+        echo '<div class="wrap"><h1>Contact Forms</h1>';
+        echo '<table class="widefat fixed" cellspacing="0">';
+        if(!empty($contact_forms)){
+            echo '<thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Subject</th><th>User ID</th><th>Created At</th></tr></thead>';
+            echo '<tbody>';
+            foreach($contact_forms as $form){
+                // $this->logger->debug('Contact Form: ' . print_r($form, true));
+                echo '<tr>';
+                echo '<td>' . esc_html($form['name']) . '</td>';
+                echo '<td>' . esc_html($form['email']) . '</td>';
+                echo '<td>' . esc_html($form['message']) . '</td>';
+                echo '<td>' . esc_html($form['subject']) . '</td>';
+                echo '<td>' . esc_html($form['user_id']) . '</td>';
+                echo '<td>' . esc_html($form['created_at']) . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+        } else {
+            echo '<p>No contact forms found.</p>';
+        }
+        echo '</table>';
+        echo '</div>';
+
+        // New table for notification forms
+        echo '<div class="wrap"><h1>Notification Forms</h1>';
+        echo '<table class="widefat fixed" cellspacing="0">';
+        if(!empty($notification_forms)){
+            echo '<thead><tr><th>Name</th><th>Email</th><th>User ID</th><th>Created At</th></tr></thead>';
+            echo '<tbody>';
+            foreach($notification_forms as $form){
+                echo '<tr>';
+                echo '<td>' . esc_html($form['name']) . '</td>';
+                echo '<td>' . esc_html($form['email']) . '</td>';
+                echo '<td>' . esc_html($form['user_id']) . '</td>';
+                echo '<td>' . esc_html($form['created_at']) . '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+        } else {
+            echo '<p>No notification forms found.</p>';
+        }
+        
+        echo '</table>';
+        echo '</div>';
+
+        // Reset post data
+        wp_reset_postdata();
 
 	}
 }
