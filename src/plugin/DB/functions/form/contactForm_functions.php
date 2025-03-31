@@ -75,7 +75,7 @@ class contactForm_functions
       ]);
     }
 
-    return $queryBuilder->get();
+    return $queryBuilder->get(output: ARRAY_A);
   }
 
 }
