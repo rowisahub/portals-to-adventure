@@ -27,6 +27,7 @@ class KadenceBlocksPTA
     
     $contact_form_id = get_option('pta_form_contact_id');
     $pta_form_notification_id = get_option('pta_form_notification_id');
+    $pta_form_registration_id = get_option('pta_form_signup_id');
 
     if($post_id == $contact_form_id){
       $this->contact_form($processed_fields, $post_id);
@@ -34,7 +35,9 @@ class KadenceBlocksPTA
     if($post_id == $pta_form_notification_id){
       $this->notification_form($processed_fields, $post_id);
     }
-
+    if($post_id == $pta_form_registration_id){
+      $this->register_user($processed_fields, $post_id);
+    }
   }
 
   private function contact_form($processed_fields, $post_id){
@@ -106,6 +109,63 @@ class KadenceBlocksPTA
       email: $email_field,
       name: $name_field
     );
+  }
+
+  private function register_user($processed_fields, $post_id){
+
+    $user = wp_get_current_user();
+    if( $user->exists() ) {
+      return;
+    }
+
+    $first_name = "";
+    $last_name = "";
+    $email = "";
+    $password = "";
+    $username = "";
+
+    foreach ( $processed_fields as $field ) {
+      $name = isset( $field['name'] ) ? $field['name'] : '';
+      $value = isset( $field['value'] ) ? $field['value'] : '';
+      if($name == "pta_form_first_name"){
+        $first_name = $value;
+      }
+      if($name == "pta_form_last_name"){
+        $last_name = $value;
+      }
+      if($name == "pta_form_email"){
+        $email = $value;
+      }
+      if($name == "pta_form_password"){
+        $password = $value;
+      }
+      if($name == "pta_form_username"){
+        $username = $value;
+      }
+    }
+
+    $user_data = [
+      'user_login' => $username,
+      'user_email' => $email,
+      'user_pass' => $password,
+      'first_name' => $first_name,
+      'last_name' => $last_name,
+      'role' => 'subscriber',
+    ];
+
+    $user_id = wp_insert_user( $user_data );
+    if ( is_wp_error( $user_id ) ) {
+      // Handle error
+      $this->forms->logger->error("Error creating user: " . $user_id->get_error_message());
+      return;
+    }
+    // User created successfully
+    $this->forms->logger->info("User created successfully: " . $user_id);
+    
+    // log in the user
+    wp_set_current_user( $user_id );
+    wp_set_auth_cookie( $user_id );
+    do_action( 'wp_login', $username, get_user_by( 'id', $user_id ) );
   }
 
 }

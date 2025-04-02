@@ -114,6 +114,7 @@ class admin_settings extends Client
 
             update_option('pta_form_contact_id', $_POST['pta_form_contact_id']);
             update_option('pta_form_notification_id', $_POST['pta_form_notification_id']);
+            update_option('pta_form_signup_id', $_POST['pta_form_signup_id']);
 
 
 
@@ -139,6 +140,7 @@ class admin_settings extends Client
 
         $pta_form_contact_id = get_option('pta_form_contact_id', '');
         $pta_form_notification_id = get_option('pta_form_notification_id', '');
+        $pta_form_signup_id = get_option('pta_form_signup_id', '');
 
         // Fetch all pages
         $pages = get_pages();
@@ -348,6 +350,29 @@ class admin_settings extends Client
                                                 $form_id = get_the_ID();
                                                 $form_title = get_the_title();
                                                 echo '<option value="' . $form_id . '" ' . selected($pta_form_notification_id, $form_id) . '>' . $form_title . '</option>';
+                                            }
+                                        } else {
+                                            echo '<option value="0">No Forms Found</option>';
+                                            
+                                        }
+                                    ?>
+                            </td>
+                        </tr>
+                    <!-- Form Sign Up ID -->
+                        <tr>
+                            <th scope="row">Form Sign Up</th>
+                            <td>
+                                <!-- Get kadence_form id -->
+                                <select name="pta_form_signup_id">
+                                    <?php
+                                        $args = array('post_type' => 'kadence_form');
+                                        $query = new \WP_Query($args);
+                                        if($query->have_posts()){
+                                            while($query->have_posts()){
+                                                $query->the_post();
+                                                $form_id = get_the_ID();
+                                                $form_title = get_the_title();
+                                                echo '<option value="' . $form_id . '" ' . selected($pta_form_signup_id, $form_id) . '>' . $form_title . '</option>';
                                             }
                                         } else {
                                             echo '<option value="0">No Forms Found</option>';
