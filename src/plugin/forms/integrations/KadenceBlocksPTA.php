@@ -22,6 +22,11 @@ class KadenceBlocksPTA
   
   public function register_routes(){
     add_action( 'kadence_blocks_advanced_form_submission', [$this, 'pta_form_submission_handler'], 10, 3 );
+
+    $use_custom_registration = get_option('pta_form_use_custom_registration', true);
+    if($use_custom_registration){
+      add_action('login_init', [$this, 'redirect_registration']);
+    }
   }
   public function pta_form_submission_handler($form_args, $processed_fields, $post_id){
     
@@ -37,6 +42,13 @@ class KadenceBlocksPTA
     }
     if($post_id == $pta_form_registration_id){
       $this->register_user($processed_fields, $post_id);
+    }
+  }
+
+  public function redirect_registration(){
+    if (isset($_GET['action']) && $_GET['action'] === 'register') {
+      wp_redirect('/register');
+      exit;
     }
   }
 
@@ -115,6 +127,8 @@ class KadenceBlocksPTA
 
     $user = wp_get_current_user();
     if( $user->exists() ) {
+      // redirect to the home page
+      wp_redirect( home_url() );
       return;
     }
 

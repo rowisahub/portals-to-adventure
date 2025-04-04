@@ -116,6 +116,8 @@ class admin_settings extends Client
             update_option('pta_form_notification_id', $_POST['pta_form_notification_id']);
             update_option('pta_form_signup_id', $_POST['pta_form_signup_id']);
 
+            update_option('pta_form_use_custom_registration', $_POST['pta_form_use_custom_registration']);
+
 
 
             // Display a success message
@@ -141,6 +143,8 @@ class admin_settings extends Client
         $pta_form_contact_id = get_option('pta_form_contact_id', '');
         $pta_form_notification_id = get_option('pta_form_notification_id', '');
         $pta_form_signup_id = get_option('pta_form_signup_id', '');
+
+        $pta_form_use_custom_registration = get_option('pta_form_use_custom_registration', 'false');
 
         // Fetch all pages
         $pages = get_pages();
@@ -381,6 +385,17 @@ class admin_settings extends Client
                                     ?>
                             </td>
                         </tr>
+                    <!-- Form Use Custom Registration -->
+                    <tr>
+                        <th scope="row">Use Custom Registration</th>
+                        <td>
+                            <select name="pta_form_use_custom_registration">
+                                <option value="true" <?php selected($pta_form_use_custom_registration, 'true'); ?>>True
+                                </option>
+                                <option value="false" <?php selected($pta_form_use_custom_registration, 'false'); ?>>False
+                                </option>
+                            </select>
+                        </td>
 
                 </table>
                 <script>
