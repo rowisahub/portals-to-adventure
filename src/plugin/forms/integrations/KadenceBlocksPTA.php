@@ -88,6 +88,25 @@ class KadenceBlocksPTA
       name: $name_field,
       message: $message_field
     );
+
+    /* Send email */
+    // $to = 'contact@portals-to-adventure.com'; // get_option('pta_form_contact_email');
+    // $subject = "New contact form submission";
+    // $headers = array('Content-Type: text/html; charset=UTF-8', "Reply-To: $name_field <$email_field>");
+
+    // $body = "<h1>New contact form submission</h1>";
+    // $body .= "<p><strong>Name:</strong> $name_field</p>";
+    // $body .= "<p><strong>Email:</strong> $email_field</p>";
+    // $body .= "<p><strong>Message:</strong></p>";
+    // $body .= "<p>$message_field</p>";
+
+    // $mailSend = wp_mail($to, $subject, $body, $headers);
+
+    // if($mailSend){
+    //   $this->forms->logger->info("Contact form email sent successfully");
+    // } else {
+    //   $this->forms->logger->error("Failed to send contact form email");
+    // }
   }
 
   private function notification_form($processed_fields, $post_id){
