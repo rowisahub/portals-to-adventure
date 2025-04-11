@@ -1,40 +1,41 @@
 <!-- Add Submission Page HTML Start -->
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/Add_Submission_Page.css'; ?>">
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-styles.css'; ?>">
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-submission-styles.css'; ?>">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 
-<div class="form-container pta-container">
+<!-- <div class="form-container pta-container">
   <p>When you have a title in mind, the text written, your intro video shot and your thumbnail created, upload them here
     (you can edit and then submit submissions from the My In-Progress Secret Doors page).</p>
 
   <form id="secret-door-form" name="submission_upload_form" method="post" enctype="multipart/form-data">
 
-    <label for="title" class="tooltip">
+    <label for="title" class="pta-label">
       Add Your Adventure Title Here!
     </label>
     <input type="text" id="title" name="title" class="pta-input" maxlength="40" required>
     <p id="title-error" class="error"></p>
 
-    <label for="adventure-text" class="tooltip">
+    <label for="adventure-text" class="pta-label">
       Add Your Adventure Text Here!
     </label>
-    <textarea id="adventure-text" name="description" class="pta-adventure-text" maxlength="10000" rows="6" required></textarea>
+    <textarea id="adventure-text" name="description" class="pta-adventure-text pta-textarea-input" maxlength="10000" rows="6" required></textarea>
     <p id="text-error" class="error"></p>
 
-    <label for="videoURL" class="tooltip">
+    <label for="videoURL" class="pta-label">
       Link Your Video Here!
     </label>
     <input type="text" id="videoURL" name="video_link" maxlength="150" required class="pta-input"> 
     <p id="video-error" class="error"></p>
 
-    <label for="map-upload" class="tooltip">
+    <label for="map-upload" class="pta-label">
       Upload Map Here!
     </label>
     <input type="file" id="map-upload" name="map[]" accept="image/*" required class="pta-input">
     <p id="map-error" class="error hide"></p>
     <div id="map-preview" class="thumbnail-preview pta-lowered-background"></div>
 
-    <label for="thumbnail-upload" class="tooltip">
+    <label for="thumbnail-upload" class="pta-label">
       Upload Thumbnail Here!
     </label>
     <input type="file" id="thumbnail-upload" name="thumbnail[]" accept="image/*" required class="pta-input">
@@ -46,7 +47,84 @@
 
     <input type="submit" name="submit_submission" value="Add Adventure" id="SubmBut" class="pta-cta-button"></input>
   </form>
+</div> -->
+
+<section class="pta-container">
+  <div class="pta-pane">
+    <h2 class="pta-pane-title">Contest Submission</h2>
+    
+    <form id="secret-door-form" name="submission_upload_form" method="post" enctype="multipart/form-data">
+      <div class="pta-pane-content pta-pane-grid">
+        <!-- Name -->
+        <label for="pta-submission-name" class="pta-label">Name</label>
+        <input type="text" id="pta-submission-name" class="pta-data" placeholder="John" disabled>
+        <!-- Title -->
+        <label for="pta-submission-title" class="pta-label">Adventure Name</label>
+        <input type="text" id="pta-submission-title" class="pta-text-input pta-data" placeholder="The Great Adventure">
+        <!-- Description -->
+        <label for="pta-submission-description" class="pta-label">Adventure Text</label>
+        <textarea id="pta-submission-description" class="pta-textarea-input" placeholder="This is a great adventure..."></textarea>
+        <!-- Map Image -->
+        <label for="pta-submission-map" class="pta-label">Map Image</label>
+        <input type="file" id="pta-submission-map" class="pta-file-input pta-data" accept="image/*">
+        <!-- Thumbnail Image -->
+        <label for="pta-submission-thumbnail" class="pta-label">Thumbnail Image</label>
+        <input type="file" id="pta-submission-thumbnail" class="pta-file-input pta-data" accept="image/*">
+        <!-- Video Link -->
+        <label for="pta-submission-video" class="pta-label">Video Link</label>
+        <input type="text" id="pta-submission-video" class="pta-text-input pta-data" placeholder="https://www.youtube.com/watch?v=example">
+        <!-- Terms and Conditions -->
+        <span class='col-span-2 flex flex-row legal justify-end'>
+          <input type='checkbox' id='pta-submission-terms' class='pta-checkbox' />
+          <p class='text-right'>By submitting I agree to the <a href="/#">terms and conditions</a></p>
+        </span>
+      </div>
+      <div class="pta-pane-footer pta-pane-grid">
+        <span></span>
+        <div class="pta-pane-button-bar">
+          <button type="button" data-variant='destructive' class='pta-form-button' id="pta-cancel-button">Cancel</button>
+          <button type="submit" class='pta-form-button' id="pta-submit-button">Submit</button>
+        </div>
+      </div>
+    </form>
+    
+  </div>
+</section>
+
+<!-- <div class="pta-header-image">
+  <p>No Image</p>
 </div>
+<section class="pta-container">
+
+  <div class="pta-pane">
+    <h2 class="pta-pane-title">Contest Submission</h2>
+    <div class="pta-pane-content pta-pane-grid">
+      <p class='pta-label'>Name</p>
+      <p class='pta-data'>John Doe</p>
+      <label class='pta-label' htmlFor="">Adventure Name</label>
+      <input class='pta-text-input pta-data' type="text" />
+      <label class='pta-label' htmlFor="">Adventure Text</label>
+      <textarea class='pta-textarea-input'></textarea>
+      <label class='pta-label' htmlFor="">Map Image</label>
+      <input class='pta-text-input pta-data' type="file" />
+      <label class='pta-label' htmlFor="">Cover Image</label>
+      <input class='pta-text-input pta-data' type="file" />
+      <label class='pta-label' htmlFor="">Video Link</label>
+      <input class='pta-text-input pta-data' type="url" />
+      <span class='col-span-2 flex flex-row legal justify-end'>
+        <input type='checkbox' class='pta-checkbox' />
+        <p class='text-right'>By submitting I agree to the <a href="/#">terms and conditions</a></p>
+      </span>
+    </div>
+    <div class="pta-pane-footer pta-pane-grid">
+      <span></span>
+      <div class='pta-pane-button-bar'>
+        <button data-variant='destructive' class='pta-form-button'>Cancel</button>
+        <button class='pta-form-button'>Submit</button>
+      </div>
+    </div>
+  </div>
+</section> -->
 
 <script src="<?php echo plugin_dir_url(__DIR__) . 'JS/Add_Submission_Page.js'; ?>"></script>
 <!-- Add Submission Page HTML End -->

@@ -65,9 +65,9 @@ body {
   padding-bottom: 50px;
   border: 1px solid rgba(86, 83, 78, 0.2);
 }
-.pta-container p {
+/* .pta-container p {
   color: red;
-}
+} */
 .pta-container > form {
   display: flex;
   flex-direction: column;

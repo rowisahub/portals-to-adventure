@@ -1,0 +1,226 @@
+:root {
+  --header-font: 'Panther', sans-serif;
+  --body-font: 'EB Garamond', serif;
+  --header-font-size: 48px;
+  --body-font-size: 18px;
+
+  --header-color: #ffffff;
+  --body-color: #1e2939;
+  --link-color: rgb(6, 182, 212);
+  --link-hover-color: rgb(14, 116, 144);
+
+  --label-color: rgb(175, 175, 175);
+  --input-color: black;
+  --data-color: white;
+
+  --input-background-color: #ffffff;
+
+  --button-color: #1e2939;
+  --button-hover-color: #364153;
+  --button-text-color: white;
+
+  --button-destructive-color: #7f1d1d;
+  --button-destructive-hover-color: #bb2727;
+
+  --max-content-width: 1200px;
+  --header-image-height: 200px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap');
+
+@font-face {
+    font-family: 'Panther';
+    src: url("/wp-content/plugins/portals-to-adventure/assets/public/arts/font/panther.woff2") format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+.font-garamond {
+    font-family: 'EB Garamond', serif;
+}
+
+.font-panther {
+    font-family: 'Panther', sans-serif;
+}
+
+.pta-container {
+  background-color: black;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  font-family: 'EB Garamond', serif;
+}
+
+.pta-container a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.pta-container a:hover {
+  color: var(--link-hover-color);
+}
+
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.legal {
+  font-size: 16px;
+}
+
+.pta-pane {
+  max-width: var(--max-content-width);
+}
+
+h2.pta-pane-title {
+  font-size: 48px;
+  font-weight: 600;
+  font-family: var(--header-font);
+  color: var(--header-color);
+  text-align: center;
+}
+
+.pta-pane-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+}
+
+p {
+  margin: 0;
+}
+
+.pta-header-image {
+  min-width: var(--max-content-width);
+  height: var(--header-image-height);
+  max-height: var(--header-image-height);
+  background-color: rgb(39, 39, 39);
+  max-width: var(--max-content-width);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.pta-label {
+  text-align: right;
+  color: var(--label-color);
+}
+
+.pta-data {
+  text-align: left;
+  color: var(--data-color);
+}
+
+.pta-text-input {
+
+  width: 100%;
+  border-radius: 5px;
+  padding: 2px 2px;
+  color: var(--input-color);
+  background-color: var(--input-background-color);
+  font-size: 18px;
+
+}
+
+.pta-textarea-input {
+  width: 100%;
+  border-radius: 5px;
+  padding: 2px 2px;
+  color: var(--input-color);
+  background-color: var(--input-background-color);
+  font-size: 18px;
+  height: 300px;
+}
+
+input[type="file"] {
+  border: 1px solid #999;
+  background-color: var(--input-background-color);
+  color: var(--input-color);
+
+  line-height: 1.5;
+  text-align: center;
+}
+
+button.pta-form-button, a.pta-form-button {
+  all: reset;
+  border: none;
+  cursor: pointer;
+  color: var(--button-text-color);
+  font-size: 24px;
+  padding: 10px 20px;
+  transition: all 300ms ease-in-out;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 1); 
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--button-color);
+
+}
+
+.pta-form-button:hover {
+  background-color: var(--button-hover-color); 
+  border-color: rgba(255, 255, 255, 0.5); 
+}
+
+.pta-pane-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  height: 100px;
+}
+
+.pta-pane-button-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px;
+}
+
+.pta-form-button[data-variant="destructive"] {
+  transition: all 300ms ease-in-out;
+  background-color: #7f1d1d; /* dark red gradient */
+  color: white;
+}
+
+.pta-form-button[data-variant="destructive"]:hover {
+  background-color: #bb2727; /* dark red gradient */
+}
