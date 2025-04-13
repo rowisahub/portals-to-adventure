@@ -150,7 +150,7 @@ class Shortcodes_functions
                 description: $description
             );
 
-            // Handle file uploads
+            // Handle file uploads - NOT IN USE
             if (!empty($_FILES['images']['name'][0])) {
                 require_once(ABSPATH . 'wp-admin/includes/file.php');
                 $uploaded_files = $_FILES['images'];

@@ -49,6 +49,27 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       return;
     }
+
+    // Name
+    var nameInput = document.getElementById('pta-submission-name');
+    // For now we are just changing the name to the user name
+    if (nameInput) {
+      if(user_data.is_logged_in){
+        nameInput.value = user_data.user_name;
+      }
+    }
+
+    var rulesButton = document.getElementById("pta-rules-popup");
+    var popup = document.getElementById("rules-popup");
+    var closeBtn = popup.querySelector(".close");
+
+    rulesButton.addEventListener("click", function () {
+      popup.style.display = "block";
+    });
+
+    closeBtn.addEventListener("click", function () {
+      popup.style.display = "none";
+    });
   }
 });
 
@@ -171,7 +192,7 @@ if (imgUpl) {
 }
 
 // Just one map
-var mapUpl = document.getElementById('map-upload');
+var mapUpl = document.getElementById('pta-submission-map');
 mapUpl.addEventListener('change', function (event) {
   const files = event.target.files;
   const previewContainer = document.getElementById('map-preview');
@@ -228,7 +249,7 @@ mapUpl.addEventListener('change', function (event) {
 });
 
 // Just one thumbnail
-var thumbnailUpl = document.getElementById('thumbnail-upload');
+var thumbnailUpl = document.getElementById('pta-submission-thumbnail');
 thumbnailUpl.addEventListener('change', function (event) {
   const files = event.target.files;
   const previewContainer = document.getElementById('thumbnail-preview');
@@ -272,12 +293,15 @@ thumbnailUpl.addEventListener('change', function (event) {
         thumbnailUpl.files = dataTransfer.files;
 
         previewDiv.remove(); // Remove the preview
+        previewContainer.classList.add('hide');
       });
 
       previewDiv.appendChild(img);
       buttonsDiv.appendChild(deleteBtn);
       previewDiv.appendChild(buttonsDiv);
       previewContainer.appendChild(previewDiv);
+
+      previewContainer.classList.remove('hide');
     };
 
     reader.readAsDataURL(file);
@@ -290,13 +314,30 @@ function validateYouTubeUrl(url) {
   return youtubeRegex.test(url);
 }
 
+const termsCheckbox = document.getElementById('pta-submission-terms');
+const submitButton = document.getElementById('pta-submit-button');
+// Check if the terms checkbox exists, if so, add an event listener when the checkbox is clicked
+if (termsCheckbox) {
+  termsCheckbox.addEventListener('click', function () {
+    if (termsCheckbox.checked) {
+      console.log('Terms and conditions accepted');
+      // Enable the submit button
+      submitButton.removeAttribute('disabled');
+    } else {
+      console.log('Terms and conditions not accepted');
+      // Disable the submit button
+      submitButton.setAttribute('disabled', 'disabled');
+    }
+  });
+}
+
 // Adding event listener to form submission
 document.getElementById("secret-door-form").addEventListener("submit", function (event) {
-  const selMap = document.getElementById('selecedMap').value;
-  const selThumbnail = document.getElementById('selecedThumbnail').value;
+  // const selMap = document.getElementById('selecedMap').value;
+  // const selThumbnail = document.getElementById('selecedThumbnail').value;
   const youtubeUrlInput = document.getElementById('videoURL').value; // Now using 'videoURL' as ID
 
-  const errorEle = document.getElementById('thumbnail-error');
+  // const errorEle = document.getElementById('thumbnail-error');
 
   const errorVid = document.getElementById('video-error');
 
@@ -308,23 +349,30 @@ document.getElementById("secret-door-form").addEventListener("submit", function 
     return; // Stop further form processing
   }
 
-  if (!ifNeededSeparateUpload && (!selMap || !selThumbnail)) {
+  // Check if terms and conditions are accepted
+  if (!termsCheckbox.checked) {
     event.preventDefault(); // Prevent form submission
-
-    if (!selMap) {
-      console.log('No map selected');
-      errorEle.textContent = 'Please select a map image.';
-      errorEle.classList.remove('hide');
-    }
-
-    if (!selThumbnail) {
-      console.log('No thumbnail selected');
-      errorEle.textContent = 'Please select a thumbnail image.';
-      errorEle.classList.remove('hide');
-    }
-
-  } else if (!ifNeededSeparateUpload && (selMap && selThumbnail)) {
-    errorEle.classList.add('hide');
+    alert('Please accept the terms and conditions.');
+    return; // Stop further form processing
   }
+
+  // if (!ifNeededSeparateUpload && (!selMap || !selThumbnail)) {
+  //   event.preventDefault(); // Prevent form submission
+
+  //   if (!selMap) {
+  //     console.log('No map selected');
+  //     errorEle.textContent = 'Please select a map image.';
+  //     errorEle.classList.remove('hide');
+  //   }
+
+  //   if (!selThumbnail) {
+  //     console.log('No thumbnail selected');
+  //     errorEle.textContent = 'Please select a thumbnail image.';
+  //     errorEle.classList.remove('hide');
+  //   }
+
+  // } else if (!ifNeededSeparateUpload && (selMap && selThumbnail)) {
+  //   errorEle.classList.add('hide');
+  // }
 
 });

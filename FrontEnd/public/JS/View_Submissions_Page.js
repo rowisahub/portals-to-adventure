@@ -299,19 +299,19 @@ function fillTemplate(submission) {
   } else {
     shareBtns.classList.add('hide');
 
-    voteBtn.classList.add('hide');
-    voteInst.classList.add('hide');
+    // voteBtn.classList.add('hide');
+    // voteInst.classList.add('hide');
   }
 
   // Set vote button data attributes
   //submissionClone.querySelector('.add-to-cart-vote').setAttribute('data-product-id', pta_api_data.woocommerce_product_id);
 
-  var voteSubBtn = submissionClone.querySelector('.vote-btn');
-  voteSubBtn.setAttribute('data-id', submission.id);
+  // var voteSubBtn = submissionClone.querySelector('.vote-btn');
+  // voteSubBtn.setAttribute('data-id', submission.id);
 
-  voteSubBtn.onclick = function () {
-    PTA_API.voteSubmission(submission.id, voteSubBtn);
-  }
+  // voteSubBtn.onclick = function () {
+  //   PTA_API.voteSubmission(submission.id, voteSubBtn);
+  // }
 
   submissionClone.querySelector('.admin-bar-pta').style.display = ifAdmin ? 'block' : 'none';
 
