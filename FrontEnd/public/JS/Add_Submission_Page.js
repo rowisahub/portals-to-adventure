@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     if(rulesButton){
       rulesButton.addEventListener("click", function (e) {
+        e.preventDefault();
         const footerButtons = document.querySelectorAll('#pta-footer button');
         footerButtons.forEach(button => {
           if (button.textContent.trim() === 'Rules') {
