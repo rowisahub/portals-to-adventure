@@ -60,16 +60,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     var rulesButton = document.getElementById("pta-rules-popup");
-    var popup = document.getElementById("rules-popup");
-    var closeBtn = popup.querySelector(".close");
 
-    rulesButton.addEventListener("click", function () {
-      popup.style.display = "block";
-    });
-
-    closeBtn.addEventListener("click", function () {
-      popup.style.display = "none";
-    });
+    if(rulesButton){
+      rulesButton.addEventListener("click", function (e) {
+        const footerButtons = document.querySelectorAll('#pta-footer button');
+        footerButtons.forEach(button => {
+          if (button.textContent.trim() === 'Rules') {
+            button.click();
+          }
+        });
+      });
+    }
   }
 });
 
