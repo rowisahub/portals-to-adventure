@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if(registirationForm) {
     // if user is logged in, redirect to landing page or redirect_to query param
-    if(user_data.is_logged_in) {
+    if(user_data.is_logged_in && !pta_api_data.user_admin) {
       // check if redirect_to query param is set
       const urlParams = new URLSearchParams(window.location.search);
       const redirectTo = urlParams.get('redirect_to');
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    console.log('Registration form loaded');
+    // console.log('Registration form loaded');
 
     const form = registirationForm.querySelector('form');
 

@@ -21,9 +21,9 @@ const selectedFiles = []; // Array to keep track of selected files
 // });
 
 document.addEventListener('DOMContentLoaded', async function () {
-  console.log("Add Submission Page JS Loaded");
+  // console.log("Add Submission Page JS Loaded");
   if(!contest_data.is_contest_active){
-    console.log("Contest is not active");
+    // console.log("Contest is not active");
     // Show the contest over message with alert
     var contestState = contest_data.contest_state; // active, pre, post
     var contest_start_date = new Date(contest_data.contest_start_date);
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     document.getElementsByClassName('entry-content')[0].insertBefore(contestOverMessage, document.getElementsByClassName('entry-content')[0].firstChild);
 
   } else {
-    console.log("Contest is active");
+    // console.log("Contest is active");
     // Name
     var nameInput = document.getElementById('pta-submission-name');
     // For now we are just changing the name to the user name
