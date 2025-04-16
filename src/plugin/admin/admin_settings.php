@@ -296,8 +296,7 @@ class admin_settings extends Client
                         <th scope="row">Clock Start Date</th>
                         <td>
                             <input type="datetime-local" name="pta_clock_start_date"
-                                value="<?php echo esc_attr($pta_clock_start_date); ?>"
-                                min="<?php echo date('Y-m-d\TH:i'); ?>" />
+                                value="<?php echo esc_attr($pta_clock_start_date); ?>" />
                         </td>
                     </tr>
                     <!-- Clock End Date -->
@@ -305,7 +304,7 @@ class admin_settings extends Client
                         <th scope="row">Clock End Date</th>
                         <td>
                             <input type="datetime-local" name="pta_clock_end_date"
-                                value="<?php echo esc_attr($pta_clock_end_date); ?>" min="<?php echo date('Y-m-d\TH:i'); ?>" />
+                                value="<?php echo esc_attr($pta_clock_end_date); ?>" />
                         </td>
                     </tr>
                     <!-- Percentage Prize Total -->
