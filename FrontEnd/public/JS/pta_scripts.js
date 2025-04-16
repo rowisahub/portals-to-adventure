@@ -39,10 +39,31 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if(registirationForm) {
-    // if user is logged in, remove the registration form
+    // if user is logged in, redirect to landing page or redirect_to query param
     if(user_data.is_logged_in) {
-      registirationForm.classList.add('hide');
+      // check if redirect_to query param is set
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirect_to');
+
+      if(redirectTo){
+        window.location.href = redirectTo;
+      } else {
+        window.location.href = '/'
+      }
+
+      return;
     }
+
+    console.log('Registration form loaded');
+
+    const form = registirationForm.querySelector('form');
+
+    form.addEventListener('submit', function(event) {
+      // reload the page after form submission
+      setTimeout(function() {
+        window.location.reload();
+      }, 1000);
+    });
   }
 
 });

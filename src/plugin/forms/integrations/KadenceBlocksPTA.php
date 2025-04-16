@@ -23,6 +23,8 @@ class KadenceBlocksPTA
   public function register_routes(){
     add_action( 'kadence_blocks_advanced_form_submission', [$this, 'pta_form_submission_handler'], 10, 3 );
 
+    add_filter( 'kadence_blocks_advanced_form_redirect', [$this, 'modify_registration_redirect'], 10, 3 );
+
     $use_custom_registration = get_option('pta_form_use_custom_registration', true);
     if($use_custom_registration){
       add_action('login_init', [$this, 'redirect_registration']);
@@ -45,11 +47,59 @@ class KadenceBlocksPTA
     }
   }
 
-  public function redirect_registration(){
-    if (isset($_GET['action']) && $_GET['action'] === 'register') {
-      wp_redirect('/register');
-      exit;
+  public function modify_registration_redirect($redirect_url, $form_args, $processed_fields) {
+    $pta_form_registration_id = get_option('pta_form_signup_id');
+
+    $this->forms->logger->info("Kadence Blocks redirect URL: " . $redirect_url);
+    // $this->forms->logger->info("Kadence Blocks form args: " . json_encode($form_args));
+    // $this->forms->logger->info("Kadence Blocks processed fields: " . json_encode($processed_fields));
+
+    if (isset($_GET['redirect_to'])) {
+      $this->forms->logger->info("Kadence Blocks redirect_to: " . $_GET['redirect_to']);
     }
+
+    $this->forms->logger->info("Post: " . json_encode($_POST));
+
+    // 
+    $unprocessed_fields = $form_args['fields'];
+    // check each field to look for "formID"
+    foreach($unprocessed_fields as $field){
+      if(isset($field['formID']) && $field['formID'] == $pta_form_registration_id){
+        if(isset($_GET['redirect_to'])) {
+          $redirect_url = $_GET['redirect_to'];
+        } else {
+          $redirect_url = home_url();
+        }
+        break;
+      }
+    }
+    
+    // if(isset($form_args['attributes']['_kb_adv_form_post_id']) && $form_args['attributes']['_kb_adv_form_post_id'] == $pta_form_registration_id) {
+    //   // This is our registration form
+    //   if (isset($_GET['redirect_to'])) {
+    //     return $_GET['redirect_to'];
+    //   } else {
+    //     return home_url();
+    //   }
+    // }
+
+    $this->forms->logger->info("Kadence Blocks redirect URL: " . $redirect_url);
+    
+    return $redirect_url;
+  }
+
+  public function redirect_registration(){
+    add_filter('register_url', function($url) {
+      // Check if the URL contains the redirect_to parameter
+      if (isset($_GET['redirect_to'])) {
+        $redirect_to = $_GET['redirect_to'];
+        $url = add_query_arg('redirect_to', urlencode($redirect_to), '/register');
+      } else {
+        // If not, just return the default registration URL
+        $url = '/register';
+      }
+      return $url;
+    });
   }
 
   private function contact_form($processed_fields, $post_id){
@@ -148,7 +198,7 @@ class KadenceBlocksPTA
     if( $user->exists() ) {
       // redirect to the home page
       wp_redirect( home_url() );
-      return;
+      exit;
     }
 
     $first_name = "";
@@ -199,6 +249,13 @@ class KadenceBlocksPTA
     wp_set_current_user( $user_id );
     wp_set_auth_cookie( $user_id );
     do_action( 'wp_login', $username, get_user_by( 'id', $user_id ) );
+
+    // redirect
+    // if (isset($_GET['redirect_to'])) {
+    //   $redirect_to = $_GET['redirect_to'];
+    //   wp_redirect( $redirect_to );
+    //   exit;
+    // }
   }
 
 }

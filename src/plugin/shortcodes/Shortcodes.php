@@ -86,6 +86,8 @@ class Shortcodes
     add_shortcode('pta_styles', [$this, 'add_pta_styles']);
 
     add_action('wp', [$this, 'setup_submission_metadata']);
+
+    add_action('login_form', [$this, 'pta_add_google_login_button']);
   }
 
   public function add_pta_styles(){
@@ -105,7 +107,9 @@ class Shortcodes
   public function submission_add_page()
   {
     if (!is_user_logged_in()) {
-      return '<p>Please log in to submit your entry.</p>';
+      // return '<p>Please log in to submit your entry.</p>';
+      wp_redirect(wp_login_url(get_permalink()));
+      exit;
     }
 
 
@@ -114,6 +118,13 @@ class Shortcodes
     if (!$pta_submission_add_page) {
       add_option('pta_submission_add_page', $page_id);
     }
+
+    // Enqueue the necessary scripts and styles
+    wp_enqueue_script('pta_submission_add_script', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/JS/Add_Submission_Page.js', array('jquery'), '1.0.1', true);
+    // wp_enqueue_style('pta_submission_add_style', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/Add_Submission_Page.css', array(), '1.0.0');
+    // wp_enqueue_style('pta_submission_add_style2', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/pta-styles.css', array(), '1.0.0');
+    // wp_enqueue_style('pta_submission_add_style3', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/pta-submission-styles.css', array(), '1.0.0');
+
 
     ob_start();
     include PTA_PLUGIN_DIR . 'FrontEnd/public/HTML/Add_Submission_Page.html';
@@ -236,22 +247,50 @@ class Shortcodes
 
       }
       // Redirect to same page if user is logged in
-      if (isset($_GET['pta-login'])) {
-        // get url of current page without query string
-        $current_url = strtok($_SERVER["REQUEST_URI"], '?');
+      // if (isset($_GET['pta-login'])) {
+      //   // get url of current page without query string
+      //   $current_url = strtok($_SERVER["REQUEST_URI"], '?');
 
-        if (is_user_logged_in()) {
-          // redirect to login page
-          wp_redirect($current_url);
-          exit;
-        }
-      }
+      //   // $this->logger->debug('Current URL: ' . $current_url);
+
+      //   if (is_user_logged_in()) {
+      //     // redirect to login page
+      //     wp_redirect($current_url);
+      //     exit;
+      //   }
+      // }
 
       // add cart fragments script if WooCommerce is active
       if (class_exists('WooCommerce')) {
         wp_enqueue_script('wc-cart-fragments');
       }
     }
+  }
+
+  public function pta_add_google_login_button(){
+    wp_enqueue_script(
+      handle: 'pta-login-google',
+      src: 'https://accounts.google.com/gsi/client',
+      deps: [],
+      ver: '1.0.0',
+      args: true
+    );
+    $ajax_object = array(
+      'ajax_url' => admin_url(path: 'admin-ajax.php'),
+      'nonce' => wp_create_nonce(action: 'wldpta_ajax_nonce')
+    );
+    $ajax_object_json = wp_json_encode($ajax_object);
+    wp_add_inline_script(
+      handle: 'pta-login-google',
+      data: "const ajax_object = $ajax_object_json;"
+    );
+    wp_enqueue_script('pta-google-login', '/wp-content/plugins/portals-to-adventure/assets/public/js/login.js', array('jquery'), '1.0.0', true);
+    ob_start();
+    ?>
+    <label>Or continue with 3rd party</label>
+    <div id="loginGoogleBtn" class="google-signin-btn">
+    </div>
+    <?php
   }
 
   private function shorten_text($text, $max_length)

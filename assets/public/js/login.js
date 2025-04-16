@@ -1,41 +1,42 @@
 document.addEventListener('DOMContentLoaded', function () {
+    console.debug('Login.js loaded');
     //
-    var popup = document.getElementById('popup');
-    var closePopupBtn = document.getElementById('closePopupBtn');
-    var promoEmails = document.getElementById('promotionalEmails');
-    var showLoginBtn = document.getElementById('showLogin');
-    var sidebarContainer = document.getElementById('sidebar-container');
+    // var popup = document.getElementById('popup');
+    // var closePopupBtn = document.getElementById('closePopupBtn');
+    // var promoEmails = document.getElementById('promotionalEmails');
+    // var showLoginBtn = document.getElementById('showLogin');
+    // var sidebarContainer = document.getElementById('sidebar-container');
 
-    // check if closePopupBtn exists
-    if (closePopupBtn === null) {
-        //console.log('closePopupBtn not found! User is already logged in.');
-        return;
-    }
+    // // check if closePopupBtn exists
+    // if (closePopupBtn === null) {
+    //     //console.log('closePopupBtn not found! User is already logged in.');
+    //     return;
+    // }
 
-    closePopupBtn.onclick = function () {
-        popup.style.display = 'none';
-    }
+    // closePopupBtn.onclick = function () {
+    //     popup.style.display = 'none';
+    // }
 
-    showLoginBtn.onclick = function () {
-        console.log('showLoginBtn clicked');
-        //event.preventDefault();
-        popup.style.display = 'flex';
+    // showLoginBtn.onclick = function () {
+    //     console.log('showLoginBtn clicked');
+    //     //event.preventDefault();
+    //     popup.style.display = 'flex';
 
-        // close sidebar if open
-        if (sidebarContainer.classList.contains('open')) {
-            sidebarContainer.classList.remove('open');
-        }
-    }
+    //     // close sidebar if open
+    //     if (sidebarContainer.classList.contains('open')) {
+    //         sidebarContainer.classList.remove('open');
+    //     }
+    // }
 
-    // Ensure the popup covers the entire viewport
-    function ensurePopupCoversViewport() {
-        //popup.style.width = (window.innerWidth) + 'px';
-        // popup.style.left = (window.innerWidth / 2) + 'px';
-        //popup.style.left = window.innerWidth;
-        //popup.style.height = (window.innerHeight) + 'px';
-        console.log('Window width: ' + window.innerWidth);
-        console.log('Window height: ' + window.innerHeight);
-    }
+    // // Ensure the popup covers the entire viewport
+    // function ensurePopupCoversViewport() {
+    //     //popup.style.width = (window.innerWidth) + 'px';
+    //     // popup.style.left = (window.innerWidth / 2) + 'px';
+    //     //popup.style.left = window.innerWidth;
+    //     //popup.style.height = (window.innerHeight) + 'px';
+    //     console.log('Window width: ' + window.innerWidth);
+    //     console.log('Window height: ' + window.innerHeight);
+    // }
 
     // Call the function on load and on resize
     //ensurePopupCoversViewport();
@@ -47,9 +48,9 @@ document.addEventListener('DOMContentLoaded', function () {
         bodyData.append('action', 'wldpta_google_login');
         bodyData.append('credential', response.credential);
 
-        if (promoEmails.checked) {
-            bodyData.append('promotionalEmails', '1');
-        }
+        // if (promoEmails.checked) {
+        //     bodyData.append('promotionalEmails', '1');
+        // }
 
         fetch(ajax_object.ajax_url, {
             method: 'POST',
@@ -62,9 +63,18 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     console.log('Google login successful!');
-                    popup.style.display = 'none';
+                    // popup.style.display = 'none';
 
-                    window.location.href = window.location.href + '?pta-login=true';
+                    // window.location.href = window.location.href + '?pta-login=true';
+
+                    // if param redirect_to is set, redirect to that page
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectTo = urlParams.get('redirect_to');
+
+                    if (redirectTo) {
+                        window.location.href = redirectTo + '?pta-login=true';
+                        // window.location.reload();
+                    }
 
                 } else {
                     console.log('Google login failed: ' + data.data.message);

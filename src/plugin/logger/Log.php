@@ -74,6 +74,7 @@ class Log implements PTALogInterface
     $evnLvl = get_option('pta_environment');
     if ($evnLvl == 'production') {
       $level = Logger::INFO;
+      $ifLogUncaught = false;
     }
 
     // use upload directory for logs and add .htaccess file to prevent access

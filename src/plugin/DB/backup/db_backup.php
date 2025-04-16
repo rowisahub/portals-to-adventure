@@ -27,7 +27,9 @@ class db_backup
   private $tables_to_backup = [
     'user_info',
     'submission_data',
-    'image_data'
+    'image_data',
+    'form_contact',
+    'form_notification'
   ];
 
   private $wpdb;
