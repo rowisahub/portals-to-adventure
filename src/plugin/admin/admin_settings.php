@@ -506,10 +506,7 @@ class admin_settings extends Client
 
         // Handle filtering by status
         $status_filter = isset($_GET['status_filter']) ? sanitize_text_field($_GET['status_filter']) : 'All';
-
-        //error_log('Status filter: ' . $status_filter);
-
-        //$this->logger->debug('Status filter: ' . $status_filter);
+        $hide_removed = isset($_GET['hide_removed']) ? boolval($_GET['hide_removed']) : false;
 
         // Retrieve submissions based on filter
         if ($status_filter == 'All') {
@@ -520,8 +517,12 @@ class admin_settings extends Client
             $submissions = $this->submission_functions->get_all_submissions_by_state(state: $status_filter);
         }
 
-        // $this->logger->debug('Status filter: ' . $status_filter);
-        // $this->logger->debug('Submissions: ' . print_r($submissions, true));
+        // Filter out removed submissions if hide_removed is checked
+        if ($hide_removed && $status_filter != 'Removed') {
+            $submissions = array_filter($submissions, function ($submission) {
+                return $submission['state'] !== 'Removed' && !$submission['is_removed'];
+            });
+        }
 
         ?>
         <div class="wrap">
@@ -540,6 +541,10 @@ class admin_settings extends Client
                     <option value="Rejected" <?php selected($status_filter, 'Rejected'); ?>>Rejected</option>
                     <option value="Removed" <?php selected($status_filter, 'Removed'); ?>>Removed</option>
                 </select>
+                <label for="hide_removed">
+                    <input type="checkbox" name="hide_removed" id="hide_removed" <?php checked($hide_removed); ?> />
+                    Hide Removed
+                </label>
                 <?php submit_button('Filter', 'primary', '', false); ?>
             </form>
 
