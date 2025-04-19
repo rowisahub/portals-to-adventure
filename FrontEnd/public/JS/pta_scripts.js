@@ -39,12 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if(registirationForm) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectTo = urlParams.get('redirect_to');
     // if user is logged in, redirect to landing page or redirect_to query param
     if(user_data.is_logged_in && !pta_api_data.user_admin) {
       // check if redirect_to query param is set
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectTo = urlParams.get('redirect_to');
-
       if(redirectTo){
         window.location.href = redirectTo;
       } else {
@@ -62,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // reload the page after form submission
       setTimeout(function() {
         window.location.reload();
-      }, 1000);
+      }, 1500);
     });
   }
 
