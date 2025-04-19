@@ -1,6 +1,12 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    var hamburgerIcon = document.getElementById('hamburger-icon');
-    var sidebarContainer = document.getElementById('sidebar-container');
+    // var hamburgerIcons = document.getElementById('hamburger-icon');
+    var sidebarContainer = document.getElementById('pta-sidebar-container');
+
+    if(!sidebarContainer){
+        return;
+    }
+
+    var hamburgerIcon = sidebarContainer.querySelector('.hamburger-icon');
 
     var loginButton = document.getElementById('showLogin');
 
@@ -52,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         loginButton.textContent = 'Logout';
         loginButton.href = user_data.logout_url;
 
-        var sidebarListItems = document.querySelectorAll('#sidebar-container ul li');
+        var sidebarListItems = document.querySelectorAll('#pta-sidebar-container ul li');
         sidebarListItems.forEach(function (item){
             item.classList.remove('hide');
         });
