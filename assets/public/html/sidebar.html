@@ -8,31 +8,31 @@
 
       <div class="user-info">
         <h3>Hello, <span id="user-name">Guest</span></h3>
-
-        <div class="user-options">
-          <a id="showLogin" href="<?php echo wp_login_url() ?>">Login</a>
-        </div>
-
       </div>
 
-      <div>
+      <div class="user-options">
+        <a id="showLogin" href="<?php echo wp_login_url() ?>">Login</a>
+      </div>
+
+      <div class="pta-nav-links">
+        <h4>Links:</h4>
         <ul id="menu-items">
-          <li class="hide"><a href="/create-a-new-secret-door/">Create New Submission</a></li>
-          <li><a href="/view-and-vote">View And Vote</a></li> <!-- This will stay if user isn't logged in -->
+          <li class="hide"><a href="/create-a-new-secret-door/">Create A New Secret Door</a></li>
+          <li><a href="/view-and-vote/">View And Vote</a></li>
           <li class="hide"><a href="/my-in-progress-secret-doors/">My In-Progress Secret Doors</a></li>
           <li class="hide"><a href="/my-submitted-secret-doors/">My Submitted Secret Doors</a></li>
         </ul>
       </div>
 
-      <div id="User-submissions" class="user-submissions hide"> <!-- Only avalible when logged in -->
-        <div id="user-inprogress-submissions">
+      <div id="User-submissions" class="user-submissions hide">
+        <div id="user-inprogress-submissions" class="pta-inprogress-submissions">
           <h4>My In-Progress Submissions:</h4>
           <ul id="user-inprogress-submissions-list">
 
           </ul>
         </div>
 
-        <div id="user-submitted-submissions">
+        <div id="user-submitted-submissions" class="pta-submitted-submissions">
           <h4>My Submitted Submissions:</h4>
           <ul id="user-submitted-submissions-list">
 

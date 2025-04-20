@@ -257,7 +257,7 @@ input.pta-form-button:disabled {
   background-color: #030712f2;
 }
 
-.popup-body p, li {
+.popup-body p, .popup-body li {
   color: white;
   text-align: left;
 }

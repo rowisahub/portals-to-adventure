@@ -24,21 +24,21 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Optionally handle hover with JS if needed
-    document.querySelectorAll('.user-info, .submission-item').forEach(function (element) {
-        element.addEventListener('mouseenter', function () {
-            var options = element.querySelector('.user-options, .submission-options');
-            if (options) {
-                options.style.display = 'block';
-            }
-        });
+    // document.querySelectorAll('.user-info, .submission-item').forEach(function (element) {
+    //     element.addEventListener('mouseenter', function () {
+    //         var options = element.querySelector('.user-options, .submission-options');
+    //         if (options) {
+    //             options.style.display = 'block';
+    //         }
+    //     });
 
-        element.addEventListener('mouseleave', function () {
-            var options = element.querySelector('.user-options, .submission-options');
-            if (options) {
-                options.style.display = 'none';
-            }
-        });
-    });
+    //     element.addEventListener('mouseleave', function () {
+    //         var options = element.querySelector('.user-options, .submission-options');
+    //         if (options) {
+    //             options.style.display = 'none';
+    //         }
+    //     });
+    // });
 
     // if param submitted_today is set, show message to user that they can only submit once per day
     var urlParams = new URLSearchParams(window.location.search);
@@ -88,15 +88,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             inProgressSubmissions.forEach(function(submission){
                 var listItem = document.createElement('li');
                 listItem.classList.add('submission-item');
-                listItem.textContent = submission.title;
 
-                // Add a link to the submission
                 var link = document.createElement('a');
-                link.classList.add('submission-options');
                 link.href = "/my-in-progress-secret-doors?edit_submission_id=" + submission.id;
-                link.textContent = 'View';
-                listItem.appendChild(link);
+                link.textContent = submission.title;
 
+                listItem.appendChild(link);
                 ipList.appendChild(listItem);
             });
         }
@@ -108,17 +105,25 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             var ssList = document.getElementById('user-submitted-submissions-list');
             submittedSubmissions.forEach(function(submission){
+                // var listItem = document.createElement('li');
+                // listItem.classList.add('submission-item');
+                // listItem.textContent = submission.title;
+
+                // // Add a link to the submission
+                // var link = document.createElement('a');
+                // link.classList.add('submission-options');
+                // link.href = "/my-submitted-secret-doors?submission_id=" + submission.id;
+                // link.textContent = 'View';
+                // listItem.appendChild(link);
+
+                // ssList.appendChild(listItem);
                 var listItem = document.createElement('li');
                 listItem.classList.add('submission-item');
-                listItem.textContent = submission.title;
-
-                // Add a link to the submission
                 var link = document.createElement('a');
-                link.classList.add('submission-options');
                 link.href = "/my-submitted-secret-doors?submission_id=" + submission.id;
-                link.textContent = 'View';
-                listItem.appendChild(link);
+                link.textContent = submission.title;
 
+                listItem.appendChild(link);
                 ssList.appendChild(listItem);
             });
         }
