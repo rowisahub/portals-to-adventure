@@ -39,14 +39,18 @@ class Submission
 
     // if user_id is provided, get all submissions for that user
     if (isset($params['user_id'])) {
-      //$this->logger->info('User ID: ' . $params['user_id']);
+      // $this->logger->info('User ID: ' . $params['user_id']);
+      // $this->restv2->logger->debug('User ID: ' . $params['user_id']);
+      // error_log('User ID: ' . $params['user_id']);
 
       $user_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_sub: false);
 
       foreach ($user_ids as $user_id) {
         $user_submissions = $this->restv2->submission_functions->get_submissions_by_user($user_id);
+        // error_log('User Submissions: ' . print_r($user_submissions, true));
         foreach($user_submissions as $submission){
           if($this->restv2->permissionChecker->check_sub_perms($user, $submission)){
+            // error_log('User has perms');
             $submissions[] = $submission;
           }
         }

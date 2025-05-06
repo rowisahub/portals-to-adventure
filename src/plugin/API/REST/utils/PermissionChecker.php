@@ -74,6 +74,12 @@ class PermissionChecker
   {
     $user_primary_role = $this->get_user_role($user);
 
+    // error_log('User Role: ' . $user_primary_role);
+    // error_log('Submission State: ' . $submission['state']);
+    // error_log('Submission Owner ID: ' . $submission['user_owner_id']);
+    // error_log('User ID: ' . $user->ID);
+    // error_log('Check Public: ' . $check_public);
+
     // return true if user is a admin, the submission is public 'Approved', or the user is the owner of the submission
     if (
       (
@@ -88,10 +94,12 @@ class PermissionChecker
         $submission['state'] === 'Approved'
       )
       ||
-      $submission['user_owner_id'] === $user->ID
+      $submission['user_owner_id'] == $user->ID
     ) {
+      error_log('User has permissions to view this submission.');
       return true;
     }
+    error_log('User does not have permissions to view this submission.');
     return false;
   }
 
