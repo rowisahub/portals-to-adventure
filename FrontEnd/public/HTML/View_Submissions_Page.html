@@ -44,7 +44,15 @@
 
 
 <div class="form-container">
-  <p>Search or browse the Secret Doors, share them with friends, and vote for your favorites.</p>
+  <div class="pta-submission-views">
+    <label for="pta-views-options">View Options:</label>
+    <select id="pta-views-options">
+      <option value="random">Random</option>
+      <option value="most-voted">Most Voted</option>
+      <option value="most-recent">Most Recent</option>
+      <option value="most-viewed">Most Viewed</option>
+    </select>
+  </div>
 
   <div class="search-options hide">
     <button onclick="searchByTitle()">Search by Title</button>
