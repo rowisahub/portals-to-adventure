@@ -390,3 +390,19 @@ text {
   border: none;
   pointer-events: none;
 }
+
+.pta-page-title {
+  font-family: 'Panther', sans-serif;
+  font-size: 120px;
+  font-weight: 600;
+  color: var(--header-color);
+  text-align: center;
+  margin: 20px 0;
+}
+.pta-page-discription {
+  font-size: px;
+  font-weight: 400;
+  color: var(--header-color);
+  text-align: center;
+  margin: 20px 0;
+}
