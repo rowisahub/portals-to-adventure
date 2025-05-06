@@ -335,3 +335,21 @@ function getYouTubeVideoID(url) {
 Fancybox.bind("[data-fancybox]", {
   protect: true
 });
+
+const voteButton = document.getElementById('vote-btn');
+if (voteButton) {
+  voteButton.addEventListener('click', async function () {
+    console.log("Vote button clicked");
+    const submissionID = voteButton.getAttribute('data-id');
+    var responce = await PTA_API.voteSubmission(submissionID);
+    if(responce.success == true){
+      jQuery(document.body).trigger('added_to_cart', [responce.data.fragments, responce.data.cart_hash, jQuery(this)]);
+      jQuery(document.body).trigger('wc_fragment_refresh');
+    } else {
+      console.error("Error:", responce.error);
+      alert("Error adding vote to cart. Please try again later. If the problem persists, please contact the site administrator.");
+    }
+  });
+} else {
+  console.error("Vote button not found");
+}
