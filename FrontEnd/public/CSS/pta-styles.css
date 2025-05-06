@@ -699,14 +699,14 @@ div.pta-data-bar p {
   font-family: 'Panther', sans-serif;
   font-size: 120px;
   font-weight: 600;
-  color: var(--header-color);
+  color: var(--header-color) !important;
   text-align: center;
   margin: 20px 0;
 }
 .pta-page-discription {
   font-size: 30px;
   font-weight: 400;
-  color: var(--header-color);
+  color: var(--header-color) !important;
   text-align: center;
   margin: 20px 0;
 }
