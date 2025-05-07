@@ -11,6 +11,7 @@ use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\ErrorHandler;
 use Monolog\Processor\IntrospectionProcessor;
+use Monolog\LogRecord;
 
 use PTA\interfaces\logger\PTALogInterface;
 
@@ -131,11 +132,35 @@ class Log implements PTALogInterface
 
   private function createLog($level, $ifLogUncaught = false)
   {
+
     $handler = new RotatingFileHandler($this->logPath, 7, $level);
     $handler->setFormatter(new LineFormatter(null, null, true, true));
+
+    $pluginBase = plugin_dir_path(__FILE__) . '../../../';
+
+    $this->logger->pushProcessor(new IntrospectionProcessor());
+
+    // $this->logger->pushProcessor(function (LogRecord $record) use ($pluginBase) {
+    //   // error_log("record: " . print_r($record, true));
+
+    //   // if (! empty($record['extra']['file']) && strpos($record['extra']['file'], realpath($pluginBase)) === 0) {
+    //   //   return $record;
+    //   // }
+    //   // return false;
+    //   if(isset($record['message'])){
+    //     // if message has 'woocommerce-payments' stop logging
+    //     if (strpos($record['message'], 'woocommerce-payments') !== false) {
+    //       // return false;
+    //       // $this->logger->debug('woocommerce-payments log message: ' . $record['message']);
+    //       return null;
+    //     }
+    //   }
+    //   return $record;
+    // });
+
     $this->logger->pushHandler($handler);
     //$this->logger->pushHandler();
-    $this->logger->pushProcessor(new IntrospectionProcessor());
+    
 
     if ($ifLogUncaught) {
       ErrorHandler::register($this->logger);

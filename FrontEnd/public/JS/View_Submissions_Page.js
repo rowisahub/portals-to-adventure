@@ -299,15 +299,15 @@ function fillTemplate(submission) {
   } else {
     shareBtns.classList.add('hide');
 
-    // voteBtn.classList.add('hide');
+    voteBtn.classList.add('hide');
     // voteInst.classList.add('hide');
   }
 
   // Set vote button data attributes
   //submissionClone.querySelector('.add-to-cart-vote').setAttribute('data-product-id', pta_api_data.woocommerce_product_id);
 
-  // var voteSubBtn = submissionClone.querySelector('.vote-btn');
-  // voteSubBtn.setAttribute('data-id', submission.id);
+  var voteSubBtn = submissionClone.querySelector('.vote-btn');
+  voteSubBtn.setAttribute('data-id', submission.id);
 
   // voteSubBtn.onclick = function () {
   //   PTA_API.voteSubmission(submission.id, voteSubBtn);
@@ -372,8 +372,9 @@ document.addEventListener('submissionsLoaded', async function () {
         jQuery(document.body).trigger('added_to_cart', [responce.data.fragments, responce.data.cart_hash, jQuery(this)]);
         jQuery(document.body).trigger('wc_fragment_refresh');
       } else {
-        console.error("Error:", responce.error);
-        alert("Error adding vote to cart. Please try again later. If the problem persists, please contact the site administrator.");
+        // console.error("Error:");
+        // console.error(responce);
+        alert("You can only vote 10 times per submission. Please try again later.");
       }
 
     }

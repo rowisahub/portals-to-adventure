@@ -205,6 +205,13 @@ function showSubmissionDetails(submission) {
       for (var i = 0; i < shareBtns.length; i++) {
         shareBtns[i].setAttribute('onclick', `shareSubmissionInt('${shareBtns[i].getAttribute('data-platform')}')`);
       }
+
+      // Show the vote button
+      var voteBtn = document.getElementById('vote-btn');
+      if (voteBtn) {
+        voteBtn.classList.remove('hide');
+        voteBtn.setAttribute('data-id', submission.id);
+      }
     }
 
 

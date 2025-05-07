@@ -54,7 +54,7 @@ class PTA
     $this->enqueue = new Enqueue();
 
     /* Logger */
-    $this->logger = new Log(name: 'Main', ifLogUncaught: true);
+    $this->logger = new Log(name: 'Main', ifLogUncaught: false);
 
     /* Database Handler */
     $this->dbHandler = new db_handler();

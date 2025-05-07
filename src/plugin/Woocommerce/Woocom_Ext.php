@@ -37,7 +37,7 @@ class Woocom_Ext extends Client{
         $this->isWooCommerceActive = true;
 
         // Add WooCommerce related hooks here
-        //$this->logger->debug('WooCommerce loaded');
+        // $this->logger->debug('WooCommerce loaded');
 
         /* Order Status */
         $this->order_status = new Woocom_order_status($this);
@@ -53,6 +53,11 @@ class Woocom_Ext extends Client{
         add_filter('woocommerce_get_item_data', array($this, 'display_submission_data_in_order_description'), 10, 2);
         /* Replace product image with submission image */
         add_filter('woocommerce_cart_item_thumbnail', array($this, 'replace_product_image_with_submission_image'), 10, 3);
+        add_filter('woocommerce_store_api_cart_item_images', array($this, 'API_cart_image'), 10, 3);
+        add_filter('woocommerce_cart_item_permalink', array($this, 'change_item_permalink'), 10, 3);
+        // add_filter('woocommerce_add_to_cart_fragments', array($this, 'update_cart_fragments'), 10, 1);
+
+        // $this->logger->debug('WooCommerce hooks registered');
     }
 
     /**
@@ -108,7 +113,7 @@ class Woocom_Ext extends Client{
      */
     public function replace_product_image_with_submission_image($thumbnail, $cart_item, $cart_item_key)
     {
-        //$this->logger->debug('Replacing product image with submission image');
+        // $this->logger->debug('Replacing product image with submission image');
         if(strpos($thumbnail, 'placeholder')){
             //$this->logger->debug('Product image is a placeholder');
             if(isset($cart_item['submission_image'])){
@@ -123,6 +128,38 @@ class Woocom_Ext extends Client{
         }
         return $thumbnail;
     }
+
+    public function API_cart_image($product_images, $cart_item, $cart_item_key)
+    {
+        //
+        // $this->logger->debug('Replacing product image with submission image API');
+        // $this->logger->debug('Product images: ' . json_encode($product_images));
+        // $this->logger->debug('Cart item: ' . json_encode($cart_item));
+
+        $image_url = $cart_item['submission_image'] ?? null;
+        if($image_url){
+            return [
+                (object)[
+                    'id' => (int) 0,
+                    'src' => $image_url,
+                    'thumbnail' => $image_url,
+                    'srcset' => (string)'',
+                    'sizes' => (string)'',
+                    'name' => 'PTA Submission Image',
+                    'alt' => 'PTA Submission Image',
+                ]
+            ];
+        }
+    }
+    public function change_item_permalink($permalink, $cart_item, $cart_item_key)
+    {
+        if ( ! empty( $cart_item['submission_id'] ) ) {
+            $reutn_permalink = '/submission/?id=' . $cart_item['submission_id'];
+            return $reutn_permalink;
+        }
+        return $permalink;
+    }
+    
 }
 
 class Woocom_order_status{
@@ -131,8 +168,6 @@ class Woocom_order_status{
     public function __construct(Woocom_Ext $woocom_ext)
     {
         $this->woocom_ext = $woocom_ext;
-
-        //$this->register_hooks();
     }
 
     public function register_hooks(){
@@ -141,7 +176,7 @@ class Woocom_order_status{
     }
 
     public function wldpta_order_status_processing($order_id){
-        //$this->woocom_ext->logger->debug('Order status processing');
+        $this->woocom_ext->logger->debug('Order status processing');
         $order = wc_get_order($order_id);
         $user_id = $order->get_user_id();
 
@@ -151,19 +186,22 @@ class Woocom_order_status{
             $this->woocom_ext->user_functions->register_user(email: $user->user_email, username: $user->display_name, firstName: $user->first_name, lastName: $user->last_name, permissions: $userPerms);
         }
         
-        $order->update_status(new_status: 'completed', note: 'Order completed by Portals to Adventure');
+        $order->update_status(new_status: 'completed', note: 'Order completed by Portals to Adventure automatically.');
     }
 
     public function wldpta_order_status_completed($order_id){
-        //$this->woocom_ext->logger->debug('Order status completed');
+        $this->woocom_ext->logger->debug('Order status completed');
         $order = wc_get_order($order_id);
         $order_items = $order->get_items();
 
+        $user_id = $order->get_user_id();
         foreach($order_items as $item){
             $submission_id = $item->get_meta('submission_id');
             $quantity = $item->get_quantity();
 
             $this->woocom_ext->submission_functions->add_submission_vote($submission_id, $quantity);
+
+            $this->woocom_ext->logger->info('User: ' . $user_id . ' has purchased a submission vote. Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
         }
     }
 }

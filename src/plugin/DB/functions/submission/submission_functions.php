@@ -194,6 +194,7 @@ class submission_functions
 
   public function add_submission_vote($submission_id, $count = 1)
   {
+    // $this->logger->debug('Adding vote to submission: ' . $submission_id);
     if (!$this->db_functions->check_id_exists('submission_data', $submission_id)) {
       return false;
     }

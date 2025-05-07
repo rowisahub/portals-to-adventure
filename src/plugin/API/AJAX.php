@@ -102,6 +102,7 @@ class AJAX extends Client
     }
   
     // check submission status
+    // $this->logger->debug('Checking submission status', $_POST);
   
     $product_id = get_option('pta_woocommerce_product_id');
     $submission_id = $_POST['submission_id'];
@@ -124,6 +125,7 @@ class AJAX extends Client
       $passed = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
 
       if(!$passed){
+        $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'passed' => $passed));
         wp_send_json_error(['notices' => wc_get_notices('error')]);
       }
 
