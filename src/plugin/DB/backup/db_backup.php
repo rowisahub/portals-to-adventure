@@ -29,7 +29,8 @@ class db_backup
     'submission_data',
     'image_data',
     'form_contact',
-    'form_notification'
+    'form_notification',
+    'user_submission_votes',
   ];
 
   private $wpdb;
