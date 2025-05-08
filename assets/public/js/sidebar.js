@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
 
         var submittedSubmissions = submissions.filter(function(submission){
-            return submission.state === 'Approved';
+            return submission.state === 'Approved' || submission.state === 'Pending Approval';
         });
 
         //

@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     var ifFoundSubmissions = false;
     submissions.forEach(function (submission) {
 
-      // For This page we need to check if the submission is the user's submission and is 'Approved'
-      if (submission.state !== 'Approved') {
+      // For This page we need to check if the submission is the user's submission and is 'Approved' or 'Pending Approval'
+      if (submission.state !== 'Approved' && submission.state !== 'Pending Approval') {
         return;
       }
       ifFoundSubmissions = true;
