@@ -96,10 +96,10 @@ class PermissionChecker
       ||
       $submission['user_owner_id'] == $user->ID
     ) {
-      error_log('User has permissions to view this submission.');
+      // error_log('User has permissions to view this submission.');
       return true;
     }
-    error_log('User does not have permissions to view this submission.');
+    // error_log('User does not have permissions to view this submission.');
     return false;
   }
 
