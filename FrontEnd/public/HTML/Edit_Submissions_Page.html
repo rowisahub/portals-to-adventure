@@ -1,7 +1,7 @@
 <!-- Edit Submission Page HTML Start -->
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/Edit_Submissions_Page.css'; ?>">
 <link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-styles.css'; ?>">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo plugin_dir_url(__DIR__) . 'CSS/pta-submission-styles.css'; ?>">
 
 <!-- <form method="post" enctype="multipart/form-data"></form> -->
 <div class="form-container pta-container">
@@ -50,7 +50,7 @@
       Video Link
       <span class="tooltiptext">For preview, use approved list! (40 char max)</span>
     </label>
-    <input class="pta-input" type="text" id="video-link" name="video_link" maxlength="150" required>
+    <input class="pta-input" type="text" id="video-link" name="video_link" maxlength="150">
     <p id="video-error" class="error"></p>
 
 
@@ -65,7 +65,7 @@
 
     <!-- Submit Button and Accept Terms -->
     <div class="pta-flex-row">
-      <label for="accept-terms">Accept terms of the contest</label>
+      <label for="accept-terms">Accept <a href="#" id="pta-rules-popup">Rules</a> of the contest</label>
       <input type="checkbox" id="accept-terms" name="accept-terms">
     </div>
 
