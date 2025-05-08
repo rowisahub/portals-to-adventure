@@ -15,6 +15,7 @@ use PTA\DB\functions\image\image_functions;
 use PTA\DB\functions\user\user_functions;
 use PTA\DB\functions\form\contactForm_functions;
 use PTA\DB\functions\form\notificationForm_functions;
+use PTA\DB\functions\user\user_submission_functions;
 
 use PTA\DB\db_handler;
 use PTA\DB\functions\db_functions;
@@ -31,6 +32,7 @@ class Client
     public user_functions $user_functions;
     public contactForm_functions $contact_form_functions;
     public notificationForm_functions $notification_form_functions;
+    public user_submission_functions $user_submission_functions;
 
     public db_handler $db_handler_instance;
     public db_functions $db_functions;
@@ -60,7 +62,8 @@ class Client
         db_functions $db_functions = null,
         admin_functions $admin_functions = null,
         contactForm_functions $contact_form_functions = null,
-        notificationForm_functions $notification_form_functions = null
+        notificationForm_functions $notification_form_functions = null,
+        user_submission_functions $user_submission_functions = null
     ) {
 
         $classname = static::class . $this->logname;
@@ -91,6 +94,8 @@ class Client
 
         $this->contact_form_functions = ($contact_form_functions instanceof contactForm_functions) ? $contact_form_functions : new contactForm_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
         $this->notification_form_functions = ($notification_form_functions instanceof notificationForm_functions) ? $notification_form_functions : new notificationForm_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
+
+        $this->user_submission_functions = ($user_submission_functions instanceof user_submission_functions) ? $user_submission_functions : new user_submission_functions(handler_instance: $this->db_handler_instance, db_functions: $this->db_functions);
 
         if ($this->callback != null && is_callable($this->callback)) {
             call_user_func($this->callback);

@@ -41,7 +41,15 @@ class user_submission_functions
     $this->logger = $this->logger->getLogger();
   }
 
-  
+  public function update_user_vote($user_id, $submission_id, $votes)
+  {
+    $table_data = [
+      'votes' => $votes
+    ];
+
+    $this->wpdb->update($this->table_path, $table_data, ['user_id' => $user_id, 'submission_id' => $submission_id]);
+    $this->logger->debug('User vote updated', $table_data);
+  }
 
   /**
    * Retrieves the number of votes for a specific user's submission.
@@ -61,7 +69,8 @@ class user_submission_functions
       ->where(['user_id' => $user_id])
       ->where(['submission_id' => $submission_id]);
 
-    $result = $this->db_functions->exe_from_builder($query);
+    $result = $this->db_functions->exe_from_builder(query_builder: $query, output_type: 'ARRAY_A');
+    $result = $result[0]['votes'] ?? 0;
 
     return $result;
   }
@@ -81,7 +90,8 @@ class user_submission_functions
       ->from($this->table_path)
       ->where(['submission_id' => $submission_id]);
 
-    $result = $this->db_functions->exe_from_builder($query);
+    $result = $this->db_functions->exe_from_builder(query_builder: $query, output_type: 'ARRAY_A');
+    $result = $result[0]['total_votes'] ?? 0;
 
     return $result;
   }
@@ -107,6 +117,53 @@ class user_submission_functions
     $result = $this->db_functions->exe_from_builder($query);
 
     return !empty($result);
+  }
+
+  public function create_user_vote($user_id, $submission_id, $votes = 0)
+  {
+    $table_data = [
+      'user_id' => $user_id,
+      'submission_id' => $submission_id,
+      'votes' => $votes
+    ];
+
+    $this->wpdb->insert($this->table_path, $table_data);
+    $this->logger->debug('User vote created', $table_data);
+  }
+
+  public function add_user_vote($user_id, $submission_id, $votes)
+  {
+    if(!$this->has_user_voted($user_id, $submission_id)){
+
+      $this->create_user_vote($user_id, $submission_id, $votes);
+
+    } else {
+
+      $result = $this->get_user_submission_votes($user_id, $submission_id);
+
+      if ($result) {
+        $votes += $result;
+      }
+
+      $this->update_user_vote($user_id, $submission_id, $votes);
+
+      $this->logger->debug('User vote updated', [
+        'user_id' => $user_id,
+        'submission_id' => $submission_id,
+        'votes' => $votes
+      ]);
+    } 
+  }
+
+  public function view_table()
+  {
+    $query = new QueryBuilder($this->wpdb);
+    $query->select('*')
+      ->from($this->table_path);
+
+    $result = $this->db_functions->exe_from_builder($query);
+
+    return $result;
   }
 
   public function has_user_voted_limit($user_id, $submission_id)

@@ -199,7 +199,8 @@ class Woocom_order_status{
             $submission_id = $item->get_meta('submission_id');
             $quantity = $item->get_quantity();
 
-            $this->woocom_ext->submission_functions->add_submission_vote($submission_id, $quantity);
+            // $this->woocom_ext->submission_functions->add_submission_vote($submission_id, $quantity);
+            $this->woocom_ext->user_submission_functions->add_user_vote($user_id, $submission_id, $quantity);
 
             $this->woocom_ext->logger->info('User: ' . $user_id . ' has purchased a submission vote. Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
         }
@@ -242,38 +243,73 @@ class Woocom_cart {
     }
 
     public function add_to_cart($cart){
-        //$this->woocom_ext->logger->debug('Adding to cart');
-        // works
-        // show the The submission ID and qunitity of the items in the cart
+        $total_vote_count = get_option('wldpta_product_limit', 10);
+        // $this->woocom_ext->logger->debug('Total vote count: ' . $total_vote_count);
+
+        $user_id = get_current_user_id();
+        // $this->woocom_ext->logger->debug('User ID: ' . $user_id);
+
+				$iferror = false;
         foreach($cart->get_cart() as $cart_item){
-            $submission_id = $cart_item['submission_id'];
-            $quantity = $cart_item['quantity'];
-            //$this->woocom_ext->logger->debug('Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
+					if($iferror) return;
 
-            if($quantity > 10){
+					$submission_id = $cart_item['submission_id'];
+					$quantity = $cart_item['quantity'];
 
-                wc_add_notice(__('You can only purchase up to 10 of each submission.', 'portals-to-adventure'), 'error');
+					$votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes($user_id, $submission_id);
 
-                $cart_item_key = $cart_item['key'];
+					$total_votes_from_user = $votes_from_user + $quantity;
 
-                $cart->set_quantity($cart_item_key, 10);
+					$total_error_text = 'You can only purchase up to ' . $total_vote_count . ' votes for each submission.';
 
-                //$this->woocom_ext->sse->send_message('You can only purchase up to 10 of each submission.', 'error');
-                
-                // update mini cart
-                //$cart->calculate_totals();
+					if($total_votes_from_user > $total_vote_count){
+						$iferror = true;
 
-                // update cart
-                //$cart->calculate_totals();
-                //WC()->cart->calculate_totals();
-                //WC_AJAX::get_refreshed_fragments();
+						if($votes_from_user > 0){
+							$total_error_text .= ' You have already purchased ' . $votes_from_user . ' votes.';
+						}
 
+						$cart_item_key = $cart_item['key'];
+						$cart->set_quantity($cart_item_key, $total_vote_count - $votes_from_user);
 
+						$this->manage_notices($total_error_text);
 
-            }
-        }
+					} else {
 
-        //
+						$this->manage_notices($total_error_text, true);
+					}
+				}
     }
+
+		protected function manage_notices($total_error_text, $remove = false){
+			$notices = wc_get_notices();
+
+			// wc_clear_notices();
+
+			// $this->woocom_ext->logger->debug('All notices: ' . json_encode($notices));
+
+			foreach($notices as $key => $notice){
+				if($key == 'error'){
+					foreach($notice as $key2 => $notice2){
+						if(strpos($notice2['notice'], $total_error_text) !== false){
+							// $this->woocom_ext->logger->debug('Removing notice from error notice');
+							unset($notices[$key][$key2]);
+						}
+					}
+				} else {
+					if(strpos($notice['notice'], $total_error_text) !== false){
+						// $this->woocom_ext->logger->debug('Removing notice single');
+						unset($notices[$key]);
+					}
+				}
+			}
+			wc_set_notices($notices);
+
+			if(!$remove){
+				// $this->woocom_ext->logger->debug('Adding notice: ' . $total_error_text);
+
+				wc_add_notice(__($total_error_text, 'portals-to-adventure'), 'error');
+			}
+		}
 
 }

@@ -34,6 +34,14 @@ class SubmissionFormatter
     
         $userpta = $this->restV2_instance->user_functions->get_user_by_id($submission['user_owner_id'])[0];
         $username = $userpta['username'];
+
+        $vote_count = $this->restV2_instance->user_submission_functions->get_total_votes_for_submission(
+          $submission['id']
+        );
+        if($vote_count == null){
+          $vote_count = 0;
+        }
+        // $this->restV2_instance->logger->debug('Vote count', ['vote_count' => $vote_count]);
     
         $submission_api_base = [
           'id' => $submission['id'],
@@ -42,7 +50,7 @@ class SubmissionFormatter
           'video_link' => $submission['video_link'],
           'state' => $submission['state'],
           'views' => $submission['views'],
-          'likes' => $submission['likes_votes'],
+          'likes' => $vote_count,
           'user_id' => $submission['user_owner_id'],
           'user_name' => $username,
           'created_at' => $submission['created_at'],
