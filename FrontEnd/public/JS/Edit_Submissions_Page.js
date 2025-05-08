@@ -32,6 +32,19 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
+  var rulesButton = document.getElementById("pta-rules-popup");
+  if(rulesButton){
+    rulesButton.addEventListener("click", function (e) {
+      e.preventDefault();
+      const footerButtons = document.querySelectorAll('#pta-footer button');
+      footerButtons.forEach(button => {
+        if (button.textContent.trim() === 'Rules') {
+          button.click();
+        }
+      });
+    });
+  }
+
   submissionChanges();
   try {
     var SelectList = document.getElementById('secret-doors-list');
@@ -494,8 +507,7 @@ document.getElementById("secret-door-form-update").addEventListener("submit", fu
 
   // Check if title, discription, image, video link is entered
   if (document.getElementById("title").value == "" ||
-    document.getElementById("adventure-text").value == "" ||
-    document.getElementById("video-link").value == "") {
+    document.getElementById("adventure-text").value == "") {
     event.preventDefault();
 
     alert("Please fill out all fields.");
