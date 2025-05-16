@@ -133,7 +133,7 @@ class AJAX extends Client
         $passed = $this->check_vote_count($submission_id, $user_id, $cart);
 
         if(!$passed){
-          $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'passed' => $passed));
+          $this->logger->debug('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'passed' => $passed));
           wp_send_json_error(['notices' => wc_get_notices('error')]);
           wp_die();
         }
