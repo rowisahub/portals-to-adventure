@@ -86,6 +86,16 @@ class admin_settings extends Client
             menu_slug: 'pta_form_submissions',      // Menu slug
             callback: [$this, 'pta_form_submissions_page']  // Callback function
         );
+
+        // Logs page
+        add_submenu_page(
+            parent_slug: 'pta_admin',            // Parent slug
+            page_title: 'Logs',          // Page title
+            menu_title: 'Logs',          // Menu title
+            capability: 'manage_options',       // Capability
+            menu_slug: 'pta_logs',      // Menu slug
+            callback: [$this, 'pta_logs_page']  // Callback function
+        );
     }
 
     public function pta_settings_page()
@@ -840,4 +850,38 @@ class admin_settings extends Client
         wp_reset_postdata();
 
 	}
+
+    public function pta_logs_page()
+    {
+        // This page will display the logs and allow for downloading
+
+        if (!current_user_can('manage_options')) {
+            wp_die('You do not have sufficient permissions to access this page.');
+        }
+
+        $log_path = '/bitnami/wordpress/wp-content/uploads/portals_to_adventure-uploads/logs/';
+
+        $log_files = glob($log_path . '*.log');
+        $log_files = array_reverse($log_files);
+        
+
+        // drop down to select log file
+        ?>
+        <div class="wrap">
+            <h1><?php _e('PTA Plugin Logs', 'portals-to-adventure'); ?></h1>
+            <form method="post">
+                <label for="log_file"><?php _e('Select Log File:', 'portals-to-adventure'); ?></label>
+                <select name="log_file" id="log_file">
+                    <?php foreach ($log_files as $log_file): ?>
+                        <option value="<?php echo esc_attr($log_file); ?>"><?php echo basename($log_file); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="submit" name="action" class="button button-primary" value="<?php _e('Download Log', 'portals-to-adventure'); ?>" />
+            </form>
+        </div>
+        <?php
+
+        // Check if the form is submitted and nonce is valid
+
+    }
 }
