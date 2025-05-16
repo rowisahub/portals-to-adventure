@@ -92,10 +92,11 @@ document.getElementById("delete-btn").addEventListener("click", async function (
     return;
   }
   try {
-    var response = await WLD_API.user_submission("delete", selectedId, "This Submission was removed by user");
-    console.log(response);
+    // var response = await WLD_API.user_submission("delete", selectedId, "This Submission was removed by user");
+    var newResponse = await PTA_API.admin_submission("delete", selectedId, "This Submission was removed by user");
+    console.log(newResponse);
 
-    if (response.code === 'success_action') {
+    if (newResponse.code === 'success_action') {
       console.log("Submission Deleted Successfully");
       alert("Submission Deleted Successfully");
       location.reload();

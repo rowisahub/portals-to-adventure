@@ -245,7 +245,7 @@ async function adminAction(action, id, button) {
       button.disabled = true;
 
       try {
-        var admin_result = await WLD_API.admin_submission('approve', id);
+        var admin_result = await PTA_API.admin_submission('approve', id);
 
         console.log("Admin Result:", admin_result);
 
@@ -270,7 +270,7 @@ async function adminAction(action, id, button) {
       }
 
       try {
-        var admin_result = await WLD_API.admin_submission('reject', id, reason);
+        var admin_result = await PTA_API.admin_submission('reject', id, reason);
 
         console.log("Admin Result:", admin_result);
 
@@ -295,7 +295,7 @@ async function adminAction(action, id, button) {
       }
 
       try {
-        var admin_result = await WLD_API.admin_submission('delete', id, reason);
+        var admin_result = await PTA_API.admin_submission('delete', id, reason);
 
         console.log("Admin Result:", admin_result);
 
@@ -314,7 +314,7 @@ async function adminAction(action, id, button) {
       button.disabled = true;
 
       try {
-        var admin_result = await WLD_API.admin_submission('unreject', id);
+        var admin_result = await PTA_API.admin_submission('unreject', id);
 
         console.log("Admin Result:", admin_result);
 
