@@ -270,19 +270,23 @@ function fillTemplate(submission) {
   // set the href attribute for view more button
   viewMoreBtn.setAttribute('href', `/submission/?id=${submission.id}`);
 
-  const videoID = getYouTubeVideoID(submission.video_link) || '0';
-  const videoThumbnailLink = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;
-
   // Populate media items
   const mapItem = submissionClone.querySelector('.media-item.map');
   mapItem.setAttribute('href', submission.map_url);
   mapItem.setAttribute('data-fancybox', `submission-${submission.id}`);
   mapItem.querySelector('img').src = submission.map_url;
 
-  const videoItem = submissionClone.querySelector('.media-item.video');
-  videoItem.setAttribute('href', submission.video_link);
-  videoItem.setAttribute('data-fancybox', `submission-${submission.id}`);
-  videoItem.querySelector('img').src = videoThumbnailLink;
+  if(submission.video_link !== ''){
+    const videoID = getYouTubeVideoID(submission.video_link) || '0';
+    const videoThumbnailLink = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;
+
+    const videoItem = submissionClone.querySelector('.media-item.video');
+    videoItem.setAttribute('href', submission.video_link);
+    videoItem.setAttribute('data-fancybox', `submission-${submission.id}`);
+    videoItem.querySelector('img').src = videoThumbnailLink;
+
+    videoItem.classList.remove('hide');
+  }
 
   const thumbnailItem = submissionClone.querySelector('.media-item.thumbnail');
   thumbnailItem.setAttribute('href', submission.thumbnail_url);
