@@ -115,6 +115,8 @@ class AJAX extends Client
     $submission_title = $submission_data['submission_title'];
     $submission_image = $submission_data['submission_thumbnail_url'];
 
+    $user_id = get_current_user_id();
+
     $this->logger->debug('Adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'submission_title' => $submission_title));
 
   
@@ -122,15 +124,22 @@ class AJAX extends Client
     if (class_exists('WooCommerce')) {
 
       //$this->logger->debug($_POST['quantity']);
-      $passed = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1);
-
-      if(!$passed){
-        $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'passed' => $passed));
-        wp_send_json_error(['notices' => wc_get_notices('error')]);
-      }
+      // $passed = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, 1)
 
       if($product_id > 0){
         $cart = WC()->cart;
+
+        $passed = true;
+        $passed = $this->check_vote_count($submission_id, $user_id, $cart);
+
+        if(!$passed){
+          $this->logger->error('Error adding product to cart', array('product_id' => $product_id, 'submission_id' => $submission_id, 'passed' => $passed));
+          wp_send_json_error(['notices' => wc_get_notices('error')]);
+          wp_die();
+        }
+
+        // $this->logger->debug('Cart', array('cart' => $cart));
+
         $added = $cart->add_to_cart(product_id: $product_id, cart_item_data: [
           'submission_id' => $submission_id, 
           'submission_title' => $submission_title,
@@ -157,6 +166,40 @@ class AJAX extends Client
     
     wp_die();
   
+  }
+
+  private function check_vote_count($submission_id, $user_id, $cart = null, $check = true){
+    $total_vote_count = get_option('wldpta_product_limit', 10);
+    // Check if the user has already voted for this submission
+    $vote_count = $this->user_submission_functions->get_user_submission_votes(
+      $user_id,
+      $submission_id
+    );
+
+    // Add count, as user has pressed the vote button
+    if($check){
+      $vote_count++;
+    }
+
+    if($cart != null){
+      // Check if the user has already voted for this submission
+      $cart_items = $cart->get_cart();
+      foreach($cart_items as $item){
+        if($item['submission_id'] == $submission_id){
+          $cart_quantity = $item['quantity'];
+          $vote_count += $cart_quantity;
+        }
+      }
+    }
+
+    $this->logger->debug('Vote count', array('vote_count' => $vote_count, 'total_vote_count' => $total_vote_count));
+
+    if ($vote_count > $total_vote_count) {
+      return false;
+    } else {
+      // User has not voted for this submission
+      return true;
+    }
   }
 
   private function get_submission_data($submission_id){

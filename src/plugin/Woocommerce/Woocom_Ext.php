@@ -222,24 +222,50 @@ class Woocom_cart {
     }
 
     public function add_to_cart_validation($passed, $product_id, $quantity){
-        $max_quantity = 10; // Set your maximum quantity here
+        // $max_quantity = 10; // Set your maximum quantity here
 
-        // Get the current quantity of the product in the cart
-        $cart = WC()->cart->get_cart();
-        $current_quantity = 0;
-        foreach ($cart as $cart_item) {
-            if ($cart_item['product_id'] == $product_id) {
-                $current_quantity += $cart_item['quantity'];
-            }
-        }
+        // // Get the current quantity of the product in the cart
+        // $cart = WC()->cart->get_cart();
+        // $current_quantity = 0;
+        // foreach ($cart as $cart_item) {
+        //     if ($cart_item['product_id'] == $product_id) {
+        //         $current_quantity += $cart_item['quantity'];
+        //     }
+        // }
 
-        // Check if the total quantity exceeds the maximum quantity
-        if (($current_quantity + $quantity) > $max_quantity) {
-            wc_add_notice(__('You can only purchase a maximum of ' . $max_quantity . ' of this product.', 'portals-to-adventure'), 'error');
-            return false;
-        }
+        // // Check if the total quantity exceeds the maximum quantity
+        // if (($current_quantity + $quantity) > $max_quantity) {
+        //     wc_add_notice(__('You can only purchase a maximum of ' . $max_quantity . ' of this product.', 'portals-to-adventure'), 'error');
+        //     return false;
+        // }
 
-        return $passed;
+        // return $passed;
+
+				$this->woocom_ext->logger->debug('Adding to cart validation');
+
+				$total_vote_count = get_option('wldpta_product_limit', 10);
+
+				$cart = WC()->cart->get_cart();
+				$this->woocom_ext->logger->debug('Cart: ' . json_encode($cart));
+
+				foreach ($cart as $cart_item) {
+					$submission_id = $cart_item['submission_id'];
+					$quantity = $cart_item['quantity'];
+
+					$votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes(get_current_user_id(), $submission_id);
+
+					$total_votes_from_user = $votes_from_user + $quantity;
+
+					$this->woocom_ext->logger->debug('Total votes from user: ' . $total_votes_from_user);
+
+					if($total_votes_from_user > $total_vote_count){
+						// wc_add_notice(__('You can only purchase up to ' . $total_vote_count . ' votes for each submission.', 'portals-to-adventure'), 'error');
+						$this->woocom_ext->logger->debug('You can only purchase up to ' . $total_vote_count . ' votes for each submission.');
+						return false;
+					}
+				}
+
+				return $passed;
     }
 
     public function add_to_cart($cart){
