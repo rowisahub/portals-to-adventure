@@ -120,7 +120,7 @@ class Shortcodes
     }
 
     // Enqueue the necessary scripts and styles
-    wp_enqueue_script('pta_submission_add_script', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/JS/Add_Submission_Page.js', array('jquery'), '1.0.1', true);
+    wp_enqueue_script('pta_submission_add_script', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/JS/Add_Submission_Page.js', array('jquery'), '1.0.2', true);
     // wp_enqueue_style('pta_submission_add_style', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/Add_Submission_Page.css', array(), '1.0.0');
     // wp_enqueue_style('pta_submission_add_style2', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/pta-styles.css', array(), '1.0.0');
     // wp_enqueue_style('pta_submission_add_style3', '/wp-content/plugins/portals-to-adventure/FrontEnd/public/CSS/pta-submission-styles.css', array(), '1.0.0');

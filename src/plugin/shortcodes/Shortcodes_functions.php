@@ -90,6 +90,7 @@ class Shortcodes_functions
             }
 
             //error_log('POST: ' . print_r($_POST, true));
+            // $this->logger->debug('Handling submission upload', array('POST' => $_POST));
 
             $user_id = get_current_user_id();
             $title = sanitize_text_field($_POST['title']);
