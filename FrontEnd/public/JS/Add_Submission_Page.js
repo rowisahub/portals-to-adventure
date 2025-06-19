@@ -88,7 +88,53 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
+  const defaultContent = 'This is a great adventure...';
 
+  var tinyMDE1 = new TinyMDE.Editor({
+    textarea: 'pta-submission-description',
+    content: defaultContent,
+  });
+  var commandBar1 = new TinyMDE.CommandBar({
+    element: 'tinymde_commandbar1',
+    editor: tinyMDE1,
+    commands: [
+      'bold', 'italic', 'strikethrough', '|', 'h1', 'h2', '|', 'ul', 'ol', '|', 'blockquote', 'hr', '|', 'code'
+    ]
+  });
+
+  tinyMDE1.addEventListener('change', (event) => {
+    // Save the content to the textarea
+    console.log('Content changed:', event.content);  
+
+    const textarea = document.getElementById('pta-submission-description');
+    if (textarea) {
+      console.log('Textarea found:', textarea.value);
+    }
+
+  });
+
+  // on submit
+
+  document.getElementById("secret-door-form").addEventListener("submit", function (event) {
+    // show content of description textarea
+    const descriptionTextarea = document.getElementById('pta-submission-description');
+    if (descriptionTextarea) {
+      console.log('Description Textarea content:', descriptionTextarea.value);
+      // Check if textarea has content or if default content is present
+      if (descriptionTextarea.value.trim() === '' || descriptionTextarea.value === defaultContent) {
+        event.preventDefault(); // Prevent form submission
+        alert('Please enter a valid description for your adventure.');
+        return; // Stop further form processing
+      }
+    }
+
+    // Check if terms and conditions are accepted
+    if (!termsCheckbox.checked) {
+      event.preventDefault(); // Prevent form submission
+      alert('Please accept the terms and conditions.');
+      return; // Stop further form processing
+    }
+  });
 });
 
 // Function to validate YouTube URL
@@ -96,6 +142,15 @@ function validateYouTubeUrl(url) {
   const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
   return youtubeRegex.test(url);
 }
+
+// TinyMDE.init({
+//   selector: '#pta-submission-description',
+//   setup: function (editor) {
+//     editor.on('change', function () {
+//       editor.save(); // Save the content to the textarea
+//     });
+//   }
+// });
 
 // Adding event listener to form submission
 // document.getElementById("secret-door-form").addEventListener("submit", function (event) {

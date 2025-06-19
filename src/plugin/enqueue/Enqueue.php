@@ -111,6 +111,21 @@ class Enqueue implements PTAEnqueueInterface
       args: true
     );
 
+    /* TinyMDE */
+    wp_enqueue_script(
+      handle: 'pta-tinymce',
+      src: 'https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.js',
+      deps: [],
+      args: true
+    );
+    wp_enqueue_style(
+      handle: 'pta-tinymce-style',
+      src: 'https://unpkg.com/tiny-markdown-editor/dist/tiny-mde.min.css',
+      deps: [],
+      ver: '1.0.0',
+      media: 'all'
+    );
+
     /* Admin */
     // $current_user = wp_get_current_user();
     // $allowed_roles = array('administrator', 'editor');

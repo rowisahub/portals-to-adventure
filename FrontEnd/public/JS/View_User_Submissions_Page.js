@@ -1,5 +1,6 @@
 var loadedSubmissions = null;
 
+var tinyMDE1 = null;
 document.addEventListener('DOMContentLoaded', async function () {
 
   if(!contest_data.is_contest_active){
@@ -29,6 +30,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       return;
     }
+  }
+
+  var textArea = document.getElementById("adventure-text");
+  if(textArea) {
+    tinyMDE1 = new TinyMDE.Editor({
+      textarea: textArea,
+    });
   }
 
   try {
@@ -132,9 +140,12 @@ document.getElementById("secret-doors-list").addEventListener("change", function
   // Update the form fields with the selected submission details
   document.getElementById("title").innerText = "Title: " + selectedSubmission.title;
   document.getElementById("submission-date").innerHTML = "Date: " + selectedSubmission.created_at_formatted;
-  document.getElementById("adventure-text").innerHTML = selectedSubmission.description;
+  // document.getElementById("adventure-text").innerHTML = selectedSubmission.description;
   document.getElementById("vote-count").innerHTML = 'Votes: ' + selectedSubmission.likes;
 
+  if (tinyMDE1) {
+    tinyMDE1.setContent(selectedSubmission.description);
+  }
 
   const videoID = getYouTubeVideoID(selectedSubmission.video_link);
   const videoThumbnailLink = `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`;

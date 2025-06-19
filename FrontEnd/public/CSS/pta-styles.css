@@ -223,12 +223,14 @@ div.submission-header .views {
   width: 100px;
 }
 
-textarea.pta-adventure-text {
+.pta-adventure-text {
   width: unset !important;
   background-color: #57534e;
   color: white;
   border: 1px solid rgba(0, 0, 0, 0.5) !important;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.5) inset;
+  overflow-y: scroll;
+  max-height: 600px;
 }
 
 .pta-lowered-background {

@@ -17,7 +17,12 @@
         <input type="text" id="pta-submission-title" class="pta-text-input pta-data" placeholder="The Great Adventure" name="title" maxlength="40" required>
         <!-- Description -->
         <label for="pta-submission-description" class="pta-label">Adventure Text</label>
-        <textarea id="pta-submission-description" class="pta-textarea-input" placeholder="This is a great adventure..." name="description" required></textarea>
+        <!-- <textarea id="pta-submission-description" class="pta-textarea-input" placeholder="This is a great adventure..." name="description" required></textarea> -->
+        <div class="pta-textarea-input">
+          <div id="tinymde_commandbar1"></div>
+          <!-- <div id="pta-submission-description"></div> -->
+          <textarea id="pta-submission-description" placeholder="This is a great adventure...." name="description"></textarea>
+        </div>
         <!-- Map Image -->
         <label for="pta-submission-map" class="pta-label">Map Image</label>
         <input type="file" id="pta-submission-map" class="pta-file-input pta-data" accept="image/*" name="map[]" required>

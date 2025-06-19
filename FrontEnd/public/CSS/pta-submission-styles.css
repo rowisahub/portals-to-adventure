@@ -167,6 +167,8 @@ p {
   background-color: var(--input-background-color);
   font-size: 18px;
   height: 300px;
+  max-width: 469px;
+  overflow-y: scroll;
 }
 
 input[type="file"] {

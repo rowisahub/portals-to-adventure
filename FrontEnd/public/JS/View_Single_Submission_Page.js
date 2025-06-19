@@ -91,7 +91,13 @@ function showSubmissionDetails(submission) {
 
     authorElement.textContent = submission.user_name;
     titleElement.textContent = submission.title;
-    descriptionElement.textContent = submission.description;
+
+    var tinyMDE1 = new TinyMDE.Editor({
+      element: descriptionElement,
+      content: submission.description,
+    });
+
+    // descriptionElement.textContent = submission.description;
 
     mapElement.setAttribute("data-fancybox", submission.id);
     mapElement.setAttribute("href", submission.map_url);

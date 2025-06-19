@@ -40,8 +40,11 @@
       Description
       <span class="tooltiptext">(10,000 character max)</span>
     </label>
-    <textarea id="adventure-text" class="pta-adventure-text" name="submission_description" maxlength="10000" rows="6" required>Adventure description goes here...
-    </textarea>
+    <div id="tinymde_editor-hidden" class="pta-adventure-text">
+      <div id="tinymde_commandbar1"></div>
+      <textarea id="adventure-text" name="submission_description" class="pta-adventure-text" maxlength="10000" rows="6" placeholder="Adventure description goes here...">Adventure description goes here...</textarea>
+    </div>
+    <!-- <textarea id="adventure-text" class="pta-adventure-text" name="submission_description" maxlength="10000" rows="6" placeholder="Adventure description goes here..." required></textarea> -->
     <p id="text-error" class="error"></p>
 
 

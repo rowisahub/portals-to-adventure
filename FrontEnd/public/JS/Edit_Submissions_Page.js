@@ -1,6 +1,6 @@
 var loadedSubmissions = null;
 
-
+var tinyMDE1 = null;
 document.addEventListener('DOMContentLoaded', async function () {
 
   if(!contest_data.is_contest_active){
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if(!pta_api_data.user_admin){
       document.getElementsByClassName('form-container')[0].classList.add('hide');
 
-      return;
+      // return;
     }
   }
 
@@ -42,6 +42,24 @@ document.addEventListener('DOMContentLoaded', async function () {
           button.click();
         }
       });
+    });
+  }
+
+  // Tinymde
+  var textArea = document.getElementById("adventure-text");
+  if (textArea) {
+    tinyMDE1 = new TinyMDE.Editor({
+      textarea: textArea
+    });
+  }
+  var CommandBar = document.getElementById("tinymde_commandbar1");
+  if (CommandBar) {
+    var commandBar1 = new TinyMDE.CommandBar({
+      element: CommandBar,
+      editor: tinyMDE1,
+      commands: [
+        'bold', 'italic', 'strikethrough', '|', 'h1', 'h2', '|', 'ul', 'ol', '|', 'blockquote', 'hr', '|', 'code'
+      ]
     });
   }
 
@@ -147,8 +165,10 @@ document.getElementById("secret-doors-list").addEventListener("change", function
 
   // Update the form fields with the selected submission details
   document.getElementById("title").value = selectedSubmission.title;
-  document.getElementById("adventure-text").value = selectedSubmission.description;
+  // document.getElementById("adventure-text").value = selectedSubmission.description;
   document.getElementById("video-link").value = selectedSubmission.video_link;
+
+  if(tinyMDE1) tinyMDE1.setContent(selectedSubmission.description);
 
   setImagePreview(selectedSubmission.images);
 
