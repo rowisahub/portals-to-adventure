@@ -46,7 +46,6 @@ function clearSubmissionList() {
   submissionList.innerHTML = '';
 }
 
-
 // on page load, get all submissions
 document.addEventListener('DOMContentLoaded', async function () {
 
@@ -71,6 +70,16 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // add the message to 'entry-content' as the first child
     document.getElementsByClassName('entry-content')[0].insertBefore(contestOverMessage, document.getElementsByClassName('entry-content')[0].firstChild);
+    return;
+  }
+
+  const SortPublicSubmissions = document.getElementById('pta-views-options');
+  if (SortPublicSubmissions) {
+    SortPublicSubmissions.addEventListener('change', function () {
+      const filter = this.value;
+      console.log("Sorting by:", filter);
+      sortSubmissionsDOM(filter);
+    });
   }
 
   ifAdmin = pta_api_data.user_admin;
@@ -98,7 +107,10 @@ async function getAllSubmissions() {
 
     loadedSubmissions = submissions;
 
+    sortSubmissions('random'); // Default sort to random
+
     console.log(loadedSubmissions);
+
     // TODO
     // Add the submissions to the submission list
     var subLoaded = createSubmissionView();
@@ -117,6 +129,67 @@ async function getAllSubmissions() {
     console.error('Error fetching submissions:', error);
     alert('Error fetching submissions. Please try again later.');
   }
+}
+
+function sortSubmissions(filter) {
+  switch (filter) {
+    case 'random':
+      loadedSubmissions.sort(() => Math.random() - 0.5);
+      break;
+    case 'most-voted':
+      loadedSubmissions.sort((a, b) => b.likes - a.likes);
+      break;
+    case 'most-recent':
+      loadedSubmissions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    default:
+      console.error("Invalid filter:", filter);
+      break;
+  }
+}
+
+// Alternative sorting method that reorders DOM elements instead of re-rendering
+function sortSubmissionsDOM(filter) {
+  // Sort the loadedSubmissions array first
+  switch (filter) {
+    case 'random':
+      loadedSubmissions.sort(() => Math.random() - 0.5);
+      break;
+    case 'most-voted':
+      loadedSubmissions.sort((a, b) => b.likes - a.likes);
+      break;
+    case 'most-recent':
+      loadedSubmissions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    default:
+      console.error("Invalid filter:", filter);
+      return;
+  }
+  
+  // Create a document fragment to hold the reordered elements
+  const fragment = document.createDocumentFragment();
+  
+  // Reorder the DOM elements based on the sorted array
+  loadedSubmissions.forEach(submission => {
+    const viewItem = loadedSubmissionsView.find(item => item.submission.id === submission.id);
+    if (viewItem && viewItem.submissionDiv) {
+      fragment.appendChild(viewItem.submissionDiv);
+    }
+  });
+  
+  // Clear the submission list and append the reordered elements
+  submissionList.innerHTML = '';
+  submissionList.appendChild(fragment);
+  
+  // Update the loadedSubmissionsView order to match
+  const reorderedView = [];
+  loadedSubmissions.forEach(submission => {
+    const viewItem = loadedSubmissionsView.find(item => item.submission.id === submission.id);
+    if (viewItem) {
+      reorderedView.push(viewItem);
+    }
+  });
+  loadedSubmissionsView = reorderedView;
 }
 
 
