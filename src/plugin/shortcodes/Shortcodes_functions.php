@@ -508,7 +508,7 @@ class Shortcodes_functions
             }
 
             // handle Save and Publish
-            if ($_POST['update_submission'] == 'Save') {
+            if ($_POST['update_submission'] == 'Save Your Progress') {
                 // set status to 'progress'
                 //update_submission($submission['id'], 'state', 'In Progress');
 
@@ -523,7 +523,7 @@ class Shortcodes_functions
                     $this->submission_func->update_submission($submission['id'], ['state' => 'In Progress']);
                 }
 
-            } elseif ($_POST['update_submission'] == 'Publish') {
+            } elseif ($_POST['update_submission'] == 'Submit to Contest') {
                 // set status to 'pending'
                 //update_submission($submission['id'], 'state', 'Pending Approval'); // Pending Approval
 

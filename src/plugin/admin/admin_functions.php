@@ -134,4 +134,23 @@ class admin_functions
         ];
         $this->submission_functions->update_submission($submission_id, $updateData);
     }
+
+    /**
+     * Reverts the submission corresponding to the provided submission ID.
+     *
+     * This method is responsible for rolling back any changes made to the submission.
+     * It takes the unique identifier of a submission and performs actions to revert it
+     * to its previous state.
+     *
+     * @param int|string $submission_id The unique identifier of the submission to be reverted.
+     * @return void
+     */
+    public function revert_submission($submission_id)
+    {
+        //$this->logger->info('Reverting submission with ID: ' . $submission_id);
+        $updateData = [
+            'state' => 'In Progress'
+        ];
+        $this->submission_functions->update_submission($submission_id, $updateData);
+    }
 }

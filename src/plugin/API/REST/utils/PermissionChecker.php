@@ -68,9 +68,10 @@ class PermissionChecker
    *
    * @param \WP_User $user The user object whose permissions are being checked.
    * @param mixed $submission The submission object or data that the user is attempting to access.
+   * @param bool $check_public Optional. Whether to check if the submission is public. Default is true.
    * @return bool True if the user has the necessary permissions, false otherwise.
    */
-  public function check_sub_perms($user, $submission, $check_public = true)
+  public function check_sub_perms($user, $submission, $check_public = true, $check_user = true, $check_admin = true)
   {
     $user_primary_role = $this->get_user_role($user);
 
@@ -83,9 +84,13 @@ class PermissionChecker
     // return true if user is a admin, the submission is public 'Approved', or the user is the owner of the submission
     if (
       (
-        $user_primary_role === $this->constants::ADMIN
-        ||
-        $user_primary_role === $this->constants::EDITOR
+        $check_admin
+        &&
+        (
+          $user_primary_role === $this->constants::ADMIN
+          ||
+          $user_primary_role === $this->constants::EDITOR
+        )
       )
       ||
       (
@@ -94,7 +99,11 @@ class PermissionChecker
         $submission['state'] === 'Approved'
       )
       ||
-      $submission['user_owner_id'] == $user->ID
+      (
+        $check_user
+        &&
+        $submission['user_owner_id'] == $user->ID
+      )
     ) {
       // error_log('User has permissions to view this submission.');
       return true;

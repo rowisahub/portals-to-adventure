@@ -84,6 +84,38 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 });
 
+document.getElementById("revert-status-btn").addEventListener("click", async function () {
+  var selectedId = document.getElementById("secret-doors-list").value;
+  console.log("Selected ID:", selectedId);
+
+  if (selectedId == -1) {
+    alert("No submission selected");
+    return;
+  }
+
+  var ifconfirm = confirm("Are you sure you want to revert the status of this submission?");
+  console.log("Confirm:", ifconfirm);
+  if (!ifconfirm) {
+    return;
+  }
+
+  try {
+    // var response = await WLD_API.user_submission("revert", selectedId, "This Submission was reverted by user");
+    var newResponse = await PTA_API.admin_submission("revert", selectedId, "This Submission was reverted by user");
+    console.log(newResponse);
+
+    if (newResponse.code === 'success_action') {
+      console.log("Submission Status Reverted Successfully");
+      alert("Submission Status Reverted Successfully");
+      location.reload();
+    }
+
+  } catch (error) {
+    console.error('Error reverting submission status:', error);
+    alert('Error reverting submission status. Please try again later.');
+  }
+});
+
 document.getElementById("delete-btn").addEventListener("click", async function () {
   var selectedId = document.getElementById("secret-doors-list").value;
   console.log("Selected ID:", selectedId);

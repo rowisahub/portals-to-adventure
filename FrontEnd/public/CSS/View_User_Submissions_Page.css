@@ -87,6 +87,10 @@ button {
   margin-bottom: 10px;
 }
 
+.revert-status-btn {
+  background-color: #ffc107;
+}
+
 button:hover {
   background-color: #218838;
 }

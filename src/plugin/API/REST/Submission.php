@@ -139,11 +139,6 @@ class Submission
     $user = wp_get_current_user();
     $user_primary_role = $this->restv2->permissionChecker->get_user_role($user);
 
-    // check if user is an admin or editor
-    if($user_primary_role !== $this->constants::ADMIN && $user_primary_role !== $this->constants::EDITOR){
-      return new \WP_Error('no_perms', 'User does not have permissions to perform this action.', array('status' => 403));
-    }
-
     $params = $request->get_params();
 
     $this->restv2->logger->debug('Action Params: ' . print_r($params, true));
@@ -179,20 +174,55 @@ class Submission
 
     $this->restv2->logger->debug('Action: ' . $action);
 
+    // check if user is an admin or editor
+    // if($user_primary_role !== $this->constants::ADMIN && $user_primary_role !== $this->constants::EDITOR){
+    //   return new \WP_Error('no_perms', 'User does not have permissions to perform this action.', array('status' => 403));
+    // }
+
     foreach($submission_ids as $submission_id){
+      $this->restv2->logger->debug('Processing Submission ID: ' . $submission_id);
+      $submission = $this->restv2->submission_functions->get_submission($submission_id)[0];
       
       switch ($action) {
         case 'approve':
+          // Admin action, check if user has permissions
+          if(!$this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: false, check_admin: true)){
+            $errors[] = new \WP_Error('no_perms', 'User does not have permissions to approve submissions.', array('status' => 403, 'submission_id' => $submission_id));
+            continue; // Skip to the next submission
+          }
           $this->restv2->admin_functions->approve_submission($submission_id);
           break;
         case 'reject':
+          // Admin action, check if user has permissions
+          if(!$this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: false, check_admin: true)){
+            $errors[] = new \WP_Error('no_perms', 'User does not have permissions to reject submissions.', array('status' => 403, 'submission_id' => $submission_id));
+            continue; // Skip to the next submission
+          }
           $this->restv2->admin_functions->reject_submission($submission_id, $reason);
           break;
         case 'delete':
+          // User action, check if user
+          if(!$this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: true, check_admin: true)){
+            $errors[] = new \WP_Error('no_perms', 'User does not have permissions to delete submissions.', array('status' => 403, 'submission_id' => $submission_id));
+            continue; // Skip to the next submission
+          }
           $this->restv2->admin_functions->delete_submission($submission_id, $reason);
           break;
         case 'unreject':
+          // Admin action, check if user has permissions
+          if(!$this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: false, check_admin: true)){
+            $errors[] = new \WP_Error('no_perms', 'User does not have permissions to unreject submissions.', array('status' => 403, 'submission_id' => $submission_id));
+            continue; // Skip to the next submission
+          }
           $this->restv2->admin_functions->unreject_submission($submission_id);
+          break;
+        case 'revert':
+          // User action
+          if(!$this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: true, check_admin: true)){
+            $errors[] = new \WP_Error('no_perms', 'User does not have permissions to revert submissions.', array('status' => 403, 'submission_id' => $submission_id));
+            continue; // Skip to the next submission
+          }
+          $this->restv2->admin_functions->revert_submission($submission_id);
           break;
         default:
           $errors[] = new \WP_Error('invalid_action', 'Invalid action provided.', array('status' => 400));
