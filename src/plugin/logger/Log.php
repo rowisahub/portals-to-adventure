@@ -133,7 +133,7 @@ class Log implements PTALogInterface
   private function createLog($level, $ifLogUncaught = false)
   {
 
-    $handler = new RotatingFileHandler($this->logPath, 7, $level);
+    $handler = new RotatingFileHandler($this->logPath, 30, $level);
     $handler->setFormatter(new LineFormatter(null, null, true, true));
 
     $pluginBase = plugin_dir_path(__FILE__) . '../../../';
