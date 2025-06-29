@@ -96,6 +96,16 @@ class admin_settings extends Client
             menu_slug: 'pta_logs',      // Menu slug
             callback: [$this, 'pta_logs_page']  // Callback function
         );
+
+        // Votes page
+        add_submenu_page(
+            parent_slug: 'pta_admin',            // Parent slug
+            page_title: 'Votes',          // Page title
+            menu_title: 'Votes',          // Menu title
+            capability: 'manage_options',       // Capability
+            menu_slug: 'pta_votes',      // Menu slug
+            callback: [$this, 'pta_vote_submissions_page']  // Callback function
+        );
     }
 
     public function pta_settings_page()
@@ -551,10 +561,10 @@ class admin_settings extends Client
                     <option value="Rejected" <?php selected($status_filter, 'Rejected'); ?>>Rejected</option>
                     <option value="Removed" <?php selected($status_filter, 'Removed'); ?>>Removed</option>
                 </select>
-                <label for="hide_removed">
-                    <input type="checkbox" name="hide_removed" id="hide_removed" <?php checked($hide_removed); ?> />
-                    Hide Removed
-                </label>
+                <label for="hide_removed">Hide Removed</label>
+                <input type="checkbox" name="hide_removed" id="hide_removed" <?php checked($hide_removed); ?> 
+                    value="<?php echo esc_attr($hide_removed ? 'true' : 'false'); ?>" />
+
                 <?php submit_button('Filter', 'primary', '', false); ?>
             </form>
 
@@ -565,6 +575,7 @@ class admin_settings extends Client
                         <th>ID</th>
                         <th>Title</th>
                         <th>Status</th>
+                        <th>Votes</th>
                         <th>User ID</th>
                         <th>User Name</th>
                         <th>Was, current Rejected, Reason</th>
@@ -580,6 +591,7 @@ class admin_settings extends Client
                                 <td><?php echo esc_html($submission['id']); ?></td>
                                 <td><?php echo esc_html($submission['title']); ?></td>
                                 <td><?php echo esc_html($submission['state']); ?></td>
+                                <td><?php echo esc_html($this->user_submission_functions->get_total_votes_for_submission($submission['id'])); ?></td>
                                 <td><?php echo esc_html($submission['user_owner_id']); ?></td>
                                 <td><?php echo esc_html($this->user_functions->get_user_by_id($submission['user_owner_id'])[0]['username']); ?>
                                 </td>
@@ -859,29 +871,256 @@ class admin_settings extends Client
             wp_die('You do not have sufficient permissions to access this page.');
         }
 
-        $log_path = '/bitnami/wordpress/wp-content/uploads/portals_to_adventure-uploads/logs/';
+        $upload_dir = wp_upload_dir();
+
+        $log_path = $upload_dir['basedir'] . '/portals_to_adventure-uploads/logs/';
 
         $log_files = glob($log_path . '*.log');
         $log_files = array_reverse($log_files);
         
 
-        // drop down to select log file
+            // Process form submission
+        if ( isset($_POST['pta_logs_nonce']) && wp_verify_nonce($_POST['pta_logs_nonce'], 'pta_logs_action') ) {
+            $selected = wp_unslash( $_POST['log_file'] );
+            // echo $selected;
+
+            // Security: only allow files from our directory
+            if ( in_array( $selected, $log_files, true ) ) {
+
+                if ( isset($_POST['action']) && $_POST['action'] === 'Download Log' ) {
+                    // Download mode
+                    // clear output buffer to prevent any previous output
+                    if (ob_get_length()) {
+                        ob_end_clean();
+                    }
+                    header( 'Content-Type: text/plain' );
+                    header( 'Content-Disposition: attachment; filename="' . basename( $selected ) . '"' );
+                    readfile( $selected );
+                    exit;
+                }
+
+                if ( isset($_POST['action']) && $_POST['action'] === 'View Log' ) {
+                    // View mode: read last 200 lines
+                    $lines = file( $selected, FILE_IGNORE_NEW_LINES );
+                    $tail  = array_slice( $lines, -200 );
+                    echo '<div class="wrap"><h2>Viewing: ' . esc_html( basename( $selected ) ) . '</h2>';
+                    echo '<pre style="background:#f5f5f5; padding:1em; max-height:500px; overflow:auto;">'
+                        . esc_html( implode("\n", $tail) )
+                        . '</pre></div>';
+                }
+
+            } else {
+                echo '<div class="notice notice-error"><p>Invalid log file selected.</p></div>';
+            }
+        }
+
+        // The form
         ?>
         <div class="wrap">
-            <h1><?php _e('PTA Plugin Logs', 'portals-to-adventure'); ?></h1>
-            <form method="post">
-                <label for="log_file"><?php _e('Select Log File:', 'portals-to-adventure'); ?></label>
-                <select name="log_file" id="log_file">
-                    <?php foreach ($log_files as $log_file): ?>
-                        <option value="<?php echo esc_attr($log_file); ?>"><?php echo basename($log_file); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="submit" name="action" class="button button-primary" value="<?php _e('Download Log', 'portals-to-adventure'); ?>" />
-            </form>
+        <h1><?php _e('PTA Plugin Logs', 'portals-to-adventure'); ?></h1>
+        <form method="post">
+            <?php wp_nonce_field('pta_logs_action','pta_logs_nonce'); ?>
+            <label for="log_file"><?php _e('Select Log File:', 'portals-to-adventure'); ?></label>
+            <select name="log_file" id="log_file">
+            <?php foreach ($log_files as $log_file): ?>
+                <option value="<?php echo esc_attr($log_file); ?>">
+                <?php echo esc_html( basename($log_file) ); ?>
+                </option>
+            <?php endforeach; ?>
+            </select>
+            <?php submit_button( __('View Log', 'portals-to-adventure'), 'secondary', 'action' ); ?>
+            <?php submit_button( __('Download Log', 'portals-to-adventure'), 'primary', 'action' ); ?>
+        </form>
         </div>
         <?php
+    }
 
-        // Check if the form is submitted and nonce is valid
+    public function pta_vote_submissions_page()
+    {
+        // This page will display the vote submissions and allow for viewing, adding, and removing votes
 
+        if (!current_user_can('manage_options')) {
+            wp_die('You do not have sufficient permissions to access this page.');
+        }
+
+        $this->logger->debug('Vote Submissions Page Loaded', [
+            'get' => $_GET,
+            'post' => $_POST
+        ]);
+
+        // Handle Add Vote
+        if ( isset( $_POST['add_vote'] ) && wp_verify_nonce( $_POST['pta_add_vote_nonce'] ?? '', 'pta_add_vote_action' ) ) {
+            $submission_id = $_POST['submission_id'];
+            $user_id       = intval( $_POST['user_id'] );
+            $quantity      = max( 1, intval( $_POST['quantity'] ) );
+
+            $this->logger->debug('Adding vote', [
+                'submission_id' => $submission_id,
+                'user_id'       => $user_id,
+                'quantity'      => $quantity
+            ]);
+
+            $this->user_submission_functions->add_user_vote( $user_id, $submission_id, $quantity );
+            echo '<div class="updated"><p>Vote added for submission #' . esc_html( $submission_id ) . ' by user #' . esc_html( $user_id ) . '.</p></div>';
+        }
+
+        // Handle Remove Vote
+        if ( isset( $_POST['remove_vote'] ) && wp_verify_nonce( $_POST['pta_remove_vote_nonce'] ?? '', 'pta_remove_vote_action' ) ) {
+            $submission_id = $_POST['submission_id'];
+            $user_id       = intval( $_POST['user_id'] );
+            $quantity      = max( 1, intval( $_POST['quantity'] ) );
+
+            $this->logger->debug('Removing vote', [
+                'submission_id' => $submission_id,
+                'user_id'       => $user_id,
+                'quantity'      => $quantity
+            ]);
+
+            $this->user_submission_functions->remove_user_vote( $user_id, $submission_id, $quantity );
+            echo '<div class="updated"><p>Removed ' . esc_html( $quantity ) . ' vote(s) from submission #' . esc_html( $submission_id ) . ' for user #' . esc_html( $user_id ) . '.</p></div>';
+        }
+
+        // Retrieve and sort all votes by submission_id then user_id
+        $votes = $this->user_submission_functions->get_all_votes();
+        usort( $votes, function( $a, $b ) {
+            if ( $a['submission_id'] === $b['submission_id'] ) {
+                return $a['user_id'] <=> $b['user_id'];
+            }
+            return $a['submission_id'] <=> $b['submission_id'];
+        } );
+
+        // Fetch Add dropdown options for submissions
+        $submissions = $this->submission_functions->get_all_submissions();
+
+        // Remove all deleted submission from array
+        // $submissions = array_filter( $submissions, function( $submission ) {
+        //     return $submission['state'] !== 'Removed' && !$submission['is_removed'];
+        // } );
+
+        $users = get_users( array(
+            'fields' => array( 'ID', 'display_name' ),
+            'orderby' => 'display_name',
+            'order' => 'ASC'
+        ) );
+
+        ?>
+        <div class="wrap">
+        <h1><?php _e( 'Vote Submissions', 'portals-to-adventure' ); ?></h1>
+
+        <!-- Votes Table -->
+        <table class="wp-list-table widefat fixed striped">
+            <thead>
+            <tr>
+                <th><?php _e( 'Submission ID', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'Submission Title', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'Submission Status', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'User ID', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'User Name', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'Total Votes', 'portals-to-adventure' ); ?></th>
+                <th><?php _e( 'Remove Votes', 'portals-to-adventure' ); ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php if ( ! empty( $votes ) ) : ?>
+                <?php foreach ( $votes as $vote ) : ?>
+                <tr>
+                    <td><?php echo esc_html( $vote['submission_id'] ); ?></td>
+                    <td>
+                        <?php
+                        $submission = array_filter( $submissions, function( $sub ) use ( $vote ) {
+                            return $sub['id'] === $vote['submission_id'];
+                        } );
+                        echo esc_html( ! empty( $submission ) ? reset( $submission )['title'] : '' );
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        $submission_status = array_filter( $submissions, function( $sub ) use ( $vote ) {
+                            return $sub['id'] === $vote['submission_id'];
+                        } );
+                        echo esc_html( ! empty( $submission_status ) ? reset( $submission_status )['state'] : '' );
+                        ?>
+                    </td>
+                    <td><?php echo esc_html( $vote['user_id'] ); ?></td>
+                    <td>
+                        <?php
+                        $user = get_user_by( 'ID', $vote['user_id'] );
+                        echo esc_html( $user ? $user->display_name : __( 'Unknown User', 'portals-to-adventure' ) );
+                        ?>
+                    </td>
+                    <td><?php echo esc_html( $vote['votes'] ); ?></td>
+                    <td>
+                    <form method="post" style="display:inline-block; margin:0; padding:0;">
+                        <input type="hidden" name="submission_id" value="<?php echo $vote['submission_id']; ?>">
+                        <input type="hidden" name="user_id"       value="<?php echo $vote['user_id']; ?>">
+                        <label style="display:none;" for="remove_qty_<?php echo esc_attr( $vote['submission_id'] . '_' . $vote['user_id'] ); ?>"></label>
+                        <input
+                        type="number"
+                        id="remove_qty_<?php echo esc_attr( $vote['submission_id'] . '_' . $vote['user_id'] ); ?>"
+                        name="quantity"
+                        value="1"
+                        min="1"
+                        max="<?php echo esc_attr( $vote['votes'] ); ?>"
+                        style="width:4em;"
+                        required
+                        />
+                        <input type="hidden" name="action" value="remove_vote">
+                        <?php wp_nonce_field( 'pta_remove_vote_action', 'pta_remove_vote_nonce' ); ?>
+                        <?php submit_button( __( 'Remove', 'portals-to-adventure' ), 'secondary small', 'remove_vote', false ); ?>
+                    </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <tr>
+                <td colspan="4"><?php _e( 'No votes found.', 'portals-to-adventure' ); ?></td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+
+        <!-- Add Vote Form -->
+        <h2><?php _e( 'Add Vote', 'portals-to-adventure' ); ?></h2>
+        <form method="post">
+            <table class="form-table">
+            <tr>
+                <th><label for="submission_id"><?php _e( 'Submission ID', 'portals-to-adventure' ); ?></label></th>
+                <td>
+                    <!-- <input type="text" name="submission_id" id="submission_id" required /> -->
+                    <select name="submission_id" id="submission_id">
+                        <!-- Remove all submissions that are Removed -->
+                        <?php
+                        $submissions = array_filter( $submissions, function( $submission ) {
+                            return $submission['state'] !== 'Removed' && !$submission['is_removed'];
+                        } );
+                        ?>
+                        <?php foreach ( $submissions as $submission ) : ?>
+                            <option value="<?php echo $submission['id']; ?>"><?php echo esc_html( $submission['title'] ); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="user_id"><?php _e( 'User ID', 'portals-to-adventure' ); ?></label></th>
+                <td>
+                    <!-- <input type="number" name="user_id" id="user_id" required /> -->
+                    <select name="user_id" id="user_id">
+                        <?php foreach ( $users as $user ) : ?>
+                            <option value="<?php echo esc_attr( $user->ID ); ?>"><?php echo esc_html( $user->display_name ); ?> (<?php echo esc_html( $user->ID ); ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="quantity_add"><?php _e( 'Quantity', 'portals-to-adventure' ); ?></label></th>
+                <td><input type="number" name="quantity" id="quantity_add" value="1" min="1" required /></td>
+            </tr>
+            </table>
+            <input type="hidden" name="action" value="add_vote">
+            <?php wp_nonce_field( 'pta_add_vote_action', 'pta_add_vote_nonce' ); ?>
+            <?php submit_button( text: __( 'Add Vote', 'portals-to-adventure' ), name: 'add_vote' ); ?>
+        </form>
+        </div>
+        <?php
     }
 }

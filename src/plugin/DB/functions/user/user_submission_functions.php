@@ -41,7 +41,7 @@ class user_submission_functions
     $this->logger = $this->logger->getLogger();
   }
 
-  public function update_user_vote($user_id, $submission_id, $votes)
+  private function update_user_vote($user_id, $submission_id, $votes)
   {
     $table_data = [
       'votes' => $votes
@@ -49,6 +49,11 @@ class user_submission_functions
 
     $this->wpdb->update($this->table_path, $table_data, ['user_id' => $user_id, 'submission_id' => $submission_id]);
     $this->logger->debug('User vote updated', $table_data);
+    $this->logger->info('User vote updated', [
+      'user_id' => $user_id,
+      'submission_id' => $submission_id,
+      'votes' => $votes
+    ]);
   }
 
   /**
@@ -119,7 +124,7 @@ class user_submission_functions
     return !empty($result);
   }
 
-  public function create_user_vote($user_id, $submission_id, $votes = 0)
+  private function create_user_vote($user_id, $submission_id, $votes = 0)
   {
     $table_data = [
       'user_id' => $user_id,
@@ -131,11 +136,25 @@ class user_submission_functions
     $this->logger->debug('User vote created', $table_data);
   }
 
+  /**
+   * Records a user vote on a submission.
+   *
+   * This function logs the vote count for the specified user and submission.
+   *
+   * @param int $user_id       The unique identifier of the user casting the vote.
+   * @param int $submission_id The unique identifier of the submission receiving the vote.
+   * @param int $votes         The number of votes to add for the submission.
+   */
   public function add_user_vote($user_id, $submission_id, $votes)
   {
     if(!$this->has_user_voted($user_id, $submission_id)){
 
       $this->create_user_vote($user_id, $submission_id, $votes);
+      $this->logger->debug('User vote created', [
+        'user_id' => $user_id,
+        'submission_id' => $submission_id,
+        'votes' => $votes
+      ]);
 
     } else {
 
@@ -155,7 +174,46 @@ class user_submission_functions
     } 
   }
 
-  public function view_table()
+  /**
+   * Removes a specified number of votes for a given user's submission.
+   *
+   * This method subtracts the specified number of votes from the submission
+   * associated with the provided submission ID for the given user.
+   *
+   * @param int $user_id        The unique identifier of the user whose vote will be removed.
+   * @param int $submission_id  The unique identifier of the submission from which the vote is to be removed.
+   * @param int $votes          The number of votes to remove. Defaults to 1.
+   */
+  public function remove_user_vote($user_id, $submission_id, $votes = 1)
+  {
+    $this->logger->debug('Attempting to remove user vote', [
+      'user_id' => $user_id,
+      'submission_id' => $submission_id,
+      'votes' => $votes
+    ]);
+
+    if ($this->has_user_voted($user_id, $submission_id)) {
+      $current_votes = $this->get_user_submission_votes($user_id, $submission_id);
+      $new_votes = max(0, $current_votes - $votes);
+
+      $this->logger->debug('Removing user vote', [
+        'user_id' => $user_id,
+        'submission_id' => $submission_id,
+        'votes' => $new_votes,
+        'current_votes' => $current_votes,
+        'votes_to_remove' => $votes
+      ]);
+
+      $this->update_user_vote($user_id, $submission_id, $new_votes);
+    } else {
+      $this->logger->debug('User has not voted on this submission', [
+        'user_id' => $user_id,
+        'submission_id' => $submission_id
+      ]);
+    }
+  }
+
+  private function view_table()
   {
     $query = new QueryBuilder($this->wpdb);
     $query->select('*')
@@ -164,6 +222,10 @@ class user_submission_functions
     $result = $this->db_functions->exe_from_builder($query);
 
     return $result;
+  }
+
+  public function get_all_votes(){
+    return $this->view_table();
   }
 
   public function has_user_voted_limit($user_id, $submission_id)
