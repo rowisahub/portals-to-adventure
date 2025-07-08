@@ -73,11 +73,22 @@ class Restv2 extends Client
     return $this->contest_api->get_contest_info($request);
   }
 
-   /**
-   * Retrieves the ID from the provided parameters. Also checks if the ID is valid and permissions are correct.
+   
+  /**
+   * Extracts an identifier from the provided parameters and validates it according to user permissions.
    *
-   * @param array $params The parameters from which to extract the ID.
-   * @return array|null The extracted ID if found, otherwise null.
+   * This method retrieves an identifier from the given associative parameters array using the specified key name.
+   * It also performs validation based on the provided user context, appending any encountered errors to the errors array.
+   * Optional checks for public accessibility and sub-permission restrictions can be enabled.
+   *
+   * @param array  $params      An associative array containing the parameters.
+   * @param string $id_name     The key name used to locate the identifier within the $params array.
+   * @param mixed  $user        The user context used for validation.
+   * @param array  &$errors     A reference to an array where error messages will be stored.
+   * @param bool   $check_public Optional. Whether to validate public accessibility. Defaults to true.
+   * @param bool   $check_sub    Optional. Whether to enforce sub-permission checking. Defaults to true.
+   *
+   * @return mixed Returns the identifier if successfully retrieved and validated, otherwise returns an appropriate error indication.
    */
   public function get_id_from_params($params, $id_name, $user, &$errors, $check_public = true, $check_sub = true)
   {
