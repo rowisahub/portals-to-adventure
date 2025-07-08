@@ -54,6 +54,8 @@ class user_functions
 
       if (is_wp_error($user_id)) {
         wp_send_json_error(array('message' => $user_id->get_error_message()));
+        $this->logger->error('Error creating user: ' . $user_id->get_error_message());
+        return null;
       }
 
       if ($firstName != null) {
@@ -73,7 +75,7 @@ class user_functions
     }
 
     if (!$user) {
-      $this->logger->error('Error creating user');
+      $this->logger->error('Error creating user - user not found after creation');
       return null;
     }
 
