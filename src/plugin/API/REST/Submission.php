@@ -43,7 +43,7 @@ class Submission
       // $this->restv2->logger->debug('User ID: ' . $params['user_id']);
       // error_log('User ID: ' . $params['user_id']);
 
-      $user_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_sub: false);
+      $user_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_public: false, check_sub: false);
 
       foreach ($user_ids as $user_id) {
         $user_submissions = $this->restv2->submission_functions->get_submissions_by_user($user_id);
