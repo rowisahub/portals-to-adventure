@@ -1088,10 +1088,10 @@ class admin_settings extends Client
                 <td>
                     <!-- <input type="text" name="submission_id" id="submission_id" required /> -->
                     <select name="submission_id" id="submission_id">
-                        <!-- Remove all submissions that are Removed -->
+                        <!-- Only return Approved submissions -->
                         <?php
                         $submissions = array_filter( $submissions, function( $submission ) {
-                            return $submission['state'] !== 'Removed' && !$submission['is_removed'];
+                            return $submission['state'] === 'Approved' && !$submission['is_removed'];
                         } );
                         ?>
                         <?php foreach ( $submissions as $submission ) : ?>
