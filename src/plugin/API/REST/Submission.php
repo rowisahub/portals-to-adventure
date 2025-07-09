@@ -29,7 +29,7 @@ class Submission
     if (isset($params['id'])) {
       //$this->logger->info('ID: ' . $params['id']);
 
-      $ids = $this->restv2->get_id_from_params($params, 'id', $user, $errors);
+      $ids = $this->restv2->get_id_from_params($params, 'id', $user, $errors, $check_perms = true, $check_public = true, $check_user = true, $check_admin = true);
 
       foreach ($ids as $id) {
         $submissions[] = $this->restv2->submission_functions->get_submission($id)[0];
@@ -43,18 +43,25 @@ class Submission
       // $this->restv2->logger->debug('User ID: ' . $params['user_id']);
       // error_log('User ID: ' . $params['user_id']);
 
-      $user_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_public: false, check_sub: false);
+      $user_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'user_id', user: $user, errors: $errors, check_if_submission: false);
 
-      foreach ($user_ids as $user_id) {
-        $user_submissions = $this->restv2->submission_functions->get_submissions_by_user($user_id);
-        // error_log('User Submissions: ' . print_r($user_submissions, true));
-        foreach($user_submissions as $submission){
-          if($this->restv2->permissionChecker->check_sub_perms($user, $submission)){
-            // error_log('User has perms');
-            $submissions[] = $submission;
+      // $this->restv2->logger->debug('User IDs: ' . print_r($user_ids, true));
+
+      if (empty($user_ids)) {
+        $errors[] = new \WP_Error('no_user_id', 'No user ID provided or user does not exist.', array('status' => 400, 'code' => 'no_user_id'));
+      } else {
+
+        foreach ($user_ids as $user_id) {
+          $user_submissions = $this->restv2->submission_functions->get_submissions_by_user($user_id);
+
+          foreach ($user_submissions as $submission) {
+            // Check permissions for each submission
+            if ($this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: true, check_admin: true)) {
+              $submissions[] = $submission;
+            }
           }
         }
-        //$submissions[];
+
       }
     }
 
@@ -67,10 +74,8 @@ class Submission
 
       foreach ($limitedSubmssionsByState as $submission) {
 
-        if ($this->restv2->permissionChecker->check_sub_perms($user, $submission)) {
+        if ($this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: true, check_user: true, check_admin: true)) {
           $submissions[] = $this->restv2->submission_functions->get_submission($submission['id'])[0];
-        } else {
-          $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $submission['id']));
         }
 
       }
@@ -83,7 +88,9 @@ class Submission
       //$this->logger->info('Pending Submissions: ' . print_r($pendingSubmissions, true));
 
       foreach ($pendingSubmissions as $submission) {
-        $submissions[] = $submission;
+        if($this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: false, check_user: false, check_admin: true)){
+          $submissions[] = $submission;
+        }
       }
     }
 
@@ -101,8 +108,8 @@ class Submission
 
     //$this->logger->info('Submissions: ' . print_r($submissions, true));
 
-    // if no parameters are provided, exepct for limit, get all submissions
-    if (empty($submissions)) {
+    // if no parameters are provided, expect for limit, get all submissions
+    if (empty($submissions) && empty($params)) {
         foreach ($this->restv2->submission_functions->get_all_submissions_by_state('Approved') as $submission){
           $submissions[] = $submission;
         }
@@ -129,7 +136,7 @@ class Submission
       'Errors' => $errors
     ];
 
-   //$this->logger->debug('API Response: ' . print_r($logResponce, true));
+    $this->restv2->logger->debug('API Response: ' . print_r($logResponce, true));
 
     return rest_ensure_response($return_data);
   }
@@ -156,7 +163,7 @@ class Submission
     // $this->logger->info('Action: ' . $params);
 
     // check if there are multiple ids, both ways should return an array
-    $submission_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'id', user: $user, errors: $errors, check_sub: false);
+    $submission_ids = $this->restv2->get_id_from_params(params: $params, id_name: 'id', user: $user, errors: $errors, check_perms: false);
 
     $this->restv2->logger->debug('Submission IDs: ' . print_r($submission_ids, true));
 

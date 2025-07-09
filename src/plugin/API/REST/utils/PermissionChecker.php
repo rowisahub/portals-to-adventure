@@ -69,9 +69,11 @@ class PermissionChecker
    * @param \WP_User $user The user object whose permissions are being checked.
    * @param mixed $submission The submission object or data that the user is attempting to access.
    * @param bool $check_public Optional. Whether to check if the submission is public. Default is true.
+   * @param bool $check_user Optional. Whether to check if the user is the owner of the submission. Default is true.
+   * @param bool $check_admin Optional. Whether to check if the user is an admin. Default is true.
    * @return bool True if the user has the necessary permissions, false otherwise.
    */
-  public function check_sub_perms($user, $submission, $check_public = true, $check_user = true, $check_admin = true)
+  public function check_sub_perms($user, $submission, $check_public = false, $check_user = true, $check_admin = false)
   {
     $user_primary_role = $this->get_user_role($user);
 
@@ -82,34 +84,58 @@ class PermissionChecker
     // error_log('Check Public: ' . $check_public);
 
     // return true if user is a admin, the submission is public 'Approved', or the user is the owner of the submission
-    if (
-      (
-        $check_admin
-        &&
-        (
-          $user_primary_role === $this->constants::ADMIN
-          ||
-          $user_primary_role === $this->constants::EDITOR
-        )
-      )
-      ||
-      (
-        $check_public
-        &&
-        $submission['state'] === 'Approved'
-      )
-      ||
-      (
-        $check_user
-        &&
-        $submission['user_owner_id'] == $user->ID
-      )
-    ) {
-      // error_log('User has permissions to view this submission.');
-      return true;
+    // if (
+    //   (
+    //     $check_admin
+    //     &&
+    //     (
+    //       $user_primary_role === $this->constants::ADMIN
+    //       ||
+    //       $user_primary_role === $this->constants::EDITOR
+    //     )
+    //   )
+    //   ||
+    //   (
+    //     $check_public
+    //     &&
+    //     $submission['state'] === 'Approved'
+    //   )
+    //   ||
+    //   (
+    //     $check_user
+    //     &&
+    //     $submission['user_owner_id'] == $user->ID
+    //   )
+    // ) {
+    //   // error_log('User has permissions to view this submission.');
+    //   return true;
+    // }
+
+    $return_bool = false;
+
+    if($check_public){
+      if ($submission['state'] === 'Approved') {
+        // error_log('Submission is public.');
+        $return_bool = true;
+      }
     }
+
+    if($check_user){
+      if ($submission['user_owner_id'] == $user->ID) {
+        // error_log('User is the owner of the submission.');
+        $return_bool = true;
+      }
+    }
+
+    if($check_admin){
+      if ($user_primary_role === $this->constants::ADMIN || $user_primary_role === $this->constants::EDITOR) {
+        // error_log('User is an admin or editor.');
+        $return_bool = true;
+      }
+    }
+
     // error_log('User does not have permissions to view this submission.');
-    return false;
+    return $return_bool;
   }
 
   /**
@@ -118,20 +144,23 @@ class PermissionChecker
    * @param int $id The ID of the submission to check.
    * @param \WP_User $user The user object whose permissions are being checked.
    * @param array &$errors An array of errors to which any errors will be added.
-   * @return bool True if the submission exists and the user has the necessary permissions, false otherwise.
+   * @param bool $check_perms Optional. Whether to enforce permission checking. Defaults to true.
+   * @param bool $check_public Optional. Whether to check if the submission is public. Defaults to false.
+   * @param bool $check_user Optional. Whether to check if the user is the owner of the submission. Defaults to true.
+   * @param bool $check_admin Optional. Whether to check if the user is an admin. Defaults to false.
    */
-  public function check_sub_exists($id, $user, &$errors, $check_perms = true, $check_public = true)
+  public function check_sub_exists($id, $user, &$errors, $check_perms = true, $check_public = false, $check_user = true, $check_admin = false)
   {
-    $limitSubmission = $this->get_limitedInfo_submission_by_id($id)[0];
+    $limitSubmission = $this->get_limitedInfo_submission_by_id(id: $id)[0];
     if(!$limitSubmission){
-      $errors[] = new \WP_Error('no_submission', 'Submission does not exist.', array('status' => 404, 'submission_id' => $id));
+      $errors[] = new \WP_Error('no_submission', 'Submission does not exist.', array('status' => 404, 'code' => 'no_submission', 'submission_id' => $id));
       return false;
     }
 
     if($check_perms){
 
-      if(!$this->check_sub_perms($user, $limitSubmission, $check_public)){
-        $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'submission_id' => $id));
+      if(!$this->check_sub_perms(user: $user, submission: $limitSubmission, check_public: $check_public, check_user: $check_user, check_admin: $check_admin)){
+        $errors[] = new \WP_Error('no_perms', 'User does not have permissions to view this submission.', array('status' => 403, 'code' => 'no_perms', 'submission_id' => $id));
         return false;
       }
 

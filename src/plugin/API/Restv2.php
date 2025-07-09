@@ -85,12 +85,15 @@ class Restv2 extends Client
    * @param string $id_name     The key name used to locate the identifier within the $params array.
    * @param mixed  $user        The user context used for validation.
    * @param array  &$errors     A reference to an array where error messages will be stored.
-   * @param bool   $check_public Optional. Whether to validate public accessibility. Defaults to true.
-   * @param bool   $check_sub    Optional. Whether to enforce sub-permission checking. Defaults to true.
+   * @param bool   $check_perms Optional. Whether to enforce permission checking. Defaults to true.
+   * @param bool   $check_public Optional. Whether to check if the submission is public. Defaults to false.
+   * @param bool   $check_user   Optional. Whether to check if the user is the owner of the submission. Defaults to true.
+   * @param bool   $check_admin Optional. Whether to check if the user is an admin. Defaults to false.
+   * @param bool   $check_if_submission Optional. Whether to check if the identifier is a submission ID. Defaults to true.
    *
    * @return mixed Returns the identifier if successfully retrieved and validated, otherwise returns an appropriate error indication.
    */
-  public function get_id_from_params($params, $id_name, $user, &$errors, $check_public = true, $check_sub = true)
+  public function get_id_from_params($params, $id_name, $user, &$errors, $check_perms = true, $check_public = false, $check_user = true, $check_admin = false, $check_if_submission = true)
   {
     $ids = sanitize_text_field($params[$id_name]);
 
@@ -99,38 +102,37 @@ class Restv2 extends Client
       return [];
     }
 
+    // $this->logger->debug('ID Name: ' . $id_name);
+    // $this->logger->debug('IDs: ' . $ids);
+
     $submissions_ids = [];
 
     // check if there are multiple ids
     if (strpos($ids, ',') !== false) { // Multiple ids
-      //$this->logger->info('Multiple IDs: ' . $ids);
+      $this->logger->info('Multiple IDs: ' . $ids);
 
       $submission_ids = explode(',', $ids);
 
-      if($check_sub){
+      foreach ($submission_ids as $id) {
 
-        foreach ($submission_ids as $id) {
-
-          if ($this->permissionChecker->check_sub_exists(id: $id, user: $user, errors: $errors, check_public: $check_public)) {
+        if ($check_if_submission) {
+          if ($this->permissionChecker->check_sub_exists(id: $id, user: $user, errors: $errors, check_public: $check_public, check_user: $check_user, check_admin: $check_admin, check_perms: $check_perms)) {
             $submissions_ids[] = $id;
           }
-          
+        } else {
+          // If no permission checking is required, just return the id
+          $submissions_ids[] = $id;
         }
-
-      } else {
-        $submissions_ids[] = $submission_ids;
+        
       }
       
     } else { // Only one id
-      //$this->logger->info('Single ID: ' . $ids);
-
-      if($check_sub){
-
-        if ($this->permissionChecker->check_sub_exists(id: $ids, user: $user, errors: $errors, check_public: $check_public)) {
+      if($check_if_submission){
+        if ($this->permissionChecker->check_sub_exists(id: $ids, user: $user, errors: $errors, check_public: $check_public, check_user: $check_user, check_admin: $check_admin, check_perms: $check_perms)) {
           $submissions_ids[] = $ids;
         }
-
-      }else{
+      } else {
+        // If no permission checking is required, just return the id
         $submissions_ids[] = $ids;
       }
 
