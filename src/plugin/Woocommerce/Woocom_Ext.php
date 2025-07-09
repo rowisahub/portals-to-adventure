@@ -129,12 +129,16 @@ class Woocom_Ext extends Client{
         return $thumbnail;
     }
 
+    /**
+     * Processes and retrieves the cart image based on the given product images and cart item details.
+     *
+     * @param array  $product_images Array of product images associated with the cart item.
+     * @param array  $cart_item      Array containing the WooCommerce cart item details.
+     * @param string $cart_item_key  Unique identifier for the cart item in the cart.
+     */
     public function API_cart_image($product_images, $cart_item, $cart_item_key)
     {
-        //
-        // $this->logger->debug('Replacing product image with submission image API');
-        // $this->logger->debug('Product images: ' . json_encode($product_images));
-        // $this->logger->debug('Cart item: ' . json_encode($cart_item));
+        // Current Working Code For Cart Image
 
         $image_url = $cart_item['submission_image'] ?? null;
         if($image_url){
@@ -151,6 +155,20 @@ class Woocom_Ext extends Client{
             ];
         }
     }
+
+    /**
+     * Modifies the permalink for a specific cart item.
+     *
+     * This method adjusts the original permalink associated with a cart item. 
+     * It takes into account the details within the cart item and its key to generate 
+     * a new, context-specific permalink.
+     *
+     * @param string $permalink      The original permalink of the cart item.
+     * @param array  $cart_item      An associative array containing the cart item details.
+     * @param string $cart_item_key  The unique identifier for the cart item.
+     *
+     * @return string The modified permalink.
+     */
     public function change_item_permalink($permalink, $cart_item, $cart_item_key)
     {
         if ( ! empty( $cart_item['submission_id'] ) ) {
@@ -180,31 +198,57 @@ class Woocom_order_status{
         $order = wc_get_order($order_id);
         $user_id = $order->get_user_id();
 
-        if(!$this->woocom_ext->db_functions->check_id_exists('user_info', $user_id)){
-            $user = get_user_by('ID', $user_id);
-            $userPerms = $this->woocom_ext->db_functions->format_permissions(1, 0, 0, 0);
-            $this->woocom_ext->user_functions->register_user(email: $user->user_email, username: $user->display_name, firstName: $user->first_name, lastName: $user->last_name, permissions: $userPerms);
-        }
+        $this->woocom_ext->logger->info('Processing order!');
+
+
+        // Check if user has a wordpress user account
         
-        $order->update_status(new_status: 'completed', note: 'Order completed by Portals to Adventure automatically.');
-    }
+        if(!$user_id || $user_id <= 0){
+            // Use the order email to create a user account
+            $user_id = $this->woocom_ext->user_functions->register_user(
+                email: $order->get_billing_email(),
+                username: sanitize_user($order->get_billing_first_name() . ' ' . $order->get_billing_last_name()),
+                firstName: $order->get_billing_first_name(),
+                lastName: $order->get_billing_last_name(),
+                permissions: $this->woocom_ext->db_functions->format_permissions(0, 0, 0, 0)
+            );
+            if($user_id == null){
+                $this->woocom_ext->logger->error('Error creating user');
 
-    public function wldpta_order_status_completed($order_id){
-        $this->woocom_ext->logger->debug('Order status completed');
-        $order = wc_get_order($order_id);
+                // Add an error notice to the order
+                // $order->add_order_note('Error creating user account. Updating order status to On Hold.');
+                $order->update_status(new_status: 'On Hold', note: 'Order halted due to user creation error. Please contact support.');
+
+                return;
+            }
+
+            $order->set_customer_id($user_id);
+
+            // Login the user
+            wp_set_current_user($user_id);
+            wp_set_auth_cookie($user_id);
+
+            $this->woocom_ext->logger->info('User created with ID: ' . $user_id);
+        }
+
+        // Add vote to the user
         $order_items = $order->get_items();
-
-        $user_id = $order->get_user_id();
         foreach($order_items as $item){
             $submission_id = $item->get_meta('submission_id');
             $quantity = $item->get_quantity();
 
-            // $this->woocom_ext->submission_functions->add_submission_vote($submission_id, $quantity);
             $this->woocom_ext->user_submission_functions->add_user_vote($user_id, $submission_id, $quantity);
-
-            $this->woocom_ext->logger->info('User: ' . $user_id . ' has purchased a submission vote. Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
+            $this->woocom_ext->logger->info('User ID: ' . $user_id . ' has purchased a submission vote. Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
         }
+        
+        // $this->woocom_ext->logger->info('User ID: ' . $user_id . ' has purchased a submission vote.');
+        $order->update_status(new_status: 'completed', note: 'Order completed by Portals to Adventure automatically.');
     }
+
+    public function wldpta_order_status_completed($order_id){
+        $this->woocom_ext->logger->info('Order completed successfully.');
+    }
+    
 }
 
 class Woocom_cart {
@@ -219,53 +263,74 @@ class Woocom_cart {
         add_filter(hook_name: 'woocommerce_add_to_cart_validation', callback: [$this, 'add_to_cart_validation'], priority: 10, accepted_args: 3);
         //$this->woocom_ext->logger->debug('Cart hooks registered');
         add_action('woocommerce_before_calculate_totals', [$this, 'add_to_cart'], 10, 1);
+
+        // add_filter('woocommerce_cart_contents_changed', [$this, 'pta_cart_contents_changed']);
+
+        // add_action('woocommerce_add_to_cart', [$this, 'wc_add_to_cart'], 10, 6);
+    }
+
+    public function wc_add_to_cart($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+        // $this->woocom_ext->logger->debug('Product added to cart: ', array(
+        //     'cart_item_key' => $cart_item_key,
+        //     'product_id' => $product_id,
+        //     'quantity' => $quantity,
+        //     'variation_id' => $variation_id,
+        //     'variation' => $variation,
+        //     'cart_item_data' => $cart_item_data
+        // ));
+        // if $cart_item_data is empty, we can assume that the product was added from the products page
+        if(empty($cart_item_data)){
+            $this->woocom_ext->logger->debug('Product does not have submission data, not adding to cart');
+            $cart = WC()->cart;
+            // Remove the item from the cart
+            $cart->remove_cart_item($cart_item_key);
+        }
+    }
+
+    public function pta_cart_contents_changed($changed){
+        // $this->woocom_ext->logger->debug('Cart contents changed: ' . json_encode($changed));
+
+        
+        return $changed;
     }
 
     public function add_to_cart_validation($passed, $product_id, $quantity){
-        // $max_quantity = 10; // Set your maximum quantity here
 
-        // // Get the current quantity of the product in the cart
+        $this->woocom_ext->logger->debug('Adding to cart validation');
+
+        // From my understanding, this function only fires when a product is added from the products page.
+        // And when its added from there is does not have a submission ID. So we can just return false,
+        // to not add it
+
+        return false;
+
+        // Check if 
+
+        // $total_vote_count = get_option('wldpta_product_limit', 10);
+
         // $cart = WC()->cart->get_cart();
-        // $current_quantity = 0;
+        // $this->woocom_ext->logger->debug('Cart: ' . json_encode($cart));
+
         // foreach ($cart as $cart_item) {
-        //     if ($cart_item['product_id'] == $product_id) {
-        //         $current_quantity += $cart_item['quantity'];
+        //     $submission_id = $cart_item['submission_id'];
+        //     $quantity = $cart_item['quantity'];
+            
+        //     $this->woocom_ext->logger->debug('Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
+
+        //     $votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes(get_current_user_id(), $submission_id);
+
+        //     $total_votes_from_user = $votes_from_user + $quantity;
+
+        //     $this->woocom_ext->logger->debug('Total votes from user: ' . $total_votes_from_user);
+
+        //     if($total_votes_from_user > $total_vote_count){
+        //         // wc_add_notice(__('You can only purchase up to ' . $total_vote_count . ' votes for each submission.', 'portals-to-adventure'), 'error');
+        //         $this->woocom_ext->logger->debug('You can only purchase up to ' . $total_vote_count . ' votes for each submission.');
+        //         return false;
         //     }
         // }
 
-        // // Check if the total quantity exceeds the maximum quantity
-        // if (($current_quantity + $quantity) > $max_quantity) {
-        //     wc_add_notice(__('You can only purchase a maximum of ' . $max_quantity . ' of this product.', 'portals-to-adventure'), 'error');
-        //     return false;
-        // }
-
         // return $passed;
-
-				$this->woocom_ext->logger->debug('Adding to cart validation');
-
-				$total_vote_count = get_option('wldpta_product_limit', 10);
-
-				$cart = WC()->cart->get_cart();
-				$this->woocom_ext->logger->debug('Cart: ' . json_encode($cart));
-
-				foreach ($cart as $cart_item) {
-					$submission_id = $cart_item['submission_id'];
-					$quantity = $cart_item['quantity'];
-
-					$votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes(get_current_user_id(), $submission_id);
-
-					$total_votes_from_user = $votes_from_user + $quantity;
-
-					$this->woocom_ext->logger->debug('Total votes from user: ' . $total_votes_from_user);
-
-					if($total_votes_from_user > $total_vote_count){
-						// wc_add_notice(__('You can only purchase up to ' . $total_vote_count . ' votes for each submission.', 'portals-to-adventure'), 'error');
-						$this->woocom_ext->logger->debug('You can only purchase up to ' . $total_vote_count . ' votes for each submission.');
-						return false;
-					}
-				}
-
-				return $passed;
     }
 
     public function add_to_cart($cart){
@@ -275,36 +340,47 @@ class Woocom_cart {
         $user_id = get_current_user_id();
         // $this->woocom_ext->logger->debug('User ID: ' . $user_id);
 
-				$iferror = false;
+        $this->woocom_ext->logger->debug('Checking cart for vote limits');
+
+		$iferror = false;
         foreach($cart->get_cart() as $cart_item){
-					if($iferror) return;
 
-					$submission_id = $cart_item['submission_id'];
-					$quantity = $cart_item['quantity'];
+            $submission_id = $cart_item['submission_id'];
+            $quantity = $cart_item['quantity'];
 
-					$votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes($user_id, $submission_id);
+            // If no submission ID, remove the item from the cart
+            if(!$submission_id){
+                $cart_item_key = $cart_item['key'];
+                $cart->remove_cart_item($cart_item_key);
+                $this->woocom_ext->logger->debug('No submission ID found, removing item from cart');
+                continue;
+            }
 
-					$total_votes_from_user = $votes_from_user + $quantity;
+            if($iferror) continue;
 
-					$total_error_text = 'You can only purchase up to ' . $total_vote_count . ' votes for each submission.';
+            $votes_from_user = $this->woocom_ext->user_submission_functions->get_user_submission_votes($user_id, $submission_id);
 
-					if($total_votes_from_user > $total_vote_count){
-						$iferror = true;
+            $total_votes_from_user = $votes_from_user + $quantity;
 
-						if($votes_from_user > 0){
-							$total_error_text .= ' You have already purchased ' . $votes_from_user . ' votes.';
-						}
+            $total_error_text = 'You can only purchase up to ' . $total_vote_count . ' votes for each submission.';
 
-						$cart_item_key = $cart_item['key'];
-						$cart->set_quantity($cart_item_key, $total_vote_count - $votes_from_user);
+            if($total_votes_from_user > $total_vote_count){
+                $iferror = true;
 
-						$this->manage_notices($total_error_text);
+                if($votes_from_user > 0){
+                    $total_error_text .= ' You have already purchased ' . $votes_from_user . ' votes.';
+                }
 
-					} else {
+                $cart_item_key = $cart_item['key'];
+                $cart->set_quantity($cart_item_key, $total_vote_count - $votes_from_user);
 
-						$this->manage_notices($total_error_text, true);
-					}
-				}
+                $this->manage_notices($total_error_text);
+
+            } else {
+
+                $this->manage_notices($total_error_text, true);
+            }
+        }
     }
 
 		protected function manage_notices($total_error_text, $remove = false){
