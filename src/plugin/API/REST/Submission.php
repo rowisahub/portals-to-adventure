@@ -72,6 +72,27 @@ class Submission
 
       //$this->logger->info('Limited Submissions: ' . print_r($limitedSubmssionsByState, true));
 
+      // check if contest finale phase is enabled, only get X amount of submissions
+      $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+      $pta_contest_finale_phase_number_of_submissions = get_option('pta_contest_finale_phase_number_of_submissions', 0);
+
+      // $this->restv2->logger->debug('Contest finale phase enabled: ' . ($pta_contest_finale_phase ? 'true' : 'false'));
+      $this->restv2->logger->debug($pta_contest_finale_phase);
+      // $this->restv2->logger->debug('Contest finale phase number of submissions: ' . $pta_contest_finale_phase_number_of_submissions);
+
+      if(($pta_contest_finale_phase == true) && (intval($pta_contest_finale_phase_number_of_submissions) > 0)) {
+        $this->restv2->logger->debug('Contest finale phase is enabled, limiting submissions to ' . $pta_contest_finale_phase_number_of_submissions);
+
+        usort($limitedSubmssionsByState, function($a, $b) {
+          return intval($b['likes_votes'] ?? 0) - intval($a['likes_votes'] ?? 0);
+        });
+
+        $this->restv2->logger->debug('Sorted submissions by votes: ' . print_r($limitedSubmssionsByState, true));
+
+        $limitedSubmssionsByState = array_slice($limitedSubmssionsByState, 0, intval($pta_contest_finale_phase_number_of_submissions));
+        $this->restv2->logger->debug('Limited submissions by state: ' . print_r($limitedSubmssionsByState, true));
+      }
+
       foreach ($limitedSubmssionsByState as $submission) {
 
         if ($this->restv2->permissionChecker->check_sub_perms($user, $submission, check_public: true, check_user: true, check_admin: true)) {

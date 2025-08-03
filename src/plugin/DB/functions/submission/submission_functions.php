@@ -123,12 +123,12 @@ class submission_functions
     return $result[0][$key] ?? null;
   }
 
-  public function get_submission_by_state($state, $output_type = 'ARRAY_A', $limited = false)
+  public function get_submission_by_state($state, $output_type = 'ARRAY_A', $limited = false, $limit_count = null)
   {
     $queryBuilder = new QueryBuilder($this->wpdb);
 
     if($limited){
-      $queryBuilder->select(['id', 'state', 'user_owner_id']);
+      $queryBuilder->select(['id', 'state', 'user_owner_id', 'likes_votes']);
     } else {
       $queryBuilder->select('*');
     }
@@ -139,14 +139,17 @@ class submission_functions
     return $this->db_functions->exe_from_builder(query_builder: $queryBuilder, output_type: $output_type);
   }
 
-  public function get_all_submissions_by_state($state, $numOfSubmissions = 10, $user_id = null, $output_type = 'ARRAY_A')
+  public function get_all_submissions_by_state($state, $numOfSubmissions = 0, $user_id = null, $output_type = 'ARRAY_A')
   {
     $queryBuilder = new QueryBuilder($this->wpdb);
     $queryBuilder->select('*')
       ->from($this->table_path)
-      ->where(['state' => $state])
-      ->limit($numOfSubmissions);
-    
+      ->where(['state' => $state]);
+
+    if($numOfSubmissions > 0){
+      $queryBuilder->limit($numOfSubmissions);
+    }
+
     if($user_id != null){
       $queryBuilder->where(['user_owner_id' => $user_id]);
     }

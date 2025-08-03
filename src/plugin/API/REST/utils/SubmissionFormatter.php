@@ -41,6 +41,21 @@ class SubmissionFormatter
         if($vote_count == null){
           $vote_count = 0;
         }
+
+        // if votes on the submission doesn't equal the vote count, update the submission
+        if($submission['likes_votes'] != $vote_count){
+          $this->restV2_instance->submission_functions->update_submission(
+            $submission['id'],
+            [
+              'likes_votes' => $vote_count
+            ]
+          );
+          $this->restV2_instance->logger->debug('Updated submission vote count', [
+            'submission_id' => $submission['id'],
+            'likes_votes' => $vote_count
+          ]);
+        }
+        
         // $this->restV2_instance->logger->debug('Vote count', ['vote_count' => $vote_count]);
     
         $submission_api_base = [
