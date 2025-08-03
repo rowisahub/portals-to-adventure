@@ -697,11 +697,21 @@ class admin_settings extends Client
                 <tbody>
                     <?php if (!empty($submissions)): ?>
                         <?php foreach ($submissions as $submission): ?>
+                            <?php
+                            // check if submission votes are the same as the vote count
+                            $vote_count = $this->user_submission_functions->get_total_votes_for_submission($submission['id']);
+                            if ($vote_count != $submission['likes_votes']) {
+                                // update the submission with the correct vote count
+                                $this->submission_functions->update_submission($submission['id'], ['likes_votes' => $vote_count]);
+                                $submission['likes_votes'] = $vote_count; // Update the local variable to reflect the change
+                                $this->logger->info('Updated submission ' . $submission['id'] . ' with correct vote count: ' . $vote_count);
+                            }
+                            ?>
                             <tr>
                                 <td><?php echo esc_html($submission['id']); ?></td>
                                 <td><?php echo esc_html($submission['title']); ?></td>
                                 <td><?php echo esc_html($submission['state']); ?></td>
-                                <td><?php echo esc_html($this->user_submission_functions->get_total_votes_for_submission($submission['id'])); ?></td>
+                                <td><?php echo esc_html($submission['likes_votes']); ?></td>
                                 <td><?php echo esc_html($submission['user_owner_id']); ?></td>
                                 <td><?php echo esc_html($this->user_functions->get_user_by_id($submission['user_owner_id'])[0]['username']); ?>
                                 </td>
