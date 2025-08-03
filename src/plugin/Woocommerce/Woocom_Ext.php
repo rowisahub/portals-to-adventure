@@ -240,6 +240,12 @@ class Woocom_order_status{
             $this->woocom_ext->user_submission_functions->add_user_vote($user_id, $submission_id, $quantity);
             $this->woocom_ext->logger->info('User ID: ' . $user_id . ' has purchased a submission vote. Submission ID: ' . $submission_id . ' Quantity: ' . $quantity);
         }
+
+        // Update the total votes for the submission
+        $total_votes = $this->woocom_ext->user_submission_functions->get_total_votes_for_submission($submission_id);
+        $this->woocom_ext->submission_functions->update_submission($submission_id, [
+            'likes_votes' => $total_votes
+        ]);
         
         // $this->woocom_ext->logger->info('User ID: ' . $user_id . ' has purchased a submission vote.');
         $order->update_status(new_status: 'completed', note: 'Order completed by Portals to Adventure automatically.');
