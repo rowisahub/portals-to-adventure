@@ -112,6 +112,16 @@ class Shortcodes
       exit;
     }
 
+    // check if the finale phase is enabled, if so, do not allow new submissions
+    $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+    if ($pta_contest_finale_phase === 'true') {
+      // if the user is not an admin or editor, then do not allow new submissions
+      if (!current_user_can('administrator')) {
+        $this->logger->debug('Finale phase is enabled, new submissions are not allowed', array('user_id' => get_current_user_id()));
+        return '<p>Contest is in the finale phase, new submissions are not allowed.</p>';
+      }
+    }
+
 
     $page_id = get_the_ID();
     $pta_submission_add_page = get_option('pta_submission_add_page');
