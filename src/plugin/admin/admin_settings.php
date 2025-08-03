@@ -118,67 +118,100 @@ class admin_settings extends Client
         if (isset($_POST['pta_settings_nonce']) && wp_verify_nonce($_POST['pta_settings_nonce'], 'pta_settings_update')) {
             // save the options
 
-            if(isset($_POST['pta_submission_add_page'])) {
+            if(isset($_POST['pta_submission_add_page']) && (get_option('pta_submission_add_page') !== $_POST['pta_submission_add_page'])) {
                 update_option('pta_submission_add_page', $_POST['pta_submission_add_page']);
             }
-            if(isset($_POST['pta_submission_edit_page'])) {
+            if(isset($_POST['pta_submission_edit_page']) && (get_option('pta_submission_edit_page') !== $_POST['pta_submission_edit_page'])) {
                 update_option('pta_submission_edit_page', $_POST['pta_submission_edit_page']);
             }
 
-            if(isset($_POST['pta_submission_view_page'])) {
+            if(isset($_POST['pta_submission_view_page']) && (get_option('pta_submission_view_page') !== $_POST['pta_submission_view_page'])) {
                 update_option('pta_submission_view_page', $_POST['pta_submission_view_page']);
             }
-            if(isset($_POST['pta_submission_user_view_page'])) {
+            if(isset($_POST['pta_submission_user_view_page']) && (get_option('pta_submission_user_view_page') !== $_POST['pta_submission_user_view_page'])) {
                 update_option('pta_submission_user_view_page', $_POST['pta_submission_user_view_page']);
             }
-            if(isset($_POST['pta_submission_view_single_page'])) {
+            if(isset($_POST['pta_submission_view_single_page']) && (get_option('pta_submission_view_single_page') !== $_POST['pta_submission_view_single_page'])) {
                 update_option('pta_submission_view_single_page', $_POST['pta_submission_view_single_page']);
             }
 
-            if(isset($_POST['pta_environment'])) {
+            if(isset($_POST['pta_environment']) && (get_option('pta_environment') !== $_POST['pta_environment'])) {
                 update_option('pta_environment', $_POST['pta_environment']);
             }
-            if(isset($_POST['pta_number_of_submissions_per_time_period'])) {
+            if(isset($_POST['pta_number_of_submissions_per_time_period']) && (get_option('pta_number_of_submissions_per_time_period') !== $_POST['pta_number_of_submissions_per_time_period'])) {
                 update_option('pta_number_of_submissions_per_time_period', $_POST['pta_number_of_submissions_per_time_period']);
             }
-            if(isset($_POST['pta_time_period'])) {
+            if(isset($_POST['pta_time_period']) && (get_option('pta_time_period') !== $_POST['pta_time_period'])) {
                 update_option('pta_time_period', $_POST['pta_time_period']);
             }
-            if(isset($_POST['pta_woocommerce_product_id'])) {
+            if(isset($_POST['pta_woocommerce_product_id']) && (get_option('pta_woocommerce_product_id') !== $_POST['pta_woocommerce_product_id'])) {
                 update_option('pta_woocommerce_product_id', $_POST['pta_woocommerce_product_id']);
             }
-            if(isset($_POST['pta_github_fg_token'])) {
+            if(isset($_POST['pta_github_fg_token']) && (get_option('pta_github_fg_token') !== $_POST['pta_github_fg_token'])) {
                 update_option('pta_github_fg_token', $_POST['pta_github_fg_token']);
             }
-            if(isset($_POST['wldpta_product_limit'])) {
+            if(isset($_POST['wldpta_product_limit']) && (get_option('wldpta_product_limit') !== $_POST['wldpta_product_limit'])) {
                 update_option('wldpta_product_limit', $_POST['wldpta_product_limit']);
             }
             if(isset($_POST['pta_clock_start_date'])) {
-                update_option('pta_clock_start_date', $_POST['pta_clock_start_date']);
+                //$this->logger->debug('Clock start date: ' . $_POST['pta_clock_start_date']);
+
+                $dTS = \DateTime::createFromFormat('Y-m-d\TH:i', $_POST['pta_clock_start_date'], new \DateTimeZone('America/Los_Angeles'));
+                $dTS->setTimezone(new \DateTimeZone('UTC'));
+
+                $utcTime = $dTS->format('Y-m-d\TH:i');
+
+                if($utcTime !== get_option('pta_clock_start_date')) {
+                    $this->logger->info('Updating clock start date to (UTC): ' . $utcTime . ' (Local: ' . $_POST['pta_clock_start_date'] . ')');
+                    update_option('pta_clock_start_date', $utcTime);
+                }
             }
             if(isset($_POST['pta_clock_end_date'])) {
-                update_option('pta_clock_end_date', $_POST['pta_clock_end_date']);
+                //$this->logger->debug('Clock end date: ' . $_POST['pta_clock_end_date']);
+
+                $dTE = \DateTime::createFromFormat('Y-m-d\TH:i', $_POST['pta_clock_end_date'], new \DateTimeZone('America/Los_Angeles'));
+                $dTE->setTimezone(new \DateTimeZone('UTC'));
+
+                $utcTime = $dTE->format('Y-m-d\TH:i');
+
+                if($utcTime !== get_option('pta_clock_end_date')) {
+                    $this->logger->info('Updating clock end date to (UTC): ' . $utcTime . ' (Local: ' . $_POST['pta_clock_end_date'] . ')');
+                    update_option('pta_clock_end_date', $utcTime);
+                }
             }
-            if(isset($_POST['pta_percentage_prize_total'])) {
+            if(isset($_POST['pta_percentage_prize_total']) && (get_option('pta_percentage_prize_total') !== $_POST['pta_percentage_prize_total'])) {
                 update_option('pta_percentage_prize_total', $_POST['pta_percentage_prize_total']);
             }
 
-            if(isset($_POST['pta_form_contact_id'])) {
+            if(isset($_POST['pta_form_contact_id']) && (get_option('pta_form_contact_id') !== $_POST['pta_form_contact_id'])) {
                 update_option('pta_form_contact_id', $_POST['pta_form_contact_id']);
             }
-            if(isset($_POST['pta_form_notification_id'])) {
+            if(isset($_POST['pta_form_notification_id']) && (get_option('pta_form_notification_id') !== $_POST['pta_form_notification_id'])) {
                 update_option('pta_form_notification_id', $_POST['pta_form_notification_id']);
             }
-            if(isset($_POST['pta_form_signup_id'])) {
+            if(isset($_POST['pta_percentage_prize_total']) && (get_option('pta_percentage_prize_total') !== $_POST['pta_percentage_prize_total'])) {
+                update_option('pta_percentage_prize_total', $_POST['pta_percentage_prize_total']);
+            }
+
+            if(isset($_POST['pta_form_contact_id']) && (get_option('pta_form_contact_id') !== $_POST['pta_form_contact_id'])) {
+                update_option('pta_form_contact_id', $_POST['pta_form_contact_id']);
+            }
+            if(isset($_POST['pta_form_notification_id']) && (get_option('pta_form_notification_id') !== $_POST['pta_form_notification_id'])) {
+                update_option('pta_form_notification_id', $_POST['pta_form_notification_id']);
+            }
+            if(isset($_POST['pta_form_signup_id']) && (get_option('pta_form_signup_id') !== $_POST['pta_form_signup_id'])) {
                 update_option('pta_form_signup_id', $_POST['pta_form_signup_id']);
             }
 
-            if(isset($_POST['pta_form_use_custom_registration'])) {
+            if(isset($_POST['pta_form_use_custom_registration']) && (get_option('pta_form_use_custom_registration') !== $_POST['pta_form_use_custom_registration'])) {
                 update_option('pta_form_use_custom_registration', $_POST['pta_form_use_custom_registration']);
             }
 
-            if(isset($_POST['pta_contest_finale_phase'])) {
+            if(isset($_POST['pta_contest_finale_phase']) && (get_option('pta_contest_finale_phase') !== $_POST['pta_contest_finale_phase'])) {
                 update_option('pta_contest_finale_phase', $_POST['pta_contest_finale_phase']);
+            }
+            if(isset($_POST['pta_contest_finale_phase_number_of_submissions']) && (get_option('pta_contest_finale_phase_number_of_submissions') !== $_POST['pta_contest_finale_phase_number_of_submissions'])) {
+                update_option('pta_contest_finale_phase_number_of_submissions', $_POST['pta_contest_finale_phase_number_of_submissions']);
             }
 
 
@@ -210,6 +243,18 @@ class admin_settings extends Client
         $pta_form_use_custom_registration = get_option('pta_form_use_custom_registration', 'false');
 
         $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+        $pta_contest_finale_phase_number_of_submissions = get_option('pta_contest_finale_phase_number_of_submissions', 0);
+
+
+        // Convert the clock start and end dates to a format suitable for datetime-local input
+        $dTS = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+        $dTE = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+        $dTS->setTimezone(new \DateTimeZone('America/Los_Angeles'));
+        $dTE->setTimezone(new \DateTimeZone('America/Los_Angeles'));
+
+        $localTimeStart = $dTS->format('Y-m-d\TH:i');
+        $localTimeEnd = $dTE->format('Y-m-d\TH:i');
 
         // Fetch all pages
         $pages = get_pages();
@@ -361,7 +406,7 @@ class admin_settings extends Client
                         <th scope="row">Clock Start Date</th>
                         <td>
                             <input type="datetime-local" name="pta_clock_start_date"
-                                value="<?php echo esc_attr($pta_clock_start_date); ?>" />
+                                value="<?php echo esc_attr($localTimeStart); ?>" />
                         </td>
                     </tr>
                     <!-- Clock End Date -->
@@ -369,7 +414,7 @@ class admin_settings extends Client
                         <th scope="row">Clock End Date</th>
                         <td>
                             <input type="datetime-local" name="pta_clock_end_date"
-                                value="<?php echo esc_attr($pta_clock_end_date); ?>" />
+                                value="<?php echo esc_attr($localTimeEnd); ?>" />
                         </td>
                     </tr>
                     <!-- Percentage Prize Total -->
@@ -471,6 +516,13 @@ class admin_settings extends Client
                                 <option value="false" <?php selected($pta_contest_finale_phase, 'false'); ?>>False
                                 </option>
                             </select>
+                        </td>
+                    </tr>
+                    <!-- Contest Finale Phase Number of Submissions -->
+                    <tr>
+                        <th scope="row">Contest Finale Phase Number of Submissions</th>
+                        <td>
+                            <input type="number" name="pta_contest_finale_phase_number_of_submissions" value="<?php echo esc_attr($pta_contest_finale_phase_number_of_submissions); ?>" />
                         </td>
                     </tr>
 
