@@ -89,6 +89,16 @@ class Shortcodes_functions
                 return;
             }
 
+            // if finale phase is enabled, then do not allow new submissions
+            $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+            if ($pta_contest_finale_phase === 'true') {
+                // if the user is not an admin or editor, then do not allow new submissions
+                if (!current_user_can('administrator')) {
+                    $this->logger->debug('Finale phase is enabled, new submissions are not allowed', array('user_id' => get_current_user_id()));
+                    return;
+                }
+            }
+
             //error_log('POST: ' . print_r($_POST, true));
             // $this->logger->debug('Handling submission upload', array('POST' => $_POST));
 
@@ -526,6 +536,18 @@ class Shortcodes_functions
             } elseif ($_POST['update_submission'] == 'Submit to Contest') {
                 // set status to 'pending'
                 //update_submission($submission['id'], 'state', 'Pending Approval'); // Pending Approval
+
+                // check if finale phase is enabled
+                $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+                if ($pta_contest_finale_phase === 'true') {
+                    // if the user is not an admin or editor, then do not allow new submissions
+                    if (!current_user_can('administrator')) {
+                        $this->logger->debug('Finale phase is enabled, new pending submissions are not allowed', array('user_id' => get_current_user_id()));
+                        echo '<p>Contest is in the finale phase, new published submissions are not allowed.</p>';
+                        wp_redirect(home_url('/my-in-progress-secret-doors/?edit_submission_id=' . $submission_id . '&error=finale_phase'));
+                        exit;
+                    }
+                }
 
                 if ($submission['state'] == 'Rejected') {
                     // $this->submission_func->set_submission_unrejeced_state($submission['id'], 'Pending Approval');
