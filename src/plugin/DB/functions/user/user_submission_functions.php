@@ -98,7 +98,7 @@ class user_submission_functions
     $result = $this->db_functions->exe_from_builder(query_builder: $query, output_type: 'ARRAY_A');
     $result = $result[0]['total_votes'] ?? 0;
 
-    return $result;
+    return (int) $result;
   }
 
   /**
