@@ -242,7 +242,7 @@ class admin_settings extends Client
 
         $pta_form_use_custom_registration = get_option('pta_form_use_custom_registration', 'false');
 
-        $pta_contest_finale_phase = get_option('pta_contest_finale_phase');
+        $pta_contest_finale_phase = get_option('pta_contest_finale_phase', 'false');
         $pta_contest_finale_phase_number_of_submissions = get_option('pta_contest_finale_phase_number_of_submissions', 0);
 
 
