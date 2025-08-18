@@ -419,5 +419,24 @@ class Woocom_cart {
 				wc_add_notice(__($total_error_text, 'portals-to-adventure'), 'error');
 			}
 		}
+    
+      private function check_contest_date()
+  {
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    $pta_start_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+    $pta_end_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+    $current_date_time = \DateTime::createFromFormat('Y-m-d\TH:i', current_time('Y-m-d\TH:i'), new \DateTimeZone('UTC'));
+
+    if ($pta_start_date && $pta_end_date) {
+      if ($current_date_time >= $pta_start_date && $current_date_time <= $pta_end_date) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
 }

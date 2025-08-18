@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if(contestState === 'pre'){
       contestOverMessage.innerHTML = 'The contest has not started. Please come back ' + contest_start_date.toLocaleString();
     } else if(contestState === 'post'){
-      contestOverMessage.innerHTML = 'The contest ended ' + contest_end_date.toLocaleString() + '. Thank you for participating.';
+      contestOverMessage.innerHTML = 'The contest ended at ' + contest_end_date.toLocaleString() + '. Thank you for participating.';
     }
 
     // add the message to 'entry-content' as the first child
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if(!pta_api_data.user_admin){
       document.getElementsByClassName('form-container')[0].classList.add('hide');
 
-      return;
+      // return;
     }
   }
 
@@ -215,8 +215,10 @@ function showSubmissionDetails(submission) {
       // Show the vote button
       var voteBtn = document.getElementById('vote-btn');
       if (voteBtn) {
-        voteBtn.classList.remove('hide');
         voteBtn.setAttribute('data-id', submission.id);
+        if(contest_data.is_contest_active){
+          voteBtn.classList.remove('hide');
+        }
       }
     }
 

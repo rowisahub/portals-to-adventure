@@ -190,12 +190,22 @@ class Enqueue implements PTAEnqueueInterface
     );
     $api_data_json = wp_json_encode($api_data);
 
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    $pta_start_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+    $pta_end_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+    $current_date_time = \DateTime::createFromFormat('Y-m-d\TH:i', current_time('Y-m-d\TH:i'), new \DateTimeZone('UTC'));
+
     // Contest data
     $contest_data = [
       'is_contest_active' => $this->check_contest_date(),
       'contest_state' => $this->check_contest_state(),
-      'contest_start_date' => get_option('pta_clock_start_date'),
-      'contest_end_date' => get_option('pta_clock_end_date')
+      'contest_start_date' => $pta_start_date->setTimezone(new \DateTimeZone('America/Los_Angeles'))->format('Y-m-d H:i:s'),
+      'contest_end_date' => $pta_end_date->setTimezone(new \DateTimeZone('America/Los_Angeles'))->format('Y-m-d H:i:s'),
+      'current_time' => $current_date_time->setTimezone(new \DateTimeZone('America/Los_Angeles'))->format('Y-m-d H:i:s'),
+      'number_of_finalists' => 10,
     ];
     $contest_data_json = json_encode($contest_data);
 
@@ -220,9 +230,13 @@ class Enqueue implements PTAEnqueueInterface
     $pta_clock_start_date = get_option('pta_clock_start_date');
     $pta_clock_end_date = get_option('pta_clock_end_date');
 
-    if ($pta_clock_start_date && $pta_clock_end_date) {
-      $current_date = date('Y-m-d H:i:s');
-      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+    $pta_start_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+    $pta_end_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+    $current_date_time = \DateTime::createFromFormat('Y-m-d\TH:i', current_time('Y-m-d\TH:i'), new \DateTimeZone('UTC'));
+
+    if ($pta_start_date && $pta_end_date) {
+      if ($current_date_time >= $pta_start_date && $current_date_time <= $pta_end_date) {
         return true;
       }
     }
@@ -232,16 +246,18 @@ class Enqueue implements PTAEnqueueInterface
 
   private function check_contest_state()
   {
-    // return 'active', 'pre', 'post'
-
     $pta_clock_start_date = get_option('pta_clock_start_date');
     $pta_clock_end_date = get_option('pta_clock_end_date');
 
-    if ($pta_clock_start_date && $pta_clock_end_date) {
-      $current_date = date('Y-m-d H:i:s');
-      if ($current_date >= $pta_clock_start_date && $current_date <= $pta_clock_end_date) {
+    $pta_start_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+    $pta_end_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+    $current_date_time = \DateTime::createFromFormat('Y-m-d\TH:i', current_time('Y-m-d\TH:i'), new \DateTimeZone('UTC'));
+
+    if ($pta_start_date && $pta_end_date) {
+      if ($current_date_time >= $pta_start_date && $current_date_time <= $pta_end_date) {
         return 'active';
-      } else if ($current_date < $pta_clock_start_date) {
+      } else if ($current_date_time < $pta_start_date) {
         return 'pre';
       } else {
         return 'post';

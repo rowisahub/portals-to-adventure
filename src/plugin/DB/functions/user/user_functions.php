@@ -72,6 +72,12 @@ class user_functions
       }
 
       $user = get_user_by('id', $user_id);
+
+      if (!$user) {
+        $this->logger->error('Error creating user - user not found after creation');
+        return null;
+      }
+      
     }
 
     if (!$user) {

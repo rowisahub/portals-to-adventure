@@ -2,7 +2,7 @@
 /*
 Plugin Name: Portals to Adventure
 Description: PTA Plugin for submissions and voting.
-Version: 1.7.2
+Version: 1.7.3
 Author: Rowan W.
 */
 

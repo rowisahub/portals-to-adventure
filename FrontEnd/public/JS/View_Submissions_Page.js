@@ -65,12 +65,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     if(contestState === 'pre'){
       contestOverMessage.innerHTML = 'The contest has not started. Please come back ' + contest_start_date.toLocaleString();
     } else if(contestState === 'post'){
-      contestOverMessage.innerHTML = 'The contest ended ' + contest_end_date.toLocaleString() + '. Thank you for participating.';
+      contestOverMessage.innerHTML = 'The contest ended at ' + contest_end_date.toLocaleString() + '. Thank you for participating.';
     }
 
     // add the message to 'entry-content' as the first child
     document.getElementsByClassName('entry-content')[0].insertBefore(contestOverMessage, document.getElementsByClassName('entry-content')[0].firstChild);
-    return;
+    // return;
   }
 
   const SortPublicSubmissions = document.getElementById('pta-views-options');
@@ -107,7 +107,15 @@ async function getAllSubmissions() {
 
     loadedSubmissions = submissions;
 
-    sortSubmissions('random'); // Default sort to random
+    if(!contest_data.is_contest_active){
+      sortSubmissions('most-voted');
+
+      // Only show the top 10 submissions
+      loadedSubmissions = loadedSubmissions.slice(0, 10);
+
+    } else {
+      sortSubmissions('random'); // Default sort to random
+    }
 
     console.log(loadedSubmissions);
 
@@ -385,6 +393,11 @@ function fillTemplate(submission) {
 
   var voteSubBtn = submissionClone.querySelector('.vote-btn');
   voteSubBtn.setAttribute('data-id', submission.id);
+
+  if(!contest_data.is_contest_active){
+    // Hide vote button
+    voteSubBtn.classList.add('hide');
+  }
 
   // voteSubBtn.onclick = function () {
   //   PTA_API.voteSubmission(submission.id, voteSubBtn);

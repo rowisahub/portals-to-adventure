@@ -100,7 +100,13 @@ class AJAX extends Client
     if (!$checkNonce) {
       wp_send_json_error(array('message' => 'Invalid nonce'));
     }
-  
+
+    // check contest date
+    if (!$this->check_contest_date()) {
+      wp_send_json_error(array('message' => 'Contest is not active'));
+      return;
+    }
+
     // check submission status
     // $this->logger->debug('Checking submission status', $_POST);
   
@@ -215,6 +221,25 @@ class AJAX extends Client
 
     return ['submission_title' => $submission_title, 'submission_thumbnail_url' => $submission_thumbnail_url];
 
+  }
+
+    private function check_contest_date()
+  {
+    $pta_clock_start_date = get_option('pta_clock_start_date');
+    $pta_clock_end_date = get_option('pta_clock_end_date');
+
+    $pta_start_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_start_date, new \DateTimeZone('UTC'));
+    $pta_end_date = \DateTime::createFromFormat('Y-m-d\TH:i', $pta_clock_end_date, new \DateTimeZone('UTC'));
+
+    $current_date_time = \DateTime::createFromFormat('Y-m-d\TH:i', current_time('Y-m-d\TH:i'), new \DateTimeZone('UTC'));
+
+    if ($pta_start_date && $pta_end_date) {
+      if ($current_date_time >= $pta_start_date && $current_date_time <= $pta_end_date) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 }
